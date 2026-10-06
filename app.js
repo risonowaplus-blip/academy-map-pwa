@@ -2660,13 +2660,25 @@ function renderTeacherDetail(
     '</div>' +
 
 
-    '<button class="secondary" onclick="openTeacherForm(\'' +
+    '<div class="detail-head-actions">' +
 
-    escapeJs(
-      teacher.teacherId
-    ) +
+'<button class="secondary" onclick="openTeacherForm(\'' +
 
-    '\')">編集</button>' +
+escapeJs(
+  teacher.teacherId
+) +
+
+'\')">編集</button>' +
+
+'<button class="detail-delete-button" onclick="deleteTeacherAction(\'' +
+
+escapeJs(
+  teacher.teacherId
+) +
+
+'\')">削除</button>' +
+
+'</div>' +
 
 
     '</div>';
@@ -3093,10 +3105,10 @@ function renderInteractionCard(
 
     '<div class="detail-head-actions">' +
 
-'<button class="secondary" onclick="openTeacherForm(\'' +
+'<button class="secondary" onclick="openInteractionForm(\'' +
 
 escapeJs(
-  teacher.teacherId
+  interaction.interactionId
 ) +
 
 '\')">編集</button>' +
