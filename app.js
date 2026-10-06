@@ -3103,25 +3103,13 @@ function renderInteractionCard(
     '</div>' +
 
 
-    '<div class="detail-head-actions">' +
-
-'<button class="secondary" onclick="openInteractionForm(\'' +
+    '<button class="secondary" onclick="openInteractionForm(\'' +
 
 escapeJs(
   interaction.interactionId
 ) +
 
 '\')">編集</button>' +
-
-'<button class="detail-delete-button" onclick="deleteTeacherAction(\'' +
-
-escapeJs(
-  teacher.teacherId
-) +
-
-'\')">削除</button>' +
-
-'</div>' +
 
     '</div>';
 
