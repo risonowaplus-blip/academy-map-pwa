@@ -1204,7 +1204,7 @@ function renderJapanMap() {
   var mapWidth;
 
 
- if (
+if (
   window.innerWidth <=
   560
 ) {
@@ -1212,14 +1212,13 @@ function renderJapanMap() {
   mapWidth =
     Math.max(
 
-      520,
+      330,
 
       Math.min(
 
-        900,
+        720,
 
-        containerWidth *
-        1.55
+        containerWidth
 
       )
 
