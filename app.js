@@ -5847,7 +5847,8 @@ var settingCandidates = {
 function showSettingSuggestions(
   inputId,
   resultId,
-  candidateType
+  candidateType,
+  showAll
 ) {
 
   var input =
@@ -5864,10 +5865,12 @@ function showSettingSuggestions(
     !input ||
     !box
   ) {
-
     return;
-
   }
+
+
+  hideSettingSuggestions();
+
 
   var query =
     String(
@@ -5875,34 +5878,50 @@ function showSettingSuggestions(
       ''
     ).trim();
 
+
   var candidates =
     settingCandidates[
       candidateType
     ] ||
     [];
 
+
   box.innerHTML =
     '';
 
-  var matched =
-    candidates.filter(
-      function(candidate) {
 
-        if (
-          !query
-        ) {
+  var matched;
 
-          return true;
+
+  if (
+    showAll
+  ) {
+
+    matched =
+      candidates.slice();
+
+  } else {
+
+    matched =
+      candidates.filter(
+        function(candidate) {
+
+          if (
+            !query
+          ) {
+            return true;
+          }
+
+          return candidate.indexOf(
+            query
+          ) !==
+            -1;
 
         }
+      );
 
-        return candidate.indexOf(
-          query
-        ) !==
-          -1;
+  }
 
-      }
-    );
 
   matched.forEach(
     function(candidate) {
@@ -5921,10 +5940,12 @@ function showSettingSuggestions(
       item.textContent =
         candidate;
 
+
       item.onclick =
         function(event) {
 
           event.preventDefault();
+
           event.stopPropagation();
 
           input.value =
@@ -5934,12 +5955,14 @@ function showSettingSuggestions(
 
         };
 
+
       box.appendChild(
         item
       );
 
     }
   );
+
 
   if (
     matched.length ===
@@ -5962,6 +5985,7 @@ function showSettingSuggestions(
     );
 
   }
+
 
   box.classList.add(
     'show'
