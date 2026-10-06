@@ -2777,15 +2777,6 @@ function renderTeacherDetail(
   }
 
 
-  html +=
-
-    '<button class="danger" onclick="deleteTeacherAction(\'' +
-
-    escapeJs(
-      teacher.teacherId
-    ) +
-
-    '\')">先生を削除</button>';
 
 
   html +=
@@ -3078,7 +3069,7 @@ function renderInteractionCard(
 
     '<div class="detail-head">' +
 
-    '<div>' +
+'<div>' +
 
     '<strong>' +
 
@@ -3099,13 +3090,25 @@ function renderInteractionCard(
     '</div>' +
 
 
-    '<button class="secondary" onclick="openInteractionForm(\'' +
+    '<div class="detail-head-actions">' +
 
-    escapeJs(
-      interaction.interactionId
-    ) +
+'<button class="secondary" onclick="openTeacherForm(\'' +
 
-    '\')">編集</button>' +
+escapeJs(
+  teacher.teacherId
+) +
+
+'\')">編集</button>' +
+
+'<button class="detail-delete-button" onclick="deleteTeacherAction(\'' +
+
+escapeJs(
+  teacher.teacherId
+) +
+
+'\')">削除</button>' +
+
+'</div>' +
 
     '</div>';
 
