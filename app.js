@@ -1,37 +1,32 @@
 var teachers = [];
-
 var addressMaster = {};
-
 var selectedPrefecture = '';
-
 var selectedTeacherId = '';
-
 var prefMode = 'active';
 
 var tokenClient = null;
-
 var accessToken = '';
-
 var accessTokenExpiresAt = 0;
-
 var pendingTokenResolve = null;
-
 var pendingTokenReject = null;
 
 var mapInstance = null;
 
-var interactionFormSource =
-  'detail';
+var interactionFormSource = 'detail';
+var pendingInteractions = [];
+var deletedInteractionIds = [];
+var editingPendingInteractionIndex = -1;
 
-var pendingInteractions =
-  [];
+var pendingLinks = [];
+var deletedLinkIds = [];
+var editingPendingLinkIndex = -1;
 
-var deletedInteractionIds =
-  [];
-
-var editingPendingInteractionIndex =
-  -1;
-
+var appSettings = {
+  appName: 'Academy Map',
+  personLabel: '先生',
+  placeLabel: '店名',
+  placeKanaLabel: '店名ふりがな'
+};
 
 var STORAGE_TOKEN =
   'academyAccessToken';
@@ -44,16 +39,13 @@ var STORAGE_AUTHORIZED =
 
 
 var prefectures = [
-
   '北海道',
-
   '青森県',
   '岩手県',
   '宮城県',
   '秋田県',
   '山形県',
   '福島県',
-
   '茨城県',
   '栃木県',
   '群馬県',
@@ -61,7 +53,6 @@ var prefectures = [
   '千葉県',
   '東京都',
   '神奈川県',
-
   '新潟県',
   '富山県',
   '石川県',
@@ -71,7 +62,6 @@ var prefectures = [
   '岐阜県',
   '静岡県',
   '愛知県',
-
   '三重県',
   '滋賀県',
   '京都府',
@@ -79,18 +69,15 @@ var prefectures = [
   '兵庫県',
   '奈良県',
   '和歌山県',
-
   '鳥取県',
   '島根県',
   '岡山県',
   '広島県',
   '山口県',
-
   '徳島県',
   '香川県',
   '愛媛県',
   '高知県',
-
   '福岡県',
   '佐賀県',
   '長崎県',
@@ -98,37 +85,28 @@ var prefectures = [
   '大分県',
   '宮崎県',
   '鹿児島県',
-
   '沖縄県'
-
 ];
 
 
 var gradeOptions = [
-
   '',
-
   '年少',
   '年中',
   '年長',
-
   '小1',
   '小2',
   '小3',
   '小4',
   '小5',
   '小6',
-
   '中1',
   '中2',
   '中3',
-
   '高1',
   '高2',
   '高3',
-
   '卒業'
-
 ];
 
 
@@ -139,6 +117,8 @@ var gradeOptions = [
 window.addEventListener(
   'load',
   function() {
+
+    restoreCachedUiSettings();
 
     registerServiceWorker();
 
@@ -197,15 +177,14 @@ function waitForGoogleIdentity(
   callback
 ) {
 
-  var attempts = 0;
-
+  var attempts =
+    0;
 
   var timer =
     setInterval(
       function() {
 
         attempts++;
-
 
         if (
           window.google &&
@@ -222,7 +201,6 @@ function waitForGoogleIdentity(
           return;
 
         }
-
 
         if (
           attempts > 100
@@ -284,11 +262,9 @@ function initializeGoogleTokenClient() {
 
             }
 
-
             accessToken =
               resp.access_token ||
               '';
-
 
             var expiresIn =
               Number(
@@ -296,12 +272,10 @@ function initializeGoogleTokenClient() {
                 3600
               );
 
-
             accessTokenExpiresAt =
               Date.now() +
               expiresIn * 1000 -
               60000;
-
 
             try {
 
@@ -324,7 +298,6 @@ function initializeGoogleTokenClient() {
 
             } catch (e) {}
 
-
             if (
               pendingTokenResolve
             ) {
@@ -334,7 +307,6 @@ function initializeGoogleTokenClient() {
               );
 
             }
-
 
             clearPendingTokenPromise();
 
@@ -359,19 +331,14 @@ function clearPendingTokenPromise() {
 function configReady() {
 
   return (
-
     CONFIG.GOOGLE_CLIENT_ID &&
-
     CONFIG.SCRIPT_DEPLOYMENT_ID &&
-
     CONFIG.GOOGLE_CLIENT_ID.indexOf(
       'ここに'
     ) === -1 &&
-
     CONFIG.SCRIPT_DEPLOYMENT_ID.indexOf(
       'ここに'
     ) === -1
-
   );
 
 }
@@ -388,7 +355,6 @@ async function restoreOrLogin() {
   var wasAuthorized =
     false;
 
-
   try {
 
     savedToken =
@@ -396,7 +362,6 @@ async function restoreOrLogin() {
         STORAGE_TOKEN
       ) ||
       '';
-
 
     savedExpiresAt =
       Number(
@@ -406,7 +371,6 @@ async function restoreOrLogin() {
         0
       );
 
-
     wasAuthorized =
       localStorage.getItem(
         STORAGE_AUTHORIZED
@@ -414,7 +378,6 @@ async function restoreOrLogin() {
       '1';
 
   } catch (e) {}
-
 
   if (
     savedToken &&
@@ -433,7 +396,6 @@ async function restoreOrLogin() {
     return;
 
   }
-
 
   if (
     wasAuthorized
@@ -458,7 +420,6 @@ async function restoreOrLogin() {
     }
 
   }
-
 
   showLoginScreen();
 
@@ -489,24 +450,19 @@ function requestGoogleToken(
 
       }
 
-
       pendingTokenResolve =
         resolve;
 
       pendingTokenReject =
         reject;
 
-
       try {
 
         tokenClient
           .requestAccessToken({
-
             prompt:
               promptMode
-
           });
-
 
       } catch (e) {
 
@@ -530,7 +486,6 @@ async function login() {
     true
   );
 
-
   try {
 
     await requestGoogleToken(
@@ -539,11 +494,9 @@ async function login() {
 
     await startApp();
 
-
   } catch (e) {
 
     showLoginScreen();
-
 
   } finally {
 
@@ -564,7 +517,6 @@ function showLoginScreen() {
     'hidden'
   );
 
-
   document.getElementById(
     'authScreen'
   ).classList.remove(
@@ -582,7 +534,6 @@ function showAppScreen() {
     'hidden'
   );
 
-
   document.getElementById(
     'appShell'
   ).classList.remove(
@@ -597,10 +548,8 @@ function clearAccessToken() {
   accessToken =
     '';
 
-
   accessTokenExpiresAt =
     0;
-
 
   try {
 
@@ -636,7 +585,6 @@ async function runScript(
     );
 
   }
-
 
   var response =
     await fetch(
@@ -681,7 +629,6 @@ async function runScript(
 
     );
 
-
   if (
     response.status === 401 &&
     !retried
@@ -689,13 +636,11 @@ async function runScript(
 
     clearAccessToken();
 
-
     try {
 
       await requestGoogleToken(
         ''
       );
-
 
       return await runScript(
         functionName,
@@ -703,11 +648,9 @@ async function runScript(
         true
       );
 
-
     } catch (e) {
 
       showLoginScreen();
-
 
       throw new Error(
         'Googleログインの有効期限が切れました。再度ログインしてください。'
@@ -717,10 +660,8 @@ async function runScript(
 
   }
 
-
   var data =
     await response.json();
-
 
   if (
     !response.ok ||
@@ -729,7 +670,6 @@ async function runScript(
 
     var msg =
       'Apps Scriptの実行に失敗しました。';
-
 
     if (
       data.error &&
@@ -740,7 +680,6 @@ async function runScript(
         data.error.message;
 
     }
-
 
     if (
       data.error &&
@@ -756,13 +695,11 @@ async function runScript(
 
     }
 
-
     throw new Error(
       msg
     );
 
   }
-
 
   return data.response
     ? data.response.result
@@ -781,14 +718,12 @@ async function startApp() {
     true
   );
 
-
   try {
 
     var data =
       await runScript(
         'getInitialData'
       );
-
 
     teachers =
       (
@@ -797,9 +732,22 @@ async function startApp() {
       ) ||
       [];
 
+    appSettings =
+      Object.assign(
+        {},
+        appSettings,
+        (
+          data &&
+          data.settings
+        ) ||
+        {}
+      );
+
+    cacheUiSettings();
+
+    applySettingsToUi();
 
     showAppScreen();
-
 
     renderAll();
 
@@ -807,13 +755,11 @@ async function startApp() {
 
     loadAddressMaster();
 
-
   } catch (e) {
 
     handleError(
       e
     );
-
 
   } finally {
 
@@ -822,6 +768,53 @@ async function startApp() {
     );
 
   }
+
+}
+
+
+function restoreCachedUiSettings() {
+
+  try {
+
+    var cached =
+      localStorage.getItem(
+        'academyUiSettings'
+      );
+
+    if (
+      cached
+    ) {
+
+      appSettings =
+        Object.assign(
+          {},
+          appSettings,
+          JSON.parse(
+            cached
+          )
+        );
+
+      applySettingsToUi();
+
+    }
+
+  } catch (e) {}
+
+}
+
+
+function cacheUiSettings() {
+
+  try {
+
+    localStorage.setItem(
+      'academyUiSettings',
+      JSON.stringify(
+        appSettings
+      )
+    );
+
+  } catch (e) {}
 
 }
 
@@ -843,7 +836,6 @@ function getRegionName(
 
   }
 
-
   if (
     [
       '青森県',
@@ -860,7 +852,6 @@ function getRegionName(
     return '東北';
 
   }
-
 
   if (
     [
@@ -879,7 +870,6 @@ function getRegionName(
     return '関東';
 
   }
-
 
   if (
     [
@@ -901,7 +891,6 @@ function getRegionName(
 
   }
 
-
   if (
     [
       '三重県',
@@ -920,7 +909,6 @@ function getRegionName(
 
   }
 
-
   if (
     [
       '鳥取県',
@@ -937,7 +925,6 @@ function getRegionName(
 
   }
 
-
   if (
     [
       '徳島県',
@@ -952,7 +939,6 @@ function getRegionName(
     return '四国';
 
   }
-
 
   if (
     [
@@ -972,7 +958,6 @@ function getRegionName(
 
   }
 
-
   if (
     pref ===
     '沖縄県'
@@ -981,7 +966,6 @@ function getRegionName(
     return '沖縄';
 
   }
-
 
   return '';
 
@@ -1022,7 +1006,6 @@ function getRegionBaseColor(
       '#E5D8F0'
 
   };
-
 
   return colors[
     region
@@ -1067,7 +1050,6 @@ function getRegionTeacherColor(
 
   };
 
-
   return colors[
     region
   ] ||
@@ -1087,7 +1069,6 @@ function renderJapanMap() {
       'japanMap'
     );
 
-
   if (
     !window.jpmap ||
     !window.jpmap.japanMap
@@ -1100,18 +1081,14 @@ function renderJapanMap() {
 
   }
 
-
   el.innerHTML =
     '';
-
 
   var counts =
     getPrefCounts();
 
-
   var areas =
     [];
-
 
   for (
     var i = 0;
@@ -1122,29 +1099,24 @@ function renderJapanMap() {
     var pref =
       prefectures[i];
 
-
     var count =
       counts[pref] ||
       0;
-
 
     var region =
       getRegionName(
         pref
       );
 
-
     var color =
       getRegionBaseColor(
         region
       );
 
-
     var hoverColor =
       getRegionTeacherColor(
         region
       );
-
 
     if (
       count > 0
@@ -1156,7 +1128,6 @@ function renderJapanMap() {
         );
 
     }
-
 
     if (
       selectedPrefecture ===
@@ -1170,7 +1141,6 @@ function renderJapanMap() {
         '#C84660';
 
     }
-
 
     areas.push({
 
@@ -1187,7 +1157,6 @@ function renderJapanMap() {
 
   }
 
-
   var containerWidth =
     Math.floor(
 
@@ -1200,32 +1169,31 @@ function renderJapanMap() {
 
     );
 
-
   var mapWidth;
 
+  if (
+    window.innerWidth <=
+    560
+  ) {
 
-if (
-  window.innerWidth <=
-  560
-) {
+    mapWidth =
+      Math.max(
 
-  mapWidth =
-    Math.max(
+        485,
 
-      485,
+        Math.min(
 
-      Math.min(
+          860,
 
-        860,
+          containerWidth *
+          1.40
 
-        containerWidth *
-        1.40
+        )
 
-      )
+      );
 
-    );
+  } else {
 
-} else {
     mapWidth =
       Math.max(
 
@@ -1236,14 +1204,13 @@ if (
           1000,
 
           containerWidth *
-        1.22
+          1.22
 
         )
 
       );
 
   }
-
 
   mapInstance =
     new jpmap.japanMap(
@@ -1287,13 +1254,11 @@ if (
                 data.code
               );
 
-
             var pref =
               prefectures[
                 code - 1
               ] ||
               data.name;
-
 
             selectPrefecture(
               pref
@@ -1305,14 +1270,13 @@ if (
 
     );
 
-
   updateSelectedPrefHeading();
 
 }
 
 
 /* ========================================
-   住所データ
+   住所
    ======================================== */
 
 async function loadAddressMaster() {
@@ -1323,7 +1287,6 @@ async function loadAddressMaster() {
       localStorage.getItem(
         'academyAddressMasterV1'
       );
-
 
     if (
       cached
@@ -1338,7 +1301,6 @@ async function loadAddressMaster() {
 
   } catch (e) {}
 
-
   try {
 
     var response =
@@ -1347,14 +1309,11 @@ async function loadAddressMaster() {
         'https://geolonia.github.io/japanese-addresses/api/ja.json',
 
         {
-
           cache:
             'force-cache'
-
         }
 
       );
-
 
     if (
       response.ok
@@ -1363,17 +1322,13 @@ async function loadAddressMaster() {
       addressMaster =
         await response.json();
 
-
       try {
 
         localStorage.setItem(
-
           'academyAddressMasterV1',
-
           JSON.stringify(
             addressMaster
           )
-
         );
 
       } catch (e) {}
@@ -1409,25 +1364,7 @@ function renderAll() {
 function renderStats() {
 
   var unknown =
-    0;
-
-
-  for (
-    var i = 0;
-    i < teachers.length;
-    i++
-  ) {
-
-    if (
-      !teachers[i].prefecture
-    ) {
-
-      unknown++;
-
-    }
-
-  }
-
+    getUnknownCount();
 
   document.getElementById(
     'stats'
@@ -1449,7 +1386,6 @@ function getPrefCounts() {
   var result =
     {};
 
-
   for (
     var i = 0;
     i < teachers.length;
@@ -1459,7 +1395,6 @@ function getPrefCounts() {
     var pref =
       teachers[i].prefecture;
 
-
     if (
       !pref
     ) {
@@ -1467,7 +1402,6 @@ function getPrefCounts() {
       continue;
 
     }
-
 
     result[pref] =
       (
@@ -1478,7 +1412,6 @@ function getPrefCounts() {
 
   }
 
-
   return result;
 
 }
@@ -1488,7 +1421,6 @@ function getUnknownCount() {
 
   var count =
     0;
-
 
   for (
     var i = 0;
@@ -1506,7 +1438,6 @@ function getUnknownCount() {
 
   }
 
-
   return count;
 
 }
@@ -1519,6 +1450,8 @@ function updateSelectedPrefHeading() {
       'selectedPrefName'
     );
 
+  var person =
+    personLabel();
 
   if (
     selectedPrefecture ===
@@ -1527,17 +1460,19 @@ function updateSelectedPrefHeading() {
 
     el.textContent =
 
-      '所在地不明｜先生 ' +
+      '所在地不明｜' +
+
+      person +
+
+      ' ' +
 
       getUnknownCount() +
 
       '名';
 
-
     return;
 
   }
-
 
   if (
     selectedPrefecture
@@ -1549,22 +1484,23 @@ function updateSelectedPrefHeading() {
       ] ||
       0;
 
-
     el.textContent =
 
       selectedPrefecture +
 
-      '｜先生 ' +
+      '｜' +
+
+      person +
+
+      ' ' +
 
       count +
 
       '名';
 
-
     return;
 
   }
-
 
   el.textContent =
     '都道府県を選択';
@@ -1572,17 +1508,12 @@ function updateSelectedPrefHeading() {
 }
 
 
-/* ========================================
-   都道府県一覧
-   ======================================== */
-
 function setPrefMode(
   mode
 ) {
 
   prefMode =
     mode;
-
 
   document.getElementById(
     'activePrefBtn'
@@ -1595,7 +1526,6 @@ function setPrefMode(
 
   );
 
-
   document.getElementById(
     'allPrefBtn'
   ).classList.toggle(
@@ -1607,20 +1537,21 @@ function setPrefMode(
 
   );
 
-
   renderPrefList();
 
 }
 
+
+/* ========================================
+   都道府県一覧
+   ======================================== */
 
 function renderPrefList() {
 
   var counts =
     getPrefCounts();
 
-
   var regionOrder = [
-
     '北海道',
     '東北',
     '関東',
@@ -1630,13 +1561,10 @@ function renderPrefList() {
     '四国',
     '九州',
     '沖縄'
-
   ];
-
 
   var grouped =
     {};
-
 
   for (
     var r = 0;
@@ -1651,7 +1579,6 @@ function renderPrefList() {
 
   }
 
-
   for (
     var i = 0;
     i < prefectures.length;
@@ -1661,11 +1588,9 @@ function renderPrefList() {
     var pref =
       prefectures[i];
 
-
     var count =
       counts[pref] ||
       0;
-
 
     if (
       prefMode ===
@@ -1677,12 +1602,10 @@ function renderPrefList() {
 
     }
 
-
     var region =
       getRegionName(
         pref
       );
-
 
     if (
       !grouped[
@@ -1696,7 +1619,6 @@ function renderPrefList() {
         [];
 
     }
-
 
     grouped[
       region
@@ -1712,10 +1634,8 @@ function renderPrefList() {
 
   }
 
-
   var html =
     '';
-
 
   for (
     var regionIndex = 0;
@@ -1728,13 +1648,11 @@ function renderPrefList() {
         regionIndex
       ];
 
-
     var regionPrefs =
       grouped[
         regionName
       ] ||
       [];
-
 
     if (
       regionPrefs.length ===
@@ -1745,33 +1663,22 @@ function renderPrefList() {
 
     }
 
-
-    var baseColor =
-      getRegionBaseColor(
-        regionName
-      );
-
-
-    var teacherColor =
-      getRegionTeacherColor(
-        regionName
-      );
-
-
     html +=
-
       '<div class="pref-region-group"' +
 
       ' style="' +
 
       '--region-base:' +
-      baseColor +
+      getRegionBaseColor(
+        regionName
+      ) +
       ';' +
 
       '--region-active:' +
-      teacherColor +
+      getRegionTeacherColor(
+        regionName
+      ) +
       ';">';
-
 
     html +=
 
@@ -1781,13 +1688,9 @@ function renderPrefList() {
         regionName
       ) +
 
-      '</div>';
-
-
-    html +=
+      '</div>' +
 
       '<div class="pref-region-chips">';
-
 
     for (
       var prefIndex = 0;
@@ -1800,10 +1703,8 @@ function renderPrefList() {
           prefIndex
         ];
 
-
       var cls =
         'chip';
-
 
       if (
         row.count > 0
@@ -1814,7 +1715,6 @@ function renderPrefList() {
 
       }
 
-
       if (
         selectedPrefecture ===
         row.prefecture
@@ -1824,7 +1724,6 @@ function renderPrefList() {
           ' selected';
 
       }
-
 
       html +=
 
@@ -1856,7 +1755,6 @@ function renderPrefList() {
 
     }
 
-
     html +=
 
       '</div>' +
@@ -1865,10 +1763,8 @@ function renderPrefList() {
 
   }
 
-
   var unknown =
     getUnknownCount();
-
 
   if (
     unknown > 0
@@ -1907,7 +1803,6 @@ function renderPrefList() {
 
   }
 
-
   document.getElementById(
     'prefList'
   ).innerHTML =
@@ -1923,10 +1818,8 @@ function selectPrefecture(
   selectedPrefecture =
     pref;
 
-
   selectedTeacherId =
     '';
-
 
   updateSelectedPrefHeading();
 
@@ -1944,10 +1837,8 @@ function selectUnknown() {
   selectedPrefecture =
     '__UNKNOWN__';
 
-
   selectedTeacherId =
     '';
-
 
   updateSelectedPrefHeading();
 
@@ -1977,6 +1868,43 @@ function teacherMatches(
 
   }
 
+  var linkText =
+    '';
+
+  var links =
+    teacher.links ||
+    [];
+
+  for (
+    var i = 0;
+    i < links.length;
+    i++
+  ) {
+
+    linkText +=
+
+      ' ' +
+
+      (
+        links[i].type ||
+        ''
+      ) +
+
+      ' ' +
+
+      (
+        links[i].displayName ||
+        ''
+      ) +
+
+      ' ' +
+
+      (
+        links[i].value ||
+        ''
+      );
+
+  }
 
   var text = [
 
@@ -1990,8 +1918,6 @@ function teacherMatches(
 
     teacher.salonKana,
 
-    teacher.instagram,
-
     teacher.prefecture,
 
     teacher.city,
@@ -2000,14 +1926,15 @@ function teacherMatches(
 
     teacher.address2,
 
-    teacher.memo
+    teacher.memo,
+
+    linkText
 
   ]
     .join(
       ' '
     )
     .toLowerCase();
-
 
   return text.indexOf(
     query.toLowerCase()
@@ -2036,7 +1963,6 @@ function teacherCard(
         ' '
       );
 
-
   return (
 
     '<div class="teacher" onclick="openTeacherDetail(\'' +
@@ -2047,7 +1973,6 @@ function teacherCard(
 
     '\')">' +
 
-
     '<div class="teacher-name">' +
 
     escapeHtml(
@@ -2056,7 +1981,6 @@ function teacherCard(
     ) +
 
     '</div>' +
-
 
     (
       teacher.nickname
@@ -2068,7 +1992,6 @@ function teacherCard(
         : ''
     ) +
 
-
     (
       teacher.salonName
         ? '<div class="meta">' +
@@ -2079,7 +2002,6 @@ function teacherCard(
         : ''
     ) +
 
-
     (
       location
         ? '<div class="meta">' +
@@ -2089,7 +2011,6 @@ function teacherCard(
           '</div>'
         : '<div class="meta">所在地不明</div>'
     ) +
-
 
     '</div>'
 
@@ -2108,10 +2029,8 @@ function renderMapTeacherPreview() {
       ''
     ).trim();
 
-
   var list =
     [];
-
 
   for (
     var i = 0;
@@ -2122,7 +2041,6 @@ function renderMapTeacherPreview() {
     var teacher =
       teachers[i];
 
-
     if (
       selectedPrefecture ===
         '__UNKNOWN__' &&
@@ -2132,7 +2050,6 @@ function renderMapTeacherPreview() {
       continue;
 
     }
-
 
     if (
       selectedPrefecture &&
@@ -2146,7 +2063,6 @@ function renderMapTeacherPreview() {
 
     }
 
-
     if (
       !teacherMatches(
         teacher,
@@ -2158,17 +2074,15 @@ function renderMapTeacherPreview() {
 
     }
 
-
     list.push(
       teacher
     );
 
   }
 
-
   var title =
-    '先生一覧';
-
+    personLabel() +
+    '一覧';
 
   if (
     selectedPrefecture ===
@@ -2187,7 +2101,6 @@ function renderMapTeacherPreview() {
 
   }
 
-
   var html =
 
     '<div class="section-title">' +
@@ -2202,20 +2115,25 @@ function renderMapTeacherPreview() {
 
     '名</div>';
 
-
   if (
     list.length ===
     0
   ) {
 
     html +=
-      '<div class="empty">該当する先生はいません。</div>';
+
+      '<div class="empty">該当する' +
+
+      escapeHtml(
+        personLabel()
+      ) +
+
+      'はいません。</div>';
 
   } else {
 
     html +=
       '<div class="teacher-list">';
-
 
     for (
       var j = 0;
@@ -2230,12 +2148,10 @@ function renderMapTeacherPreview() {
 
     }
 
-
     html +=
       '</div>';
 
   }
-
 
   document.getElementById(
     'mapSide'
@@ -2255,10 +2171,8 @@ function renderFullTeacherList() {
       ''
     ).trim();
 
-
   var html =
     '';
-
 
   for (
     var i = 0;
@@ -2282,14 +2196,21 @@ function renderFullTeacherList() {
 
   }
 
-
   document.getElementById(
     'fullTeacherList'
   ).innerHTML =
 
     html ||
 
-    '<div class="empty">該当する先生はいません。</div>';
+    (
+      '<div class="empty">該当する' +
+
+      escapeHtml(
+        personLabel()
+      ) +
+
+      'はいません。</div>'
+    );
 
 }
 
@@ -2304,7 +2225,6 @@ function renderSearchResults() {
       ''
     ).trim();
 
-
   if (
     !query
   ) {
@@ -2314,15 +2234,12 @@ function renderSearchResults() {
     ).innerHTML =
       '<div class="empty">検索語を入力してください。</div>';
 
-
     return;
 
   }
 
-
   var html =
     '';
-
 
   for (
     var i = 0;
@@ -2346,14 +2263,21 @@ function renderSearchResults() {
 
   }
 
-
   document.getElementById(
     'searchResults'
   ).innerHTML =
 
     html ||
 
-    '<div class="empty">該当する先生はいません。</div>';
+    (
+      '<div class="empty">該当する' +
+
+      escapeHtml(
+        personLabel()
+      ) +
+
+      'はいません。</div>'
+    );
 
 }
 
@@ -2378,10 +2302,12 @@ function showPage(
       'pageSearch',
 
     detail:
-      'pageDetail'
+      'pageDetail',
+
+    settings:
+      'pageSettings'
 
   };
-
 
   for (
     var key in pages
@@ -2394,35 +2320,43 @@ function showPage(
       'active',
 
       key ===
-        name
+      name
 
     );
 
   }
 
-
-  [
-    'Map',
-    'List',
-    'Search'
-  ].forEach(
-    function(navName) {
-
-      document.getElementById(
-        'nav' +
-        navName
-      ).classList.toggle(
-
-        'active',
-
-        navName.toLowerCase() ===
-          name
-
-      );
-
-    }
+  document.getElementById(
+    'navMap'
+  ).classList.toggle(
+    'active',
+    name ===
+      'map'
   );
 
+  document.getElementById(
+    'navList'
+  ).classList.toggle(
+    'active',
+    name ===
+      'list'
+  );
+
+  document.getElementById(
+    'navSearch'
+  ).classList.toggle(
+    'active',
+    name ===
+      'search'
+  );
+
+  document.getElementById(
+    'navSettings'
+  ).classList.toggle(
+    'active',
+    name ===
+      'settings'
+  );
 
   if (
     name ===
@@ -2433,7 +2367,6 @@ function showPage(
 
   }
 
-
   if (
     name ===
     'search'
@@ -2443,6 +2376,14 @@ function showPage(
 
   }
 
+  if (
+    name ===
+    'settings'
+  ) {
+
+    fillSettingsForm();
+
+  }
 
   window.scrollTo(
     0,
@@ -2477,7 +2418,6 @@ function findTeacher(
 
   }
 
-
   return null;
 
 }
@@ -2492,7 +2432,6 @@ function openTeacherDetail(
       id
     );
 
-
   if (
     !teacher
   ) {
@@ -2501,10 +2440,8 @@ function openTeacherDetail(
 
   }
 
-
   selectedTeacherId =
     id;
-
 
   if (
     teacher.prefecture
@@ -2515,7 +2452,6 @@ function openTeacherDetail(
 
   }
 
-
   renderPrefList();
 
   renderJapanMap();
@@ -2523,7 +2459,6 @@ function openTeacherDetail(
   renderTeacherDetail(
     teacher
   );
-
 
   showPage(
     'detail'
@@ -2539,7 +2474,6 @@ function birthdayText(
   var result =
     '';
 
-
   if (
     obj.birthYear
   ) {
@@ -2549,7 +2483,6 @@ function birthdayText(
       '年';
 
   }
-
 
   if (
     obj.birthMonth
@@ -2561,7 +2494,6 @@ function birthdayText(
 
   }
 
-
   if (
     obj.birthDay
   ) {
@@ -2571,7 +2503,6 @@ function birthdayText(
       '日';
 
   }
-
 
   return result;
 
@@ -2592,7 +2523,6 @@ function detailRow(
     return '';
 
   }
-
 
   return (
 
@@ -2644,7 +2574,6 @@ function renderTeacherDetail(
 
     '</div>' +
 
-
     (
       teacher.kana
         ? '<div class="meta">' +
@@ -2655,21 +2584,29 @@ function renderTeacherDetail(
         : ''
     ) +
 
+    '</div>' +
+
+    '<div class="detail-head-actions">' +
+
+    '<button class="secondary" onclick="openTeacherForm(\'' +
+
+    escapeJs(
+      teacher.teacherId
+    ) +
+
+    '\')">編集</button>' +
+
+    '<button class="detail-delete-button" onclick="deleteTeacherAction(\'' +
+
+    escapeJs(
+      teacher.teacherId
+    ) +
+
+    '\')">🗑 削除</button>' +
 
     '</div>' +
 
-
-    '<button class="secondary" onclick="openInteractionForm(\'' +
-
-escapeJs(
-  interaction.interactionId
-) +
-
-'\')">編集</button>' +
-
-
     '</div>';
-
 
   html +=
     detailRow(
@@ -2677,13 +2614,11 @@ escapeJs(
       teacher.nickname
     );
 
-
   html +=
     detailRow(
       '性別',
       teacher.gender
     );
-
 
   html +=
     detailRow(
@@ -2693,27 +2628,23 @@ escapeJs(
       )
     );
 
-
   html +=
     detailRow(
       '年齢',
       teacher.ageDisplay
     );
 
-
   html +=
     detailRow(
-      'サロン名',
+      placeLabel(),
       teacher.salonName
     );
 
-
   html +=
     detailRow(
-      'サロン名ふりがな',
+      placeKanaLabel(),
       teacher.salonKana
     );
-
 
   html +=
     detailRow(
@@ -2721,44 +2652,50 @@ escapeJs(
       teacher.fullAddress
     );
 
-
-  html +=
-    detailRow(
-      'Instagram',
-      teacher.instagram
-        ? '@' +
-          teacher.instagram
-        : ''
-    );
-
-
   html +=
     detailRow(
       'メモ',
       teacher.memo
     );
 
-
-  html +=
-    '<div class="actions">';
-
+  var links =
+    teacher.links ||
+    [];
 
   if (
-    teacher.instagram
+    links.length
   ) {
 
     html +=
 
-      '<button class="secondary" onclick="openInstagram(\'' +
+      '<div class="detail-row">' +
 
-      escapeJs(
-        teacher.instagram
-      ) +
+      '<div class="label">リンク・SNS</div>' +
 
-      '\')">Instagram</button>';
+      '<div class="link-list">';
+
+    for (
+      var linkIndex = 0;
+      linkIndex < links.length;
+      linkIndex++
+    ) {
+
+      html +=
+        renderDetailLink(
+          links[
+            linkIndex
+          ]
+        );
+
+    }
+
+    html +=
+
+      '</div>' +
+
+      '</div>';
 
   }
-
 
   if (
     teacher.fullAddress
@@ -2766,26 +2703,29 @@ escapeJs(
 
     html +=
 
+      '<div class="actions">' +
+
       '<button class="secondary" onclick="openGoogleMap(\'' +
 
       escapeJs(
         teacher.fullAddress
       ) +
 
-      '\')">Google Maps</button>';
+      '\')">Google Maps</button>' +
+
+      '</div>';
 
   }
 
-
-
-
   html +=
-    '</div></div>';
+    '</div>';
 
 
-  /* ==============================
-     交流履歴
-     ============================== */
+  /* 交流履歴 */
+
+  var interactions =
+    teacher.interactions ||
+    [];
 
   html +=
 
@@ -2795,23 +2735,13 @@ escapeJs(
 
     '<div class="section-title">交流履歴 ' +
 
-    (
-      teacher.interactions
-        ? teacher.interactions.length
-        : 0
-    ) +
+    interactions.length +
 
     '件</div>' +
 
     '<button class="primary" onclick="openInteractionForm()">＋ 追加</button>' +
 
     '</div>';
-
-
-  var interactions =
-    teacher.interactions ||
-    [];
-
 
   if (
     interactions.length ===
@@ -2829,31 +2759,28 @@ escapeJs(
       interactionIndex++
     ) {
 
-      var interaction =
-        interactions[
-          interactionIndex
-        ];
-
-
       html +=
         renderInteractionCard(
-          interaction
+          interactions[
+            interactionIndex
+          ]
         );
 
     }
 
   }
 
-
   html +=
     '</div>';
 
 
-  /* ==============================
-     子ども
-     ============================== */
+  /* 子ども */
 
-    html +=
+  var children =
+    teacher.children ||
+    [];
+
+  html +=
 
     '<div class="card">' +
 
@@ -2863,11 +2790,7 @@ escapeJs(
 
     '子ども情報 ' +
 
-    (
-      teacher.children
-        ? teacher.children.length
-        : 0
-    ) +
+    children.length +
 
     '人</div>' +
 
@@ -2882,9 +2805,8 @@ escapeJs(
     '</div>';
 
   if (
-    !teacher.children ||
-    teacher.children.length ===
-      0
+    children.length ===
+    0
   ) {
 
     html +=
@@ -2893,34 +2815,34 @@ escapeJs(
   } else {
 
     for (
-      var i = 0;
-      i < teacher.children.length;
-      i++
+      var childIndex = 0;
+      childIndex < children.length;
+      childIndex++
     ) {
 
       var child =
-        teacher.children[i];
-
-
-      html +=
-        '<div class="child">';
-
+        children[
+          childIndex
+        ];
 
       html +=
 
-       '<div class="child-name-text">' +
+        '<div class="child">' +
 
-escapeHtml(
-  child.name ||
-  child.nickname ||
-  '名前未登録'
-) +
+        '<div class="child-name-text">' +
 
-'</div>';
+        escapeHtml(
+          child.name ||
+          child.nickname ||
+          '名前未登録'
+        ) +
 
+        '</div>';
 
       if (
-        child.nickname
+        child.nickname &&
+        child.nickname !==
+          child.name
       ) {
 
         html +=
@@ -2934,7 +2856,6 @@ escapeHtml(
           '</div>';
 
       }
-
 
       if (
         child.gender
@@ -2952,7 +2873,6 @@ escapeHtml(
 
       }
 
-
       if (
         child.gradeDisplay
       ) {
@@ -2969,7 +2889,6 @@ escapeHtml(
 
       }
 
-
       if (
         child.ageDisplay
       ) {
@@ -2985,7 +2904,6 @@ escapeHtml(
           '</div>';
 
       }
-
 
       if (
         birthdayText(
@@ -3007,7 +2925,6 @@ escapeHtml(
 
       }
 
-
       if (
         child.memo
       ) {
@@ -3024,7 +2941,6 @@ escapeHtml(
 
       }
 
-
       html +=
         '</div>';
 
@@ -3032,10 +2948,8 @@ escapeHtml(
 
   }
 
-
   html +=
     '</div>';
-
 
   document.getElementById(
     'detailContent'
@@ -3057,11 +2971,9 @@ function renderInteractionCard(
     interaction.date ||
     '日付未登録';
 
-
   var typeText =
     interaction.interactionType ||
     '種別未登録';
-
 
   var html =
 
@@ -3069,37 +2981,47 @@ function renderInteractionCard(
 
     '<div class="detail-head">' +
 
-'<div>' +
+    '<div>' +
 
     '<div class="interaction-date">' +
 
-escapeHtml(
-  dateText
-) +
-
-'</div>' +
-
-'<span class="interaction-type-label">' +
-
-escapeHtml(
-  typeText
-) +
-
-'</span>' +
+    escapeHtml(
+      dateText
+    ) +
 
     '</div>' +
 
+    '<span class="interaction-type-label">' +
+
+    escapeHtml(
+      typeText
+    ) +
+
+    '</span>' +
+
+    '</div>' +
+
+    '<div class="detail-head-actions">' +
 
     '<button class="secondary" onclick="openInteractionForm(\'' +
 
-escapeJs(
-  interaction.interactionId
-) +
+    escapeJs(
+      interaction.interactionId
+    ) +
 
-'\')">編集</button>' +
+    '\')">編集</button>' +
+
+    '<button class="detail-delete-button" onclick="deleteInteractionAction(\'' +
+
+    escapeJs(
+      interaction.interactionId
+    ) +
+
+    '\')">🗑 削除</button>' +
+
+    '</div>' +
 
     '</div>';
-
 
   if (
     interaction.memo
@@ -3117,23 +3039,8 @@ escapeJs(
 
   }
 
-
   html +=
-
-    '<div class="actions">' +
-
-    '<button class="danger" onclick="deleteInteractionAction(\'' +
-
-    escapeJs(
-      interaction.interactionId
-    ) +
-
-    '\')">削除</button>' +
-
-    '</div>' +
-
     '</div>';
-
 
   return html;
 
@@ -3149,7 +3056,6 @@ function findInteraction(
       selectedTeacherId
     );
 
-
   if (
     !teacher
   ) {
@@ -3158,11 +3064,9 @@ function findInteraction(
 
   }
 
-
   var interactions =
     teacher.interactions ||
     [];
-
 
   for (
     var i = 0;
@@ -3181,7 +3085,6 @@ function findInteraction(
 
   }
 
-
   return null;
 
 }
@@ -3191,9 +3094,8 @@ function openInteractionForm(
   interactionId
 ) {
 
-    interactionFormSource =
+  interactionFormSource =
     'detail';
-
 
   editingPendingInteractionIndex =
     -1;
@@ -3206,30 +3108,25 @@ function openInteractionForm(
 
   }
 
-
   setValue(
     'interactionId',
     ''
   );
-
 
   setValue(
     'interactionDate',
     todayYmd()
   );
 
-
   setValue(
     'interactionType',
     ''
   );
 
-
   setValue(
     'interactionMemo',
     ''
   );
-
 
   var interaction =
     interactionId
@@ -3237,7 +3134,6 @@ function openInteractionForm(
           interactionId
         )
       : null;
-
 
   if (
     interaction
@@ -3248,30 +3144,25 @@ function openInteractionForm(
     ).textContent =
       '交流記録を編集';
 
-
     setValue(
       'interactionId',
       interaction.interactionId
     );
-
 
     setValue(
       'interactionDate',
       interaction.date
     );
 
-
     setValue(
       'interactionType',
       interaction.interactionType
     );
 
-
     setValue(
       'interactionMemo',
       interaction.memo
     );
-
 
   } else {
 
@@ -3281,7 +3172,6 @@ function openInteractionForm(
       '交流記録を追加';
 
   }
-
 
   document.getElementById(
     'interactionModal'
@@ -3329,9 +3219,6 @@ async function saveInteractionForm() {
 
   };
 
-
-  /* 先生フォーム内からの追加 */
-
   if (
     interactionFormSource ===
     'teacherForm'
@@ -3347,7 +3234,6 @@ async function saveInteractionForm() {
       ] =
         payload;
 
-
     } else {
 
       pendingInteractions.push(
@@ -3356,23 +3242,16 @@ async function saveInteractionForm() {
 
     }
 
-
     closeInteractionForm();
 
-
     renderTeacherFormInteractions();
-
 
     editingPendingInteractionIndex =
       -1;
 
-
     return;
 
   }
-
-
-  /* Detailから直接追加 */
 
   if (
     !selectedTeacherId
@@ -3382,15 +3261,12 @@ async function saveInteractionForm() {
 
   }
 
-
   payload.teacherId =
     selectedTeacherId;
-
 
   setLoading(
     true
   );
-
 
   try {
 
@@ -3401,21 +3277,17 @@ async function saveInteractionForm() {
       ]
     );
 
-
     closeInteractionForm();
-
 
     await refreshTeacherData(
       selectedTeacherId
     );
-
 
   } catch (e) {
 
     handleError(
       e
     );
-
 
   } finally {
 
@@ -3442,11 +3314,9 @@ async function deleteInteractionAction(
 
   }
 
-
   setLoading(
     true
   );
-
 
   try {
 
@@ -3457,18 +3327,15 @@ async function deleteInteractionAction(
       ]
     );
 
-
     await refreshTeacherData(
       selectedTeacherId
     );
-
 
   } catch (e) {
 
     handleError(
       e
     );
-
 
   } finally {
 
@@ -3486,36 +3353,29 @@ function todayYmd() {
   var now =
     new Date();
 
+  return (
 
-  var year =
-    now.getFullYear();
+    now.getFullYear() +
 
+    '-' +
 
-  var month =
     String(
       now.getMonth() +
       1
     ).padStart(
       2,
       '0'
-    );
+    ) +
 
+    '-' +
 
-  var day =
     String(
       now.getDate()
     ).padStart(
       2,
       '0'
-    );
+    )
 
-
-  return (
-    year +
-    '-' +
-    month +
-    '-' +
-    day
   );
 
 }
@@ -3533,17 +3393,14 @@ async function refreshTeacherData(
     ) ||
     [];
 
-
   renderAll();
 
   renderJapanMap();
-
 
   var teacher =
     findTeacher(
       teacherId
     );
-
 
   if (
     teacher
@@ -3552,11 +3409,9 @@ async function refreshTeacherData(
     selectedTeacherId =
       teacherId;
 
-
     renderTeacherDetail(
       teacher
     );
-
 
     showPage(
       'detail'
@@ -3577,14 +3432,12 @@ function openTeacherForm(
 
   clearTeacherForm();
 
-
   var teacher =
     id
       ? findTeacher(
           id
         )
       : null;
-
 
   pendingInteractions =
     teacher &&
@@ -3596,23 +3449,37 @@ function openTeacherForm(
         )
       : [];
 
-
   deletedInteractionIds =
     [];
-
 
   editingPendingInteractionIndex =
     -1;
 
+  pendingLinks =
+    teacher &&
+    teacher.links
+      ? JSON.parse(
+          JSON.stringify(
+            teacher.links
+          )
+        )
+      : [];
+
+  deletedLinkIds =
+    [];
+
+  editingPendingLinkIndex =
+    -1;
 
   document.getElementById(
     'modalTitle'
   ).textContent =
 
     teacher
-      ? '先生情報を編集'
-      : '先生を追加';
-
+      ? personLabel() +
+        '情報を編集'
+      : personLabel() +
+        'を追加';
 
   if (
     teacher
@@ -3623,24 +3490,20 @@ function openTeacherForm(
       teacher.teacherId
     );
 
-
     setValue(
       'name',
       teacher.name
     );
-
 
     setValue(
       'kana',
       teacher.kana
     );
 
-
     setValue(
       'nickname',
       teacher.nickname
     );
-
 
     setValue(
       'gender',
@@ -3648,78 +3511,60 @@ function openTeacherForm(
       ''
     );
 
-
     setValue(
       'birthYear',
       teacher.birthYear
     );
-
 
     setValue(
       'birthMonth',
       teacher.birthMonth
     );
 
-
     setValue(
       'birthDay',
       teacher.birthDay
     );
-
 
     setValue(
       'ageManual',
       teacher.ageManual
     );
 
-
     setValue(
       'salonName',
       teacher.salonName
     );
-
 
     setValue(
       'salonKana',
       teacher.salonKana
     );
 
-
     setValue(
       'prefecture',
       teacher.prefecture
     );
-
 
     setValue(
       'city',
       teacher.city
     );
 
-
     setValue(
       'address1',
       teacher.address1
     );
-
 
     setValue(
       'address2',
       teacher.address2
     );
 
-
-    setValue(
-      'instagram',
-      teacher.instagram
-    );
-
-
     setValue(
       'memo',
       teacher.memo
     );
-
 
   } else {
 
@@ -3730,6 +3575,17 @@ function openTeacherForm(
 
   }
 
+  document.getElementById(
+    'placeNameLabel'
+  ).textContent =
+    placeLabel();
+
+  document.getElementById(
+    'placeKanaLabel'
+  ).textContent =
+    placeKanaLabel();
+
+  renderLinksEditor();
 
   renderChildrenEditor(
 
@@ -3740,9 +3596,7 @@ function openTeacherForm(
 
   );
 
-
   renderTeacherFormInteractions();
-
 
   document.getElementById(
     'teacherModal'
@@ -3761,22 +3615,28 @@ function closeTeacherForm() {
     'show'
   );
 
-
   hideCombos();
-
 
   pendingInteractions =
     [];
 
-
   deletedInteractionIds =
     [];
-
 
   editingPendingInteractionIndex =
     -1;
 
+  pendingLinks =
+    [];
+
+  deletedLinkIds =
+    [];
+
+  editingPendingLinkIndex =
+    -1;
+
 }
+
 
 function clearTeacherForm() {
 
@@ -3810,12 +3670,9 @@ function clearTeacherForm() {
 
     'address2',
 
-    'instagram',
-
     'memo'
 
   ];
-
 
   for (
     var i = 0;
@@ -3830,7 +3687,6 @@ function clearTeacherForm() {
 
   }
 
-
   setValue(
     'gender',
     '女'
@@ -3840,6 +3696,9 @@ function clearTeacherForm() {
 
 
 async function saveTeacherForm() {
+
+  var instagramLegacy =
+    firstInstagramAccountFromPendingLinks();
 
   var payload = {
 
@@ -3919,9 +3778,7 @@ async function saveTeacherForm() {
       ),
 
     instagram:
-      valueOf(
-        'instagram'
-      ),
+      instagramLegacy,
 
     memo:
       valueOf(
@@ -3930,11 +3787,9 @@ async function saveTeacherForm() {
 
   };
 
-
   setLoading(
     true
   );
-
 
   try {
 
@@ -3946,28 +3801,27 @@ async function saveTeacherForm() {
         ]
       );
 
-
     await saveChildrenAfterTeacher(
       saved
     );
 
+    await saveLinksAfterTeacher(
+      saved.teacherId
+    );
 
     await saveInteractionsAfterTeacher(
       saved.teacherId
     );
 
-
     await refreshAfterSave(
       saved.teacherId
     );
-
 
   } catch (e) {
 
     handleError(
       e
     );
-
 
   } finally {
 
@@ -3980,10 +3834,6 @@ async function saveTeacherForm() {
 }
 
 
-/* ========================================
-   子ども
-   ======================================== */
-
 function openTeacherFormForNewChild(
   teacherId
 ) {
@@ -3992,9 +3842,7 @@ function openTeacherFormForNewChild(
     teacherId
   );
 
-
   addChildRow();
-
 
   setTimeout(
     function() {
@@ -4003,7 +3851,6 @@ function openTeacherFormForNewChild(
         document.getElementById(
           'childrenEditArea'
         );
-
 
       if (
         area
@@ -4039,7 +3886,6 @@ function renderTeacherFormInteractions() {
       'interactionEditArea'
     );
 
-
   if (
     !area
   ) {
@@ -4047,7 +3893,6 @@ function renderTeacherFormInteractions() {
     return;
 
   }
-
 
   var html =
 
@@ -4071,7 +3916,6 @@ function renderTeacherFormInteractions() {
 
     '</div>';
 
-
   if (
     pendingInteractions.length ===
     0
@@ -4087,7 +3931,6 @@ function renderTeacherFormInteractions() {
 
   }
 
-
   for (
     var i = 0;
     i < pendingInteractions.length;
@@ -4097,7 +3940,6 @@ function renderTeacherFormInteractions() {
     var interaction =
       pendingInteractions[i];
 
-
     html +=
 
       '<div class="child">' +
@@ -4106,38 +3948,43 @@ function renderTeacherFormInteractions() {
 
       '<div>' +
 
-      '<strong>' +
+      '<div class="interaction-date">' +
 
       escapeHtml(
         interaction.date ||
         '日付未登録'
       ) +
 
-      '</strong>' +
+      '</div>' +
 
-      '<div class="meta">' +
+      '<span class="interaction-type-label">' +
 
       escapeHtml(
         interaction.interactionType ||
         '種別未登録'
       ) +
 
-      '</div>' +
+      '</span>' +
 
       '</div>' +
+
+      '<div class="detail-head-actions">' +
 
       '<button type="button" class="secondary" onclick="openTeacherFormInteraction(' +
 
       i +
 
-      ')">' +
+      ')">編集</button>' +
 
-      '編集' +
+      '<button type="button" class="detail-delete-button" onclick="removeTeacherFormInteraction(' +
 
-      '</button>' +
+      i +
+
+      ')">🗑 削除</button>' +
+
+      '</div>' +
 
       '</div>';
-
 
     if (
       interaction.memo
@@ -4155,27 +4002,10 @@ function renderTeacherFormInteractions() {
 
     }
 
-
     html +=
-
-      '<div class="actions">' +
-
-      '<button type="button" class="danger" onclick="removeTeacherFormInteraction(' +
-
-      i +
-
-      ')">' +
-
-      '削除' +
-
-      '</button>' +
-
-      '</div>' +
-
       '</div>';
 
   }
-
 
   area.innerHTML =
     html;
@@ -4190,37 +4020,32 @@ function openTeacherFormInteraction(
   interactionFormSource =
     'teacherForm';
 
-
   editingPendingInteractionIndex =
+
     typeof index ===
       'number'
       ? index
       : -1;
-
 
   setValue(
     'interactionId',
     ''
   );
 
-
   setValue(
     'interactionDate',
     todayYmd()
   );
-
 
   setValue(
     'interactionType',
     ''
   );
 
-
   setValue(
     'interactionMemo',
     ''
   );
-
 
   if (
     editingPendingInteractionIndex >=
@@ -4232,12 +4057,10 @@ function openTeacherFormInteraction(
         editingPendingInteractionIndex
       ];
 
-
     document.getElementById(
       'interactionModalTitle'
     ).textContent =
       '交流記録を編集';
-
 
     setValue(
       'interactionId',
@@ -4245,13 +4068,11 @@ function openTeacherFormInteraction(
       ''
     );
 
-
     setValue(
       'interactionDate',
       interaction.date ||
       ''
     );
-
 
     setValue(
       'interactionType',
@@ -4259,13 +4080,11 @@ function openTeacherFormInteraction(
       ''
     );
 
-
     setValue(
       'interactionMemo',
       interaction.memo ||
       ''
     );
-
 
   } else {
 
@@ -4275,7 +4094,6 @@ function openTeacherFormInteraction(
       '交流記録を追加';
 
   }
-
 
   document.getElementById(
     'interactionModal'
@@ -4295,6 +4113,15 @@ function removeTeacherFormInteraction(
       index
     ];
 
+  if (
+    !confirm(
+      'この交流記録を削除しますか？'
+    )
+  ) {
+
+    return;
+
+  }
 
   if (
     interaction &&
@@ -4307,16 +4134,648 @@ function removeTeacherFormInteraction(
 
   }
 
-
   pendingInteractions.splice(
     index,
     1
   );
 
-
   renderTeacherFormInteractions();
 
 }
+
+
+/* ========================================
+   リンク・SNS
+   ======================================== */
+
+function renderLinksEditor() {
+
+  var area =
+    document.getElementById(
+      'linkEditArea'
+    );
+
+  if (
+    !area
+  ) {
+
+    return;
+
+  }
+
+  var html =
+
+    '<div class="detail-head">' +
+
+    '<div class="section-title">' +
+
+    'リンク・SNS ' +
+
+    pendingLinks.length +
+
+    '件</div>' +
+
+    '<button type="button" class="secondary" onclick="openTeacherFormLink()">' +
+
+    '＋ リンクを追加' +
+
+    '</button>' +
+
+    '</div>';
+
+  if (
+    pendingLinks.length ===
+    0
+  ) {
+
+    html +=
+
+      '<div class="empty">' +
+
+      'リンク・SNSはまだありません。' +
+
+      '</div>';
+
+  }
+
+  for (
+    var i = 0;
+    i < pendingLinks.length;
+    i++
+  ) {
+
+    var link =
+      pendingLinks[i];
+
+    var label =
+
+      link.displayName ||
+
+      link.type ||
+
+      'リンク';
+
+    html +=
+
+      '<div class="link-edit">' +
+
+      '<div class="detail-head">' +
+
+      '<div class="link-row-main">' +
+
+      '<div class="link-label">' +
+
+      escapeHtml(
+        label
+      ) +
+
+      '</div>' +
+
+      '<div class="link-value">' +
+
+      escapeHtml(
+        displayLinkValue(
+          link
+        )
+      ) +
+
+      '</div>' +
+
+      '</div>' +
+
+      '<div class="detail-head-actions">' +
+
+      '<button type="button" class="secondary" onclick="openTeacherFormLink(' +
+
+      i +
+
+      ')">編集</button>' +
+
+      '<button type="button" class="detail-delete-button" onclick="removeTeacherFormLink(' +
+
+      i +
+
+      ')">🗑 削除</button>' +
+
+      '</div>' +
+
+      '</div>' +
+
+      '</div>';
+
+  }
+
+  area.innerHTML =
+    html;
+
+}
+
+
+function openTeacherFormLink(
+  index
+) {
+
+  editingPendingLinkIndex =
+
+    typeof index ===
+      'number'
+      ? index
+      : -1;
+
+  setValue(
+    'linkId',
+    ''
+  );
+
+  setValue(
+    'linkType',
+    'Instagram'
+  );
+
+  setValue(
+    'linkDisplayName',
+    ''
+  );
+
+  setValue(
+    'linkValue',
+    ''
+  );
+
+  if (
+    editingPendingLinkIndex >=
+    0
+  ) {
+
+    var link =
+      pendingLinks[
+        editingPendingLinkIndex
+      ];
+
+    document.getElementById(
+      'linkModalTitle'
+    ).textContent =
+      'リンク・SNSを編集';
+
+    setValue(
+      'linkId',
+      link.linkId ||
+      ''
+    );
+
+    setValue(
+      'linkType',
+      link.type ||
+      ''
+    );
+
+    setValue(
+      'linkDisplayName',
+      link.displayName ||
+      ''
+    );
+
+    setValue(
+      'linkValue',
+      link.value ||
+      ''
+    );
+
+  } else {
+
+    document.getElementById(
+      'linkModalTitle'
+    ).textContent =
+      'リンク・SNSを追加';
+
+  }
+
+  updateLinkInputGuide();
+
+  document.getElementById(
+    'linkModal'
+  ).classList.add(
+    'show'
+  );
+
+}
+
+
+function closeLinkForm() {
+
+  document.getElementById(
+    'linkModal'
+  ).classList.remove(
+    'show'
+  );
+
+  editingPendingLinkIndex =
+    -1;
+
+}
+
+
+function updateLinkInputGuide() {
+
+  var type =
+    valueOf(
+      'linkType'
+    );
+
+  var label =
+    document.getElementById(
+      'linkValueLabel'
+    );
+
+  var input =
+    document.getElementById(
+      'linkValue'
+    );
+
+  var note =
+    document.getElementById(
+      'linkValueNote'
+    );
+
+  if (
+    normalizeLinkType(
+      type
+    ) ===
+    'instagram'
+  ) {
+
+    label.textContent =
+      'アカウント名またはURL';
+
+    input.placeholder =
+      '例：awomb8 / @awomb8 / Instagram URL';
+
+    note.textContent =
+      'Instagramはアカウント名だけでも登録できます。';
+
+  } else {
+
+    label.textContent =
+      'URL';
+
+    input.placeholder =
+      'https://...';
+
+    note.textContent =
+      '';
+
+  }
+
+}
+
+
+function saveLinkForm() {
+
+  var payload = {
+
+    linkId:
+      valueOf(
+        'linkId'
+      ),
+
+    type:
+      valueOf(
+        'linkType'
+      ),
+
+    displayName:
+      valueOf(
+        'linkDisplayName'
+      ),
+
+    value:
+      valueOf(
+        'linkValue'
+      )
+
+  };
+
+  if (
+    editingPendingLinkIndex >=
+    0
+  ) {
+
+    pendingLinks[
+      editingPendingLinkIndex
+    ] =
+      payload;
+
+  } else {
+
+    pendingLinks.push(
+      payload
+    );
+
+  }
+
+  closeLinkForm();
+
+  renderLinksEditor();
+
+}
+
+
+function removeTeacherFormLink(
+  index
+) {
+
+  var link =
+    pendingLinks[
+      index
+    ];
+
+  if (
+    !confirm(
+      'このリンクを削除しますか？'
+    )
+  ) {
+
+    return;
+
+  }
+
+  if (
+    link &&
+    link.linkId
+  ) {
+
+    deletedLinkIds.push(
+      link.linkId
+    );
+
+  }
+
+  pendingLinks.splice(
+    index,
+    1
+  );
+
+  renderLinksEditor();
+
+}
+
+
+function renderDetailLink(
+  link
+) {
+
+  var label =
+
+    link.displayName ||
+
+    link.type ||
+
+    'リンク';
+
+  return (
+
+    '<div class="link-row">' +
+
+    '<div class="link-row-main">' +
+
+    '<div class="link-label">' +
+
+    escapeHtml(
+      label
+    ) +
+
+    '</div>' +
+
+    '<div class="link-value">' +
+
+    escapeHtml(
+      displayLinkValue(
+        link
+      )
+    ) +
+
+    '</div>' +
+
+    '</div>' +
+
+    '<button class="secondary link-open" onclick="openLink(\'' +
+
+    escapeJs(
+      link.type ||
+      ''
+    ) +
+
+    '\',\'' +
+
+    escapeJs(
+      link.value ||
+      ''
+    ) +
+
+    '\')">開く</button>' +
+
+    '</div>'
+
+  );
+
+}
+
+
+function displayLinkValue(
+  link
+) {
+
+  if (
+    normalizeLinkType(
+      link.type
+    ) ===
+    'instagram'
+  ) {
+
+    var account =
+      instagramAccount(
+        link.value ||
+        ''
+      );
+
+    return account
+      ? '@' +
+        account
+      : (
+          link.value ||
+          ''
+        );
+
+  }
+
+  return link.value ||
+    '';
+
+}
+
+
+function normalizeLinkType(
+  type
+) {
+
+  return String(
+    type ||
+    ''
+  )
+    .trim()
+    .toLowerCase()
+    .replace(
+      /\s+/g,
+      ''
+    );
+
+}
+
+
+function instagramAccount(
+  value
+) {
+
+  return String(
+    value ||
+    ''
+  )
+    .trim()
+
+    .replace(
+      /^https?:\/\/(www\.)?instagram\.com\//i,
+      ''
+    )
+
+    .replace(
+      /^@/,
+      ''
+    )
+
+    .replace(
+      /[/?#].*$/,
+      ''
+    )
+
+    .replace(
+      /\/$/,
+      ''
+    );
+
+}
+
+
+function firstInstagramAccountFromPendingLinks() {
+
+  for (
+    var i = 0;
+    i < pendingLinks.length;
+    i++
+  ) {
+
+    if (
+      normalizeLinkType(
+        pendingLinks[i].type
+      ) ===
+      'instagram'
+    ) {
+
+      return instagramAccount(
+        pendingLinks[i].value ||
+        ''
+      );
+
+    }
+
+  }
+
+  return '';
+
+}
+
+
+function openLink(
+  type,
+  value
+) {
+
+  if (
+    !value
+  ) {
+
+    return;
+
+  }
+
+  var url =
+    '';
+
+  var normalizedType =
+    normalizeLinkType(
+      type
+    );
+
+  if (
+    normalizedType ===
+    'instagram'
+  ) {
+
+    var account =
+      instagramAccount(
+        value
+      );
+
+    if (
+      !account
+    ) {
+
+      return;
+
+    }
+
+    url =
+
+      'https://www.instagram.com/' +
+
+      encodeURIComponent(
+        account
+      ) +
+
+      '/';
+
+  } else {
+
+    url =
+      String(
+        value
+      ).trim();
+
+    if (
+      !/^https?:\/\//i.test(
+        url
+      )
+    ) {
+
+      url =
+        'https://' +
+        url;
+
+    }
+
+  }
+
+  window.open(
+    url,
+    '_blank',
+    'noopener'
+  );
+
+}
+
+
+/* ========================================
+   子ども
+   ======================================== */
 
 function renderChildrenEditor(
   children
@@ -4326,12 +4785,19 @@ function renderChildrenEditor(
     'childrenEditArea'
   ).innerHTML =
 
+    '<div class="detail-head">' +
+
     '<div class="section-title">子ども情報</div>' +
 
-    '<div id="childRows"></div>' +
+    '<button type="button" class="secondary" onclick="addChildRow()">' +
 
-    '<button type="button" class="secondary" onclick="addChildRow()">＋ 子どもを追加</button>';
+    '＋ 子どもを追加' +
 
+    '</button>' +
+
+    '</div>' +
+
+    '<div id="childRows"></div>';
 
   for (
     var i = 0;
@@ -4356,16 +4822,13 @@ function addChildRow(
     child ||
     {};
 
-
   var div =
     document.createElement(
       'div'
     );
 
-
   div.className =
     'child-edit';
-
 
   div.setAttribute(
     'data-child-id',
@@ -4373,10 +4836,8 @@ function addChildRow(
     ''
   );
 
-
   var gradeSelect =
     '<select class="child-grade">';
-
 
   for (
     var i = 0;
@@ -4386,7 +4847,6 @@ function addChildRow(
 
     var grade =
       gradeOptions[i];
-
 
     gradeSelect +=
 
@@ -4416,10 +4876,8 @@ function addChildRow(
 
   }
 
-
   gradeSelect +=
     '</select>';
-
 
   div.innerHTML =
 
@@ -4440,7 +4898,6 @@ function addChildRow(
 
     '</div>' +
 
-
     '<div class="field">' +
 
     '<label>ふりがな</label>' +
@@ -4458,7 +4915,6 @@ function addChildRow(
 
     '</div>' +
 
-
     '<div class="grid2">' +
 
     '<div class="field">' +
@@ -4475,7 +4931,6 @@ function addChildRow(
     '">' +
 
     '</div>' +
-
 
     '<div class="field">' +
 
@@ -4521,7 +4976,6 @@ function addChildRow(
 
     '</div>' +
 
-
     '<div class="grid2">' +
 
     '<div class="field">' +
@@ -4531,7 +4985,6 @@ function addChildRow(
     gradeSelect +
 
     '</div>' +
-
 
     '<div class="field">' +
 
@@ -4550,7 +5003,6 @@ function addChildRow(
 
     '</div>' +
 
-
     '<div class="field">' +
 
     '<label>生まれ年</label>' +
@@ -4565,7 +5017,6 @@ function addChildRow(
     '">' +
 
     '</div>' +
-
 
     '<div class="grid2">' +
 
@@ -4584,7 +5035,6 @@ function addChildRow(
 
     '</div>' +
 
-
     '<div class="field">' +
 
     '<label>誕生日</label>' +
@@ -4602,7 +5052,6 @@ function addChildRow(
 
     '</div>' +
 
-
     '<div class="field">' +
 
     '<label>メモ</label>' +
@@ -4618,13 +5067,11 @@ function addChildRow(
 
     '</div>' +
 
+    '<button type="button" class="detail-delete-button" onclick="removeChildRow(this)">' +
 
-    '<button type="button" class="danger" onclick="removeChildRow(this)">' +
-
-    'この子ども情報を削除' +
+    '🗑 この子ども情報を削除' +
 
     '</button>';
-
 
   document.getElementById(
     'childRows'
@@ -4644,7 +5091,6 @@ async function saveChildrenAfterTeacher(
       '.child-edit'
     );
 
-
   for (
     var i = 0;
     i < rows.length;
@@ -4653,7 +5099,6 @@ async function saveChildrenAfterTeacher(
 
     var row =
       rows[i];
-
 
     var payload = {
 
@@ -4718,7 +5163,6 @@ async function saveChildrenAfterTeacher(
 
     };
 
-
     await runScript(
       'saveChild',
       [
@@ -4728,8 +5172,74 @@ async function saveChildrenAfterTeacher(
 
   }
 
+}
+
+
+async function saveLinksAfterTeacher(
+  teacherId
+) {
+
+  for (
+    var deleteIndex = 0;
+    deleteIndex < deletedLinkIds.length;
+    deleteIndex++
+  ) {
+
+    await runScript(
+      'deleteLink',
+      [
+        deletedLinkIds[
+          deleteIndex
+        ]
+      ]
+    );
+
+  }
+
+  for (
+    var i = 0;
+    i < pendingLinks.length;
+    i++
+  ) {
+
+    var link =
+      pendingLinks[i];
+
+    await runScript(
+      'saveLink',
+      [
+        {
+
+          linkId:
+            link.linkId ||
+            '',
+
+          teacherId:
+            teacherId,
+
+          type:
+            link.type ||
+            '',
+
+          displayName:
+            link.displayName ||
+            '',
+
+          value:
+            link.value ||
+            '',
+
+          sortOrder:
+            i + 1
+
+        }
+      ]
+    );
+
+  }
 
 }
+
 
 async function saveInteractionsAfterTeacher(
   teacherId
@@ -4752,7 +5262,6 @@ async function saveInteractionsAfterTeacher(
 
   }
 
-
   for (
     var i = 0;
     i < pendingInteractions.length;
@@ -4761,7 +5270,6 @@ async function saveInteractionsAfterTeacher(
 
     var interaction =
       pendingInteractions[i];
-
 
     await runScript(
       'saveInteraction',
@@ -4808,20 +5316,16 @@ async function refreshAfterSave(
     ) ||
     [];
 
-
   closeTeacherForm();
-
 
   renderAll();
 
   renderJapanMap();
 
-
   var teacher =
     findTeacher(
       teacherId
     );
-
 
   if (
     teacher
@@ -4845,12 +5349,10 @@ async function removeChildRow(
       '.child-edit'
     );
 
-
   var childId =
     row.getAttribute(
       'data-child-id'
     );
-
 
   if (
     !childId
@@ -4862,7 +5364,6 @@ async function removeChildRow(
 
   }
 
-
   if (
     !confirm(
       'この子ども情報を削除しますか？'
@@ -4873,11 +5374,9 @@ async function removeChildRow(
 
   }
 
-
   setLoading(
     true
   );
-
 
   try {
 
@@ -4888,16 +5387,13 @@ async function removeChildRow(
       ]
     );
 
-
     row.remove();
-
 
   } catch (e) {
 
     handleError(
       e
     );
-
 
   } finally {
 
@@ -4920,7 +5416,13 @@ async function deleteTeacherAction(
 
   if (
     !confirm(
-      'この先生と紐づく子ども情報・交流履歴も削除します。\n本当に削除しますか？'
+
+      'この' +
+
+      personLabel() +
+
+      'と紐づく子ども情報・交流履歴・リンクも削除します。\n本当に削除しますか？'
+
     )
   ) {
 
@@ -4928,11 +5430,9 @@ async function deleteTeacherAction(
 
   }
 
-
   setLoading(
     true
   );
-
 
   try {
 
@@ -4943,7 +5443,6 @@ async function deleteTeacherAction(
       ]
     );
 
-
     teachers =
       (
         await runScript(
@@ -4952,27 +5451,22 @@ async function deleteTeacherAction(
       ) ||
       [];
 
-
     selectedTeacherId =
       '';
-
 
     renderAll();
 
     renderJapanMap();
 
-
     showPage(
       'map'
     );
-
 
   } catch (e) {
 
     handleError(
       e
     );
-
 
   } finally {
 
@@ -4996,16 +5490,13 @@ function showPrefectureResults() {
       'prefecture'
     );
 
-
   var box =
     document.getElementById(
       'prefResults'
     );
 
-
   box.innerHTML =
     '';
-
 
   for (
     var i = 0;
@@ -5015,7 +5506,6 @@ function showPrefectureResults() {
 
     var pref =
       prefectures[i];
-
 
     if (
       query &&
@@ -5029,33 +5519,27 @@ function showPrefectureResults() {
 
     }
 
-
     var item =
       document.createElement(
         'div'
       );
 
-
     item.className =
       'combo-option';
 
-
     item.textContent =
       pref;
-
 
     item.onclick =
       makePrefSelector(
         pref
       );
 
-
     box.appendChild(
       item
     );
 
   }
-
 
   box.classList.add(
     'show'
@@ -5075,12 +5559,10 @@ function makePrefSelector(
       pref
     );
 
-
     setValue(
       'city',
       ''
     );
-
 
     document.getElementById(
       'prefResults'
@@ -5100,16 +5582,13 @@ function showCityResults() {
       'city'
     );
 
-
   var selectedPref =
     valueOf(
       'prefecture'
     );
 
-
   var results =
     [];
-
 
   for (
     var pref in addressMaster
@@ -5125,7 +5604,6 @@ function showCityResults() {
 
     }
 
-
     if (
       selectedPref &&
       pref !==
@@ -5136,11 +5614,9 @@ function showCityResults() {
 
     }
 
-
     var cities =
       addressMaster[pref] ||
       [];
-
 
     for (
       var i = 0;
@@ -5150,7 +5626,6 @@ function showCityResults() {
 
       var city =
         cities[i];
-
 
       if (
         query &&
@@ -5164,7 +5639,6 @@ function showCityResults() {
 
       }
 
-
       results.push({
 
         prefecture:
@@ -5174,7 +5648,6 @@ function showCityResults() {
           city
 
       });
-
 
       if (
         results.length >=
@@ -5187,7 +5660,6 @@ function showCityResults() {
 
     }
 
-
     if (
       results.length >=
       100
@@ -5199,16 +5671,13 @@ function showCityResults() {
 
   }
 
-
   var box =
     document.getElementById(
       'cityResults'
     );
 
-
   box.innerHTML =
     '';
-
 
   for (
     var j = 0;
@@ -5219,16 +5688,13 @@ function showCityResults() {
     var result =
       results[j];
 
-
     var item =
       document.createElement(
         'div'
       );
 
-
     item.className =
       'combo-option';
-
 
     item.textContent =
 
@@ -5238,19 +5704,16 @@ function showCityResults() {
 
       result.prefecture;
 
-
     item.onclick =
       makeCitySelector(
         result
       );
-
 
     box.appendChild(
       item
     );
 
   }
-
 
   box.classList.add(
     'show'
@@ -5270,12 +5733,10 @@ function makeCitySelector(
       row.city
     );
 
-
     setValue(
       'prefecture',
       row.prefecture
     );
-
 
     document.getElementById(
       'cityResults'
@@ -5295,7 +5756,6 @@ function hideCombos() {
   ).classList.remove(
     'show'
   );
-
 
   document.getElementById(
     'cityResults'
@@ -5328,34 +5788,6 @@ document.addEventListener(
    外部リンク
    ======================================== */
 
-function openInstagram(
-  account
-) {
-
-  if (
-    !account
-  ) {
-
-    return;
-
-  }
-
-
-  window.open(
-
-    'https://www.instagram.com/' +
-
-    encodeURIComponent(
-      account
-    ),
-
-    '_blank'
-
-  );
-
-}
-
-
 function openGoogleMap(
   address
 ) {
@@ -5368,7 +5800,6 @@ function openGoogleMap(
 
   }
 
-
   window.open(
 
     'https://www.google.com/maps/search/?api=1&query=' +
@@ -5377,9 +5808,500 @@ function openGoogleMap(
       address
     ),
 
-    '_blank'
+    '_blank',
+
+    'noopener'
 
   );
+
+}
+
+
+/* ========================================
+   設定
+   ======================================== */
+
+function personLabel() {
+
+  return String(
+    appSettings.personLabel ||
+    '先生'
+  ).trim() ||
+    '先生';
+
+}
+
+
+function placeLabel() {
+
+  return String(
+    appSettings.placeLabel ||
+    '店名'
+  ).trim() ||
+    '店名';
+
+}
+
+
+function placeKanaLabel() {
+
+  return String(
+    appSettings.placeKanaLabel ||
+    '店名ふりがな'
+  ).trim() ||
+    '店名ふりがな';
+
+}
+
+
+function appName() {
+
+  return String(
+    appSettings.appName ||
+    'Academy Map'
+  ).trim() ||
+    'Academy Map';
+
+}
+
+
+function fillSettingsForm() {
+
+  setValue(
+    'settingAppName',
+    appName()
+  );
+
+  setValue(
+    'settingPersonLabel',
+    personLabel()
+  );
+
+  setValue(
+    'settingPlaceLabel',
+    placeLabel()
+  );
+
+  setValue(
+    'settingPlaceKanaLabel',
+    placeKanaLabel()
+  );
+
+}
+
+
+async function saveSettingsForm() {
+
+  var payload = {
+
+    appName:
+      valueOf(
+        'settingAppName'
+      ) ||
+      'Academy Map',
+
+    personLabel:
+      valueOf(
+        'settingPersonLabel'
+      ) ||
+      '先生',
+
+    placeLabel:
+      valueOf(
+        'settingPlaceLabel'
+      ) ||
+      '店名',
+
+    placeKanaLabel:
+      valueOf(
+        'settingPlaceKanaLabel'
+      ) ||
+      '店名ふりがな'
+
+  };
+
+  setLoading(
+    true
+  );
+
+  try {
+
+    appSettings =
+      await runScript(
+        'saveAppSettings',
+        [
+          payload
+        ]
+      );
+
+    cacheUiSettings();
+
+    applySettingsToUi();
+
+    renderAll();
+
+    renderJapanMap();
+
+    alert(
+      '設定を保存しました。'
+    );
+
+  } catch (e) {
+
+    handleError(
+      e
+    );
+
+  } finally {
+
+    setLoading(
+      false
+    );
+
+  }
+
+}
+
+
+function applySettingsToUi() {
+
+  var app =
+    appName();
+
+  var person =
+    personLabel();
+
+  var brandName =
+    document.getElementById(
+      'brandName'
+    );
+
+  if (
+    brandName
+  ) {
+
+    brandName.textContent =
+      app;
+
+  }
+
+  var brandSub =
+    document.getElementById(
+      'brandSub'
+    );
+
+  if (
+    brandSub
+  ) {
+
+    brandSub.textContent =
+
+      '全国の' +
+
+      person +
+
+      '管理';
+
+  }
+
+  var authAppName =
+    document.getElementById(
+      'authAppName'
+    );
+
+  if (
+    authAppName
+  ) {
+
+    authAppName.textContent =
+      app;
+
+  }
+
+  var authDescription =
+    document.getElementById(
+      'authDescription'
+    );
+
+  if (
+    authDescription
+  ) {
+
+    authDescription.textContent =
+
+      'Googleアカウントでログインして' +
+
+      person +
+
+      '情報を開きます。';
+
+  }
+
+  document.title =
+    app;
+
+  var appleAppTitle =
+    document.getElementById(
+      'appleAppTitle'
+    );
+
+  if (
+    appleAppTitle
+  ) {
+
+    appleAppTitle.setAttribute(
+      'content',
+      app
+    );
+
+  }
+
+  var listPageTitle =
+    document.getElementById(
+      'listPageTitle'
+    );
+
+  if (
+    listPageTitle
+  ) {
+
+    listPageTitle.textContent =
+
+      person +
+
+      '一覧';
+
+  }
+
+  var navListText =
+    document.getElementById(
+      'navListText'
+    );
+
+  if (
+    navListText
+  ) {
+
+    navListText.textContent =
+
+      person +
+
+      '一覧';
+
+  }
+
+  var mapLegendActive =
+    document.getElementById(
+      'mapLegendActive'
+    );
+
+  if (
+    mapLegendActive
+  ) {
+
+    mapLegendActive.textContent =
+
+      person +
+
+      'あり';
+
+  }
+
+  var activePrefBtn =
+    document.getElementById(
+      'activePrefBtn'
+    );
+
+  if (
+    activePrefBtn
+  ) {
+
+    activePrefBtn.textContent =
+
+      person +
+
+      'がいる県のみ';
+
+  }
+
+  var mapSearch =
+    document.getElementById(
+      'mapSearch'
+    );
+
+  if (
+    mapSearch
+  ) {
+
+    mapSearch.placeholder =
+
+      '名前・' +
+
+      placeLabel() +
+
+      '・地域を検索';
+
+  }
+
+  var listSearch =
+    document.getElementById(
+      'listSearch'
+    );
+
+  if (
+    listSearch
+  ) {
+
+    listSearch.placeholder =
+
+      '名前・呼び名・' +
+
+      placeLabel() +
+
+      '・地域で検索';
+
+  }
+
+  var globalSearch =
+    document.getElementById(
+      'globalSearch'
+    );
+
+  if (
+    globalSearch
+  ) {
+
+    globalSearch.placeholder =
+
+      '名前・ふりがな・呼び名・' +
+
+      placeLabel() +
+
+      '・SNS・住所';
+
+  }
+
+  var placeNameLabel =
+    document.getElementById(
+      'placeNameLabel'
+    );
+
+  if (
+    placeNameLabel
+  ) {
+
+    placeNameLabel.textContent =
+      placeLabel();
+
+  }
+
+  var placeKanaLabelEl =
+    document.getElementById(
+      'placeKanaLabel'
+    );
+
+  if (
+    placeKanaLabelEl
+  ) {
+
+    placeKanaLabelEl.textContent =
+      placeKanaLabel();
+
+  }
+
+  updateDynamicManifest();
+
+}
+
+
+function updateDynamicManifest() {
+
+  var manifestLink =
+    document.getElementById(
+      'appManifest'
+    );
+
+  if (
+    !manifestLink
+  ) {
+
+    return;
+
+  }
+
+  try {
+
+    var manifest = {
+
+      name:
+        appName(),
+
+      short_name:
+        appName(),
+
+      start_url:
+        './',
+
+      display:
+        'standalone',
+
+      background_color:
+        '#faf7f6',
+
+      theme_color:
+        '#d95b72',
+
+      icons: [
+
+        {
+          src:
+            './icon-192.png',
+          sizes:
+            '192x192',
+          type:
+            'image/png'
+        },
+
+        {
+          src:
+            './icon-512.png',
+          sizes:
+            '512x512',
+          type:
+            'image/png'
+        }
+
+      ]
+
+    };
+
+    var blob =
+      new Blob(
+
+        [
+          JSON.stringify(
+            manifest
+          )
+        ],
+
+        {
+          type:
+            'application/manifest+json'
+        }
+
+      );
+
+    var url =
+      URL.createObjectURL(
+        blob
+      );
+
+    manifestLink.setAttribute(
+      'href',
+      url
+    );
+
+  } catch (e) {}
 
 }
 
@@ -5392,12 +6314,17 @@ function valueOf(
   id
 ) {
 
-  return document
-    .getElementById(
+  var el =
+    document.getElementById(
       id
-    )
-    .value
-    .trim();
+    );
+
+  return el
+    ? String(
+        el.value ||
+        ''
+      ).trim()
+    : '';
 
 }
 
@@ -5407,9 +6334,20 @@ function setValue(
   value
 ) {
 
-  document.getElementById(
-    id
-  ).value =
+  var el =
+    document.getElementById(
+      id
+    );
+
+  if (
+    !el
+  ) {
+
+    return;
+
+  }
+
+  el.value =
 
     value === null ||
     value === undefined
@@ -5441,7 +6379,6 @@ function handleError(
     false
   );
 
-
   alert(
 
     error &&
@@ -5461,8 +6398,12 @@ function escapeHtml(
 ) {
 
   return String(
-    str ||
-    ''
+
+    str === null ||
+    str === undefined
+      ? ''
+      : str
+
   )
 
     .replace(
@@ -5509,8 +6450,12 @@ function escapeJs(
 ) {
 
   return String(
-    str ||
-    ''
+
+    str === null ||
+    str === undefined
+      ? ''
+      : str
+
   )
 
     .replace(
