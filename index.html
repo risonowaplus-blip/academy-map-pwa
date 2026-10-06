@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#8f625b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Academy Map">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="stylesheet" href="./style.css">
+  <title>Academy Map</title>
+</head>
+<body>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="app-mark">A</div>
+    <h1>Academy Map</h1>
+    <p>先生管理アプリを開くにはGoogleアカウントでログインしてください。</p>
+    <button id="loginButton" class="primary big" onclick="login()">Googleでログイン</button>
+    <div id="authMessage" class="small-note"></div>
+  </div>
+</div>
+
+<div id="loading" class="loading">読み込み中…</div>
+
+<div id="appShell" class="app-shell hidden">
+  <header class="topbar">
+    <div>
+      <div class="brand">Academy Map</div>
+      <div class="sub">全国の先生管理</div>
+    </div>
+    <button class="round-add" onclick="openTeacherForm()">＋</button>
+  </header>
+
+  <main class="main">
+    <section id="pageMap" class="page active">
+      <div class="desktop-grid">
+        <div>
+          <div class="card">
+            <input id="mapSearch" class="search" type="search"
+              placeholder="先生・サロン・地域を検索"
+              oninput="renderMapTeacherPreview()">
+            <div id="stats" class="stats"></div>
+          </div>
+
+          <div class="card">
+            <div class="map-heading">
+              <div>
+                <div class="label">日本地図</div>
+                <div id="selectedPrefName" class="selected-pref">都道府県を選択</div>
+              </div>
+            </div>
+
+            <div id="japanMap" class="japan-map"></div>
+
+            <div class="segmented">
+              <button id="activePrefBtn" class="active" onclick="setPrefMode('active')">先生がいる県のみ</button>
+              <button id="allPrefBtn" onclick="setPrefMode('all')">全都道府県</button>
+            </div>
+
+            <div id="prefList" class="chips"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="mapSide">
+            <div class="empty">日本地図または都道府県名を選択してください。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pageList" class="page">
+      <div class="card">
+        <div class="section-title">先生一覧</div>
+        <input id="listSearch" class="search" type="search"
+          placeholder="名前・呼び名・サロン名・地域で検索"
+          oninput="renderFullTeacherList()">
+        <div id="fullTeacherList" class="teacher-list top-gap"></div>
+      </div>
+    </section>
+
+    <section id="pageSearch" class="page">
+      <div class="card">
+        <div class="section-title">検索</div>
+        <input id="globalSearch" class="search" type="search"
+          placeholder="先生名・ふりがな・呼び名・サロン・Instagram・住所"
+          oninput="renderSearchResults()">
+        <div id="searchResults" class="teacher-list top-gap"></div>
+      </div>
+    </section>
+
+    <section id="pageDetail" class="page">
+      <div id="detailContent"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button id="navMap" class="nav-btn active" onclick="showPage('map')">
+      <span class="nav-icon">🗾</span><span>地図</span>
+    </button>
+    <button id="navList" class="nav-btn" onclick="showPage('list')">
+      <span class="nav-icon">👥</span><span>先生一覧</span>
+    </button>
+    <button id="navSearch" class="nav-btn" onclick="showPage('search')">
+      <span class="nav-icon">⌕</span><span>検索</span>
+    </button>
+    <button class="nav-btn" onclick="openTeacherForm()">
+      <span class="nav-icon">＋</span><span>追加</span>
+    </button>
+  </nav>
+</div>
+
+<div id="teacherModal" class="modal-bg">
+  <div class="modal">
+    <div class="modal-head">
+      <div id="modalTitle" class="modal-title">先生を追加</div>
+      <button class="close" onclick="closeTeacherForm()">×</button>
+    </div>
+
+    <input id="teacherId" type="hidden">
+
+    <div class="grid2">
+      <div class="field"><label>名前</label><input id="name"></div>
+      <div class="field"><label>ふりがな</label><input id="kana"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="field"><label>呼び名</label><input id="nickname"></div>
+      <div class="field">
+        <label>性別</label>
+        <select id="gender"><option value="女">女</option><option value="男">男</option></select>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field"><label>生まれ年</label><input id="birthYear" type="number" placeholder="不明なら空欄"></div>
+      <div class="field"><label>年齢</label><input id="ageManual" type="number" placeholder="分かる場合だけ"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="field"><label>誕生月</label><input id="birthMonth" type="number" min="1" max="12"></div>
+      <div class="field"><label>誕生日</label><input id="birthDay" type="number" min="1" max="31"></div>
+    </div>
+
+    <div class="field"><label>サロン名</label><input id="salonName"></div>
+    <div class="field"><label>サロン名ふりがな</label><input id="salonKana"></div>
+
+    <div class="grid2">
+      <div class="field combo">
+        <label>都道府県</label>
+        <input id="prefecture" autocomplete="off" placeholder="検索して選択"
+          onfocus="showPrefectureResults()" oninput="showPrefectureResults()">
+        <div id="prefResults" class="combo-results"></div>
+      </div>
+
+      <div class="field combo">
+        <label>市区町村</label>
+        <input id="city" autocomplete="off" placeholder="検索して選択"
+          onfocus="showCityResults()" oninput="showCityResults()">
+        <div id="cityResults" class="combo-results"></div>
+      </div>
+    </div>
+
+    <div class="field"><label>町名・番地</label><input id="address1"></div>
+    <div class="field"><label>建物名・部屋番号</label><input id="address2"></div>
+    <div class="field"><label>Instagramアカウント</label><input id="instagram" placeholder="@なしでOK"></div>
+    <div class="field"><label>メモ</label><textarea id="memo"></textarea></div>
+
+    <div id="childrenEditArea" class="children-area"></div>
+
+    <div class="form-actions">
+      <button class="secondary" onclick="closeTeacherForm()">キャンセル</button>
+      <button class="primary" onclick="saveTeacherForm()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client"></script>
+<script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
