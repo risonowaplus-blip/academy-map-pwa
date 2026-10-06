@@ -44,7 +44,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261006-06"
+    href="./style.css?v=20261006-07"
   >
 
   <title>
@@ -336,71 +336,100 @@
           表示名は候補から選んでも、自由に入力しても構いません。
         </div>
 
-        <div class="field">
-          <label>アプリ名</label>
-          <input id="settingAppName" list="appNameOptions">
-          <datalist id="appNameOptions">
-            <option value="つながりマップ"></option>
-            <option value="メンバーマップ"></option>
-            <option value="先生マップ"></option>
-            <option value="講師マップ"></option>
-            <option value="仲間マップ"></option>
-            <option value="スタッフマップ"></option>
-            <option value="コミュニティマップ"></option>
-            <option value="Academy Map"></option>
-            <option value="Member Map"></option>
-            <option value="Teacher Map"></option>
-          </datalist>
+
+        <div class="field setting-combo">
+
+          <label>
+            アプリ名
+          </label>
+
+          <input
+            id="settingAppName"
+            autocomplete="off"
+            onfocus="showSettingSuggestions('settingAppName','settingAppNameResults','appName')"
+            oninput="showSettingSuggestions('settingAppName','settingAppNameResults','appName')"
+          >
+
+          <div
+            id="settingAppNameResults"
+            class="setting-results"
+          ></div>
+
         </div>
 
-        <div class="field">
-          <label>人物名称</label>
-          <input id="settingPersonLabel" list="personLabelOptions">
-          <datalist id="personLabelOptions">
-            <option value="先生"></option>
-            <option value="講師"></option>
-            <option value="メンバー"></option>
-            <option value="スタッフ"></option>
-            <option value="仲間"></option>
-            <option value="担当者"></option>
-            <option value="受講生"></option>
-          </datalist>
+
+        <div class="field setting-combo">
+
+          <label>
+            人物名称
+          </label>
+
+          <input
+            id="settingPersonLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions('settingPersonLabel','settingPersonLabelResults','personLabel')"
+            oninput="showSettingSuggestions('settingPersonLabel','settingPersonLabelResults','personLabel')"
+          >
+
+          <div
+            id="settingPersonLabelResults"
+            class="setting-results"
+          ></div>
+
         </div>
 
-        <div class="field">
-          <label>店名の表示名</label>
-          <input id="settingPlaceLabel" list="placeLabelOptions">
-          <datalist id="placeLabelOptions">
-            <option value="店名"></option>
-            <option value="サロン名"></option>
-            <option value="店舗名"></option>
-            <option value="教室名"></option>
-            <option value="所属先"></option>
-            <option value="勤務先"></option>
-            <option value="会社名"></option>
-            <option value="施設名"></option>
-          </datalist>
+
+        <div class="field setting-combo">
+
+          <label>
+            店名の表示名
+          </label>
+
+          <input
+            id="settingPlaceLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions('settingPlaceLabel','settingPlaceLabelResults','placeLabel')"
+            oninput="showSettingSuggestions('settingPlaceLabel','settingPlaceLabelResults','placeLabel')"
+          >
+
+          <div
+            id="settingPlaceLabelResults"
+            class="setting-results"
+          ></div>
+
         </div>
 
-        <div class="field">
-          <label>店名ふりがなの表示名</label>
-          <input id="settingPlaceKanaLabel" list="placeKanaLabelOptions">
-          <datalist id="placeKanaLabelOptions">
-            <option value="店名ふりがな"></option>
-            <option value="サロン名ふりがな"></option>
-            <option value="店舗名ふりがな"></option>
-            <option value="教室名ふりがな"></option>
-            <option value="所属先ふりがな"></option>
-            <option value="勤務先ふりがな"></option>
-            <option value="会社名ふりがな"></option>
-            <option value="施設名ふりがな"></option>
-          </datalist>
+
+        <div class="field setting-combo">
+
+          <label>
+            店名ふりがなの表示名
+          </label>
+
+          <input
+            id="settingPlaceKanaLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions('settingPlaceKanaLabel','settingPlaceKanaLabelResults','placeKanaLabel')"
+            oninput="showSettingSuggestions('settingPlaceKanaLabel','settingPlaceKanaLabelResults','placeKanaLabel')"
+          >
+
+          <div
+            id="settingPlaceKanaLabelResults"
+            class="setting-results"
+          ></div>
+
         </div>
+
 
         <div class="form-actions">
-          <button class="primary" onclick="saveSettingsForm()">
+
+          <button
+            class="primary"
+            onclick="saveSettingsForm()"
+          >
             設定を保存
           </button>
+
         </div>
 
       </div>
@@ -690,7 +719,7 @@
 
     <div class="field">
 
-      <label>
+      <label id="placeNameLabel">
         サロン名
       </label>
 
@@ -701,7 +730,7 @@
 
     <div class="field">
 
-      <label>
+      <label id="placeKanaLabel">
         サロン名ふりがな
       </label>
 
@@ -906,19 +935,12 @@
       <datalist id="interactionTypeOptions">
 
         <option value="研修"></option>
-
         <option value="勉強会"></option>
-
         <option value="懇親会"></option>
-
         <option value="Instagram"></option>
-
         <option value="LINE"></option>
-
         <option value="電話"></option>
-
         <option value="Zoom"></option>
-
         <option value="その他"></option>
 
       </datalist>
@@ -1138,7 +1160,7 @@
 
 <script src="./config.js?v=20261006-03"></script>
 
-<script src="./app.js?v=20261006-12"></script>
+<script src="./app.js?v=20261006-13"></script>
 
 
 </body>
