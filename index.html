@@ -26,11 +26,13 @@
   >
 
   <meta
+    id="appleAppTitle"
     name="apple-mobile-web-app-title"
     content="Academy Map"
   >
 
   <link
+    id="appManifest"
     rel="manifest"
     href="./manifest.webmanifest"
   >
@@ -42,7 +44,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261006-05"
+    href="./style.css?v=20261006-06"
   >
 
   <title>
@@ -66,11 +68,11 @@
       A
     </div>
 
-    <h1>
+    <h1 id="authAppName">
       Academy Map
     </h1>
 
-    <p>
+    <p id="authDescription">
       Googleアカウントでログインして先生情報を開きます。
     </p>
 
@@ -110,11 +112,11 @@
 
     <div>
 
-      <div class="brand">
+      <div id="brandName" class="brand">
         Academy Map
       </div>
 
-      <div class="sub">
+      <div id="brandSub" class="sub">
         全国の先生管理
       </div>
 
@@ -197,7 +199,7 @@
 
                 <span class="legend-dot teacher-dot"></span>
 
-                先生あり
+                <span id="mapLegendActive">先生あり</span>
 
               </span>
 
@@ -268,7 +270,7 @@
 
       <div class="card">
 
-        <div class="section-title">
+        <div id="listPageTitle" class="section-title">
           先生一覧
         </div>
 
@@ -320,6 +322,93 @@
 
 
     <section
+      id="pageSettings"
+      class="page"
+    >
+
+      <div class="card">
+
+        <div class="section-title">
+          設定
+        </div>
+
+        <div class="form-note">
+          表示名は候補から選んでも、自由に入力しても構いません。
+        </div>
+
+        <div class="field">
+          <label>アプリ名</label>
+          <input id="settingAppName" list="appNameOptions">
+          <datalist id="appNameOptions">
+            <option value="つながりマップ"></option>
+            <option value="メンバーマップ"></option>
+            <option value="先生マップ"></option>
+            <option value="講師マップ"></option>
+            <option value="仲間マップ"></option>
+            <option value="スタッフマップ"></option>
+            <option value="コミュニティマップ"></option>
+            <option value="Academy Map"></option>
+            <option value="Member Map"></option>
+            <option value="Teacher Map"></option>
+          </datalist>
+        </div>
+
+        <div class="field">
+          <label>人物名称</label>
+          <input id="settingPersonLabel" list="personLabelOptions">
+          <datalist id="personLabelOptions">
+            <option value="先生"></option>
+            <option value="講師"></option>
+            <option value="メンバー"></option>
+            <option value="スタッフ"></option>
+            <option value="仲間"></option>
+            <option value="担当者"></option>
+            <option value="受講生"></option>
+          </datalist>
+        </div>
+
+        <div class="field">
+          <label>店名の表示名</label>
+          <input id="settingPlaceLabel" list="placeLabelOptions">
+          <datalist id="placeLabelOptions">
+            <option value="店名"></option>
+            <option value="サロン名"></option>
+            <option value="店舗名"></option>
+            <option value="教室名"></option>
+            <option value="所属先"></option>
+            <option value="勤務先"></option>
+            <option value="会社名"></option>
+            <option value="施設名"></option>
+          </datalist>
+        </div>
+
+        <div class="field">
+          <label>店名ふりがなの表示名</label>
+          <input id="settingPlaceKanaLabel" list="placeKanaLabelOptions">
+          <datalist id="placeKanaLabelOptions">
+            <option value="店名ふりがな"></option>
+            <option value="サロン名ふりがな"></option>
+            <option value="店舗名ふりがな"></option>
+            <option value="教室名ふりがな"></option>
+            <option value="所属先ふりがな"></option>
+            <option value="勤務先ふりがな"></option>
+            <option value="会社名ふりがな"></option>
+            <option value="施設名ふりがな"></option>
+          </datalist>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary" onclick="saveSettingsForm()">
+            設定を保存
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section
       id="pageDetail"
       class="page"
     >
@@ -361,7 +450,7 @@
         👥
       </span>
 
-      <span>
+      <span id="navListText">
         先生一覧
       </span>
 
@@ -396,6 +485,23 @@
 
       <span>
         追加
+      </span>
+
+    </button>
+
+
+    <button
+      id="navSettings"
+      class="nav-btn"
+      onclick="showPage('settings')"
+    >
+
+      <span class="nav-icon">
+        ⚙
+      </span>
+
+      <span>
+        設定
       </span>
 
     </button>
@@ -676,18 +782,10 @@
     </div>
 
 
-    <div class="field">
-
-      <label>
-        Instagramアカウント
-      </label>
-
-      <input
-        id="instagram"
-        placeholder="@なしでOK"
-      >
-
-    </div>
+    <div
+      id="linkEditArea"
+      class="children-area"
+    ></div>
 
 
     <div class="field">
@@ -702,15 +800,15 @@
 
 
     <div
-  id="childrenEditArea"
-  class="children-area"
-></div>
+      id="childrenEditArea"
+      class="children-area"
+    ></div>
 
 
-<div
-  id="interactionEditArea"
-  class="children-area"
-></div>
+    <div
+      id="interactionEditArea"
+      class="children-area"
+    ></div>
 
 
     <div class="form-actions">
@@ -867,13 +965,180 @@
 </div>
 
 
+<!-- =====================================
+     リンク・SNSフォーム
+     ===================================== -->
+
+<div
+  id="linkModal"
+  class="modal-bg"
+>
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div
+        id="linkModalTitle"
+        class="modal-title"
+      >
+        リンク・SNSを追加
+      </div>
+
+      <button
+        class="close"
+        onclick="closeLinkForm()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <input
+      id="linkId"
+      type="hidden"
+    >
+
+
+    <div class="field">
+
+      <label>
+        種類
+      </label>
+
+      <select
+        id="linkType"
+        onchange="updateLinkInputGuide()"
+      >
+
+        <option value="Instagram">Instagram</option>
+        <option value="ホームページ">ホームページ</option>
+        <option value="Facebook">Facebook</option>
+        <option value="X">X</option>
+        <option value="Threads">Threads</option>
+        <option value="TikTok">TikTok</option>
+        <option value="YouTube">YouTube</option>
+        <option value="LINE">LINE</option>
+        <option value="ブログ">ブログ</option>
+        <option value="その他">その他</option>
+
+      </select>
+
+    </div>
+
+
+    <div class="field">
+
+      <label>
+        表示名
+      </label>
+
+      <input
+        id="linkDisplayName"
+        placeholder="空欄なら種類名を表示"
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label id="linkValueLabel">
+        アカウント名またはURL
+      </label>
+
+      <input
+        id="linkValue"
+        placeholder="例：awomb8 / @awomb8 / Instagram URL"
+      >
+
+      <div
+        id="linkValueNote"
+        class="small-note"
+      >
+        Instagramはアカウント名だけでも登録できます。
+      </div>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        class="secondary"
+        onclick="closeLinkForm()"
+      >
+        キャンセル
+      </button>
+
+      <button
+        class="primary"
+        onclick="saveLinkForm()"
+      >
+        保存
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================
+     アプリ内確認ダイアログ
+     ===================================== -->
+
+<div
+  id="confirmModal"
+  class="confirm-bg"
+>
+
+  <div class="confirm-card">
+
+    <div
+      id="confirmTitle"
+      class="confirm-title"
+    >
+      確認
+    </div>
+
+    <div
+      id="confirmMessage"
+      class="confirm-message"
+    ></div>
+
+    <div class="confirm-actions">
+
+      <button
+        id="confirmCancel"
+        class="secondary"
+      >
+        キャンセル
+      </button>
+
+      <button
+        id="confirmOk"
+        class="confirm-danger"
+      >
+        削除する
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
 <script src="https://accounts.google.com/gsi/client"></script>
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
 <script src="./config.js?v=20261006-03"></script>
 
-<script src="./app.js?v=20261006-11"></script>
+<script src="./app.js?v=20261006-12"></script>
 
 
 </body>
