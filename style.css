@@ -1229,16 +1229,21 @@ button {
 /* スマホ地図はcanvasをCSSで拡大・移動しない */
 @media (max-width: 560px) {
 
+  .japan-map {
+    overflow: hidden;
+    justify-content: center;
+    min-height: 350px;
+  }
+
   .japan-map canvas {
     position: static;
-    left: auto;
     width: auto !important;
     height: auto !important;
     max-width: none;
+    flex: 0 0 auto;
   }
 
 }
-
 
 /* PCの日本地図を少し左へ */
 @media (min-width: 561px) {
