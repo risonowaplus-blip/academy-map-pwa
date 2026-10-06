@@ -1243,3 +1243,88 @@ button {
   }
 
 }
+
+/* ========================================
+   地図以外のページを中央寄せ
+   ======================================== */
+
+#pageList,
+#pageSearch,
+#pageDetail {
+  width: 100%;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* ========================================
+   Detail 表示調整
+   ======================================== */
+
+.interaction-date {
+  font-weight: 400;
+  font-size: 14px;
+  color: #5f5755;
+  margin-bottom: 6px;
+}
+
+.interaction-type-label {
+  display: inline-block;
+
+  padding: 4px 9px;
+
+  border-radius: 999px;
+
+  background: #f4e9e7;
+
+  color: #805f5b;
+
+  font-size: 12px;
+
+  line-height: 1.3;
+}
+
+.child-name-text {
+  font-weight: 400;
+  font-size: 15px;
+  color: #332d2b;
+}
+
+.detail-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-delete-button {
+  padding: 7px 10px;
+
+  border: 1px solid #e9c7c7;
+
+  border-radius: 9px;
+
+  background: #fffafa;
+
+  color: #ad6262;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.detail-delete-button:hover {
+  background: #f9eeee;
+  color: #994646;
+}
+
+
+@media (max-width: 560px) {
+
+  #pageList,
+  #pageSearch,
+  #pageDetail {
+    max-width: 100%;
+  }
+
+}
