@@ -138,41 +138,175 @@ async function loadAddressMaster() {
 }
 
 function renderJapanMap() {
-  var el = document.getElementById('japanMap');
-  if (!window.jpmap || !window.jpmap.japanMap) {
-    el.innerHTML = '<div class="empty">日本地図ライブラリを読み込めませんでした。</div>';
+
+  var el =
+    document.getElementById(
+      'japanMap'
+    );
+
+  if (
+    !window.jpmap ||
+    !window.jpmap.japanMap
+  ) {
+
+    el.innerHTML =
+      '<div class="empty">日本地図ライブラリを読み込めませんでした。</div>';
+
     return;
   }
 
   el.innerHTML = '';
-  var counts = getPrefCounts();
+
+  var counts =
+    getPrefCounts();
+
   var areas = [];
 
-  for (var i = 0; i < prefectures.length; i++) {
-    var pref = prefectures[i];
-    var color = '#ece9e7';
-    if (counts[pref]) color = '#d7bbb5';
-    if (selectedPrefecture === pref) color = '#8f625b';
+  for (
+    var i = 0;
+    i < prefectures.length;
+    i++
+  ) {
+
+    var pref =
+      prefectures[i];
+
+    var hasTeacher =
+      !!counts[pref];
+
+    var isSelected =
+      selectedPrefecture ===
+      pref;
+
+    var color =
+      '#f3f5f6';
+
+    var hoverColor =
+      '#d9edf5';
+
+    if (
+      hasTeacher
+    ) {
+
+      color =
+        '#ff9f8f';
+
+      hoverColor =
+        '#ff7f73';
+
+    }
+
+    if (
+      isSelected
+    ) {
+
+      color =
+        '#e95663';
+
+      hoverColor =
+        '#d94755';
+
+    }
 
     areas.push({
-      code: i + 1,
-      color: color,
-      hoverColor: selectedPrefecture === pref ? '#8f625b' : '#c9a39c'
+
+      code:
+        i + 1,
+
+      color:
+        color,
+
+      hoverColor:
+        hoverColor
+
     });
+
   }
 
-  mapInstance = new jpmap.japanMap(el, {
-    areas: areas,
-    width: Math.min(680, Math.max(320, el.clientWidth || 600)),
-    showsPrefectureName: true,
-    movesIslands: true,
-    borderLineColor: '#ffffff',
-    onSelect: function(data) {
-      var code = Number(data.code);
-      var pref = prefectures[code - 1] || data.name;
-      selectPrefecture(pref);
-    }
-  });
+  var mapWidth =
+    Math.min(
+      760,
+      Math.max(
+        340,
+        el.clientWidth || 650
+      )
+    );
+
+  var labelSize =
+    mapWidth < 500
+      ? 11
+      : 13;
+
+  mapInstance =
+    new jpmap.japanMap(
+      el,
+      {
+
+        areas:
+          areas,
+
+        width:
+          mapWidth,
+
+        showsPrefectureName:
+          true,
+
+        prefectureNameType:
+          'full',
+
+        movesIslands:
+          true,
+
+        backgroundColor:
+          '#fffdfc',
+
+        lineColor:
+          '#cfc7c4',
+
+        lineWidth:
+          1,
+
+        borderLineColor:
+          '#ffffff',
+
+        borderLineWidth:
+          1.2,
+
+        font:
+          '"Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif',
+
+        fontSize:
+          labelSize,
+
+        fontColor:
+          '#2f2927',
+
+        fontShadowColor:
+          '#ffffff',
+
+        onSelect:
+          function(data) {
+
+            var code =
+              Number(
+                data.code
+              );
+
+            var pref =
+              prefectures[
+                code - 1
+              ] ||
+              data.name;
+
+            selectPrefecture(
+              pref
+            );
+
+          }
+
+      }
+    );
+
 }
 
 function renderAll() {
