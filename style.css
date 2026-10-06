@@ -1190,3 +1190,33 @@ button {
   background:
     #ffffff;
 }
+
+/* ========================================
+   Detail右上操作
+   ======================================== */
+
+.detail-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-delete-button {
+  padding: 6px 9px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #b9aaaa;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.detail-delete-button:hover {
+  color: #b24b55;
+  background: #f9eeee;
+  border-radius: 8px;
+}
