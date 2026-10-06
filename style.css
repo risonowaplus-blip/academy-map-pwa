@@ -363,8 +363,8 @@ button {
   }
 
   .japan-map svg {
-    width: 135% !important;
-    transform: translateX(-26%);
+    width: 125% !important;
+    transform: translateX(-10%);
   }
 
 }
