@@ -150,7 +150,7 @@ function renderJapanMap() {
   ) {
 
     el.innerHTML =
-      '<div class="empty">日本地図ライブラリを読み込めませんでした。</div>';
+      '<div class="empty">日本地図を読み込めませんでした。</div>';
 
     return;
   }
@@ -171,42 +171,40 @@ function renderJapanMap() {
     var pref =
       prefectures[i];
 
-    var hasTeacher =
-      !!counts[pref];
+    var count =
+      counts[pref] || 0;
 
     var isSelected =
-      selectedPrefecture ===
-      pref;
+      selectedPrefecture === pref;
 
     var color =
-      '#f3f5f6';
+      '#F1F3F5';
 
     var hoverColor =
-      '#d9edf5';
+      '#FFD4CC';
 
-    if (
-      hasTeacher
-    ) {
+
+    if (count > 0) {
 
       color =
-        '#ff9f8f';
+        '#FF9A8B';
 
       hoverColor =
-        '#ff7f73';
+        '#FF7E70';
 
     }
 
-    if (
-      isSelected
-    ) {
+
+    if (isSelected) {
 
       color =
-        '#e95663';
+        '#D94F64';
 
       hoverColor =
-        '#d94755';
+        '#C63F54';
 
     }
+
 
     areas.push({
 
@@ -223,19 +221,16 @@ function renderJapanMap() {
 
   }
 
+
   var mapWidth =
     Math.min(
-      760,
+      720,
       Math.max(
-        340,
-        el.clientWidth || 650
+        330,
+        el.clientWidth || 620
       )
     );
 
-  var labelSize =
-    mapWidth < 500
-      ? 11
-      : 13;
 
   mapInstance =
     new jpmap.japanMap(
@@ -248,41 +243,31 @@ function renderJapanMap() {
         width:
           mapWidth,
 
+        /*
+          県名は地図内には出さない。
+          一覧との連動で場所を覚える仕様。
+        */
         showsPrefectureName:
-          true,
-
-        prefectureNameType:
-          'full',
+          false,
 
         movesIslands:
           true,
 
         backgroundColor:
-          '#fffdfc',
+          '#FFFFFF',
 
         lineColor:
-          '#cfc7c4',
+          '#D6DADD',
 
         lineWidth:
           1,
 
         borderLineColor:
-          '#ffffff',
+          '#FFFFFF',
 
         borderLineWidth:
-          1.2,
+          1.5,
 
-        font:
-          '"Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif',
-
-        fontSize:
-          labelSize,
-
-        fontColor:
-          '#2f2927',
-
-        fontShadowColor:
-          '#ffffff',
 
         onSelect:
           function(data) {
