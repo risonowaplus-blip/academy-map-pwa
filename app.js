@@ -2921,15 +2921,15 @@ escapeJs(
 
       html +=
 
-        '<strong>' +
+       '<div class="child-name-text">' +
 
-        escapeHtml(
-          child.name ||
-          child.nickname ||
-          '名前未登録'
-        ) +
+escapeHtml(
+  child.name ||
+  child.nickname ||
+  '名前未登録'
+) +
 
-        '</strong>';
+'</div>';
 
 
       if (
@@ -3084,32 +3084,44 @@ function renderInteractionCard(
 
 '<div>' +
 
-    '<strong>' +
+    '<div class="interaction-date">' +
 
-    escapeHtml(
-      dateText
-    ) +
+escapeHtml(
+  dateText
+) +
 
-    '</strong>' +
+'</div>' +
 
-    '<div class="meta">' +
+'<span class="interaction-type-label">' +
 
-    escapeHtml(
-      typeText
-    ) +
+escapeHtml(
+  typeText
+) +
+
+'</span>' +
 
     '</div>' +
 
-    '</div>' +
 
+    '<div class="detail-head-actions">' +
 
-    '<button class="secondary" onclick="openInteractionForm(\'' +
+'<button class="secondary" onclick="openTeacherForm(\'' +
 
 escapeJs(
-  interaction.interactionId
+  teacher.teacherId
 ) +
 
 '\')">編集</button>' +
+
+'<button class="detail-delete-button" onclick="deleteTeacherAction(\'' +
+
+escapeJs(
+  teacher.teacherId
+) +
+
+'\')">🗑 削除</button>' +
+
+'</div>' +
 
     '</div>';
 
