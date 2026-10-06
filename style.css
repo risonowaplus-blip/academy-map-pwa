@@ -1233,3 +1233,13 @@ button {
   }
 
 }
+
+/* PCの日本地図を少し左へ */
+@media (min-width: 561px) {
+
+  .japan-map canvas {
+    position: relative;
+    left: -55px;
+  }
+
+}
