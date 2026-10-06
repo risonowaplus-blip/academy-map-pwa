@@ -20,6 +20,18 @@ var pendingTokenReject = null;
 
 var mapInstance = null;
 
+var interactionFormSource =
+  'detail';
+
+var pendingInteractions =
+  [];
+
+var deletedInteractionIds =
+  [];
+
+var editingPendingInteractionIndex =
+  -1;
+
 
 var STORAGE_TOKEN =
   'academyAccessToken';
@@ -3520,6 +3532,25 @@ function openTeacherForm(
       : null;
 
 
+  pendingInteractions =
+    teacher &&
+    teacher.interactions
+      ? JSON.parse(
+          JSON.stringify(
+            teacher.interactions
+          )
+        )
+      : [];
+
+
+  deletedInteractionIds =
+    [];
+
+
+  editingPendingInteractionIndex =
+    -1;
+
+
   document.getElementById(
     'modalTitle'
   ).textContent =
@@ -3647,11 +3678,16 @@ function openTeacherForm(
 
 
   renderChildrenEditor(
+
     teacher
       ? teacher.children ||
         []
       : []
+
   );
+
+
+  renderTeacherFormInteractions();
 
 
   document.getElementById(
