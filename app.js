@@ -836,9 +836,7 @@ function getRegionName(
     pref ===
     '北海道'
   ) {
-
     return '北海道';
-
   }
 
   if (
@@ -853,9 +851,7 @@ function getRegionName(
       pref
     ) !== -1
   ) {
-
     return '東北';
-
   }
 
   if (
@@ -871,9 +867,7 @@ function getRegionName(
       pref
     ) !== -1
   ) {
-
     return '関東';
-
   }
 
   if (
@@ -891,9 +885,7 @@ function getRegionName(
       pref
     ) !== -1
   ) {
-
     return '中部';
-
   }
 
   if (
@@ -909,9 +901,7 @@ function getRegionName(
       pref
     ) !== -1
   ) {
-
     return '近畿';
-
   }
 
   if (
@@ -925,9 +915,7 @@ function getRegionName(
       pref
     ) !== -1
   ) {
-
     return '中国';
-
   }
 
   if (
@@ -940,9 +928,7 @@ function getRegionName(
       pref
     ) !== -1
   ) {
-
     return '四国';
-
   }
 
   if (
@@ -958,18 +944,14 @@ function getRegionName(
       pref
     ) !== -1
   ) {
-
     return '九州';
-
   }
 
   if (
     pref ===
     '沖縄県'
   ) {
-
     return '沖縄';
-
   }
 
   return '';
@@ -1176,28 +1158,28 @@ function renderJapanMap() {
 
   var mapWidth;
 
- if (
-  window.innerWidth <=
-  560
-) {
+  if (
+    window.innerWidth <=
+    560
+  ) {
 
-  mapWidth =
-    Math.max(
+    mapWidth =
+      Math.max(
 
-      420,
+        420,
 
-      Math.min(
+        Math.min(
 
-        620,
+          620,
 
-        containerWidth *
-        1.28
+          containerWidth *
+          1.28
 
-      )
+        )
 
-    );
+      );
 
-} else {
+  } else {
 
     mapWidth =
       Math.max(
@@ -1523,23 +1505,17 @@ function setPrefMode(
   document.getElementById(
     'activePrefBtn'
   ).classList.toggle(
-
     'active',
-
     mode ===
       'active'
-
   );
 
   document.getElementById(
     'allPrefBtn'
   ).classList.toggle(
-
     'active',
-
     mode ===
       'all'
-
   );
 
   renderPrefList();
@@ -3645,33 +3621,19 @@ function clearTeacherForm() {
   var ids = [
 
     'teacherId',
-
     'name',
-
     'kana',
-
     'nickname',
-
     'birthYear',
-
     'birthMonth',
-
     'birthDay',
-
     'ageManual',
-
     'salonName',
-
     'salonKana',
-
     'prefecture',
-
     'city',
-
     'address1',
-
     'address2',
-
     'memo'
 
   ];
@@ -5831,6 +5793,7 @@ function openGoogleMap(
 /* ========================================
    設定
    ======================================== */
+
 var settingCandidates = {
 
   appName: [
@@ -5884,10 +5847,8 @@ var settingCandidates = {
 function showSettingSuggestions(
   inputId,
   resultId,
-  type
+  candidateType
 ) {
-
-  hideSettingSuggestions();
 
   var input =
     document.getElementById(
@@ -5912,22 +5873,20 @@ function showSettingSuggestions(
     String(
       input.value ||
       ''
-    )
-      .trim()
-      .toLowerCase();
+    ).trim();
 
-  var list =
+  var candidates =
     settingCandidates[
-      type
+      candidateType
     ] ||
     [];
 
   box.innerHTML =
     '';
 
-  var filtered =
-    list.filter(
-      function(item) {
+  var matched =
+    candidates.filter(
+      function(candidate) {
 
         if (
           !query
@@ -5937,78 +5896,69 @@ function showSettingSuggestions(
 
         }
 
-        return String(
-          item
-        )
-          .toLowerCase()
-          .indexOf(
-            query
-          ) !==
+        return candidate.indexOf(
+          query
+        ) !==
           -1;
 
       }
     );
 
+  matched.forEach(
+    function(candidate) {
+
+      var item =
+        document.createElement(
+          'button'
+        );
+
+      item.type =
+        'button';
+
+      item.className =
+        'setting-option';
+
+      item.textContent =
+        candidate;
+
+      item.onclick =
+        function(event) {
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          input.value =
+            candidate;
+
+          hideSettingSuggestions();
+
+        };
+
+      box.appendChild(
+        item
+      );
+
+    }
+  );
+
   if (
-    filtered.length ===
+    matched.length ===
     0
   ) {
 
-    var empty =
+    var note =
       document.createElement(
         'div'
       );
 
-    empty.className =
+    note.className =
       'setting-no-result';
 
-    empty.textContent =
-      '候補にない名称も自由に入力できます。';
+    note.textContent =
+      '候補にない名称もそのまま入力できます。';
 
     box.appendChild(
-      empty
-    );
-
-  } else {
-
-    filtered.forEach(
-      function(item) {
-
-        var button =
-          document.createElement(
-            'button'
-          );
-
-        button.type =
-          'button';
-
-        button.className =
-          'setting-option';
-
-        button.textContent =
-          item;
-
-        button.addEventListener(
-          'click',
-          function(e) {
-
-            e.preventDefault();
-
-            e.stopPropagation();
-
-            input.value =
-              item;
-
-            hideSettingSuggestions();
-
-          }
-        );
-
-        box.appendChild(
-          button
-        );
-
-      }
+      note
     );
 
   }
@@ -6037,6 +5987,7 @@ function hideSettingSuggestions() {
     );
 
 }
+
 
 function personLabel() {
 
