@@ -1220,3 +1220,13 @@ button {
   background: #f9eeee;
   border-radius: 8px;
 }
+
+/* スマホの日本地図を左へ移動 */
+@media (max-width: 560px) {
+
+  .japan-map canvas {
+    position: relative;
+    left: -38px;
+  }
+
+}
