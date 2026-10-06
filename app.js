@@ -164,6 +164,11 @@ function registerServiceWorker() {
       .register(
         './sw.js'
       )
+      .then(
+        function(registration) {
+          registration.update();
+        }
+      )
       .catch(
         function() {}
       );
@@ -1178,18 +1183,8 @@ function renderJapanMap() {
 
     mapWidth =
       Math.max(
-
-        485,
-
-        Math.min(
-
-          860,
-
-          containerWidth *
-          1.40
-
-        )
-
+        300,
+        containerWidth
       );
 
   } else {
@@ -1212,7 +1207,7 @@ function renderJapanMap() {
 
   }
 
-   mapInstance =
+  mapInstance =
     new jpmap.japanMap(
 
       el,
@@ -1270,313 +1265,10 @@ function renderJapanMap() {
 
     );
 
-
-  enableMobileMapTouch();
-
-
   updateSelectedPrefHeading();
 
 }
 
-/* ========================================
-   スマホ地図タップ対応
-   japan-map-js はマウスイベントしか持たないため
-   touch を mousemove → mousedown に変換する
-   ======================================== */
-
-function enableMobileMapTouch() {
-
-  if (
-    window.innerWidth >
-    560
-  ) {
-
-    return;
-
-  }
-
-
-  var map =
-    document.getElementById(
-      'japanMap'
-    );
-
-
-  if (
-    !map
-  ) {
-
-    return;
-
-  }
-
-
-  var canvas =
-    map.querySelector(
-      'canvas'
-    );
-
-
-  if (
-    !canvas
-  ) {
-
-    return;
-
-  }
-
-
-  if (
-    canvas.dataset.mobileTouchReady ===
-    '1'
-  ) {
-
-    return;
-
-  }
-
-
-  canvas.dataset.mobileTouchReady =
-    '1';
-
-
-  var startX =
-    0;
-
-  var startY =
-    0;
-
-  var moved =
-    false;
-
-
-  canvas.addEventListener(
-
-    'touchstart',
-
-    function(event) {
-
-      if (
-        event.touches.length !==
-        1
-      ) {
-
-        moved =
-          true;
-
-        return;
-
-      }
-
-
-      var touch =
-        event.touches[0];
-
-
-      startX =
-        touch.clientX;
-
-      startY =
-        touch.clientY;
-
-      moved =
-        false;
-
-    },
-
-    {
-      passive:
-        true
-    }
-
-  );
-
-
-  canvas.addEventListener(
-
-    'touchmove',
-
-    function(event) {
-
-      if (
-        event.touches.length !==
-        1
-      ) {
-
-        moved =
-          true;
-
-        return;
-
-      }
-
-
-      var touch =
-        event.touches[0];
-
-
-      var diffX =
-        Math.abs(
-          touch.clientX -
-          startX
-        );
-
-
-      var diffY =
-        Math.abs(
-          touch.clientY -
-          startY
-        );
-
-
-      if (
-        diffX > 12 ||
-        diffY > 12
-      ) {
-
-        moved =
-          true;
-
-      }
-
-    },
-
-    {
-      passive:
-        true
-    }
-
-  );
-
-
-  canvas.addEventListener(
-
-    'touchend',
-
-    function(event) {
-
-      if (
-        moved
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        !event.changedTouches ||
-        !event.changedTouches.length
-      ) {
-
-        return;
-
-      }
-
-
-      var touch =
-        event.changedTouches[0];
-
-
-      /*
-       * 通常のスマホ側の疑似マウスイベントとの
-       * 二重発火を防ぐ
-       */
-      event.preventDefault();
-
-
-      /*
-       * japan-map-js は mousemove で
-       * 「今どの県にいるか」を判定する。
-       */
-      canvas.dispatchEvent(
-
-        new MouseEvent(
-
-          'mousemove',
-
-          {
-
-            bubbles:
-              true,
-
-            cancelable:
-              true,
-
-            view:
-              window,
-
-            clientX:
-              touch.clientX,
-
-            clientY:
-              touch.clientY,
-
-            screenX:
-              touch.screenX,
-
-            screenY:
-              touch.screenY
-
-          }
-
-        )
-
-      );
-
-
-      /*
-       * その直後の mousedown で
-       * onSelect が実行される。
-       */
-      canvas.dispatchEvent(
-
-        new MouseEvent(
-
-          'mousedown',
-
-          {
-
-            bubbles:
-              true,
-
-            cancelable:
-              true,
-
-            view:
-              window,
-
-            clientX:
-              touch.clientX,
-
-            clientY:
-              touch.clientY,
-
-            screenX:
-              touch.screenX,
-
-            screenY:
-              touch.screenY,
-
-            button:
-              0
-
-          }
-
-        )
-
-      );
-
-    },
-
-    {
-      passive:
-        false
-    }
-
-  );
-
-}
 
 /* ========================================
    住所
@@ -3024,8 +2716,6 @@ function renderTeacherDetail(
     '</div>';
 
 
-  /* 交流履歴 */
-
   var interactions =
     teacher.interactions ||
     [];
@@ -3076,8 +2766,6 @@ function renderTeacherDetail(
   html +=
     '</div>';
 
-
-  /* 子ども */
 
   var children =
     teacher.children ||
@@ -3608,9 +3296,10 @@ async function deleteInteractionAction(
 ) {
 
   if (
-    !confirm(
-      'この交流記録を削除しますか？'
-    )
+    !(await appConfirm(
+      '交流記録を削除しますか？',
+      'この交流記録を削除します。\nこの操作は元に戻せません。'
+    ))
   ) {
 
     return;
@@ -4407,7 +4096,7 @@ function openTeacherFormInteraction(
 }
 
 
-function removeTeacherFormInteraction(
+async function removeTeacherFormInteraction(
   index
 ) {
 
@@ -4417,9 +4106,10 @@ function removeTeacherFormInteraction(
     ];
 
   if (
-    !confirm(
-      'この交流記録を削除しますか？'
-    )
+    !(await appConfirm(
+      '交流記録を削除しますか？',
+      'この交流記録を削除します。\nこの操作は元に戻せません。'
+    ))
   ) {
 
     return;
@@ -4783,7 +4473,7 @@ function saveLinkForm() {
 }
 
 
-function removeTeacherFormLink(
+async function removeTeacherFormLink(
   index
 ) {
 
@@ -4793,9 +4483,10 @@ function removeTeacherFormLink(
     ];
 
   if (
-    !confirm(
-      'このリンクを削除しますか？'
-    )
+    !(await appConfirm(
+      'リンクを削除しますか？',
+      'このリンクを削除します。\nこの操作は元に戻せません。'
+    ))
   ) {
 
     return;
@@ -5668,9 +5359,10 @@ async function removeChildRow(
   }
 
   if (
-    !confirm(
-      'この子ども情報を削除しますか？'
-    )
+    !(await appConfirm(
+      '子ども情報を削除しますか？',
+      'この子ども情報を削除します。\nこの操作は元に戻せません。'
+    ))
   ) {
 
     return;
@@ -5718,15 +5410,11 @@ async function deleteTeacherAction(
 ) {
 
   if (
-    !confirm(
-
-      'この' +
-
+    !(await appConfirm(
       personLabel() +
-
-      'と紐づく子ども情報・交流履歴・リンクも削除します。\n本当に削除しますか？'
-
-    )
+      'を削除しますか？',
+      '紐づく子ども情報・交流履歴・リンクも削除されます。\nこの操作は元に戻せません。'
+    ))
   ) {
 
     return;
@@ -6605,6 +6293,94 @@ function updateDynamicManifest() {
     );
 
   } catch (e) {}
+
+}
+
+
+/* ========================================
+   アプリ内確認ダイアログ
+   ======================================== */
+
+function appConfirm(
+  title,
+  message,
+  okText
+) {
+
+  return new Promise(
+    function(resolve) {
+
+      var modal =
+        document.getElementById(
+          'confirmModal'
+        );
+
+      var titleEl =
+        document.getElementById(
+          'confirmTitle'
+        );
+
+      var messageEl =
+        document.getElementById(
+          'confirmMessage'
+        );
+
+      var cancel =
+        document.getElementById(
+          'confirmCancel'
+        );
+
+      var ok =
+        document.getElementById(
+          'confirmOk'
+        );
+
+      titleEl.textContent =
+        title ||
+        '確認';
+
+      messageEl.textContent =
+        message ||
+        '';
+
+      ok.textContent =
+        okText ||
+        '削除する';
+
+      function finish(result) {
+
+        modal.classList.remove(
+          'show'
+        );
+
+        cancel.onclick =
+          null;
+
+        ok.onclick =
+          null;
+
+        resolve(
+          result
+        );
+
+      }
+
+      cancel.onclick =
+        function() {
+          finish(false);
+        };
+
+      ok.onclick =
+        function() {
+          finish(true);
+        };
+
+      modal.classList.add(
+        'show'
+      );
+
+    }
+  );
 
 }
 
