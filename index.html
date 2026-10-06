@@ -339,86 +339,126 @@
 
         <div class="field setting-combo">
 
-          <label>
-            アプリ名
-          </label>
+  <label>
+    アプリ名
+  </label>
 
-          <input
-            id="settingAppName"
-            autocomplete="off"
-            onfocus="showSettingSuggestions('settingAppName','settingAppNameResults','appName')"
-            oninput="showSettingSuggestions('settingAppName','settingAppNameResults','appName')"
-          >
+  <input
+    id="settingAppName"
+    autocomplete="off"
+    onfocus="showSettingSuggestions(
+      'settingAppName',
+      'settingAppNameResults',
+      'appName',
+      true
+    )"
+    oninput="showSettingSuggestions(
+      'settingAppName',
+      'settingAppNameResults',
+      'appName',
+      false
+    )"
+  >
 
-          <div
-            id="settingAppNameResults"
-            class="setting-results"
-          ></div>
+  <div
+    id="settingAppNameResults"
+    class="setting-results"
+  ></div>
 
-        </div>
-
-
-        <div class="field setting-combo">
-
-          <label>
-            人物名称
-          </label>
-
-          <input
-            id="settingPersonLabel"
-            autocomplete="off"
-            onfocus="showSettingSuggestions('settingPersonLabel','settingPersonLabelResults','personLabel')"
-            oninput="showSettingSuggestions('settingPersonLabel','settingPersonLabelResults','personLabel')"
-          >
-
-          <div
-            id="settingPersonLabelResults"
-            class="setting-results"
-          ></div>
-
-        </div>
+</div>
 
 
-        <div class="field setting-combo">
+<div class="field setting-combo">
 
-          <label>
-            店名の表示名
-          </label>
+  <label>
+    人物名称
+  </label>
 
-          <input
-            id="settingPlaceLabel"
-            autocomplete="off"
-            onfocus="showSettingSuggestions('settingPlaceLabel','settingPlaceLabelResults','placeLabel')"
-            oninput="showSettingSuggestions('settingPlaceLabel','settingPlaceLabelResults','placeLabel')"
-          >
+  <input
+    id="settingPersonLabel"
+    autocomplete="off"
+    onfocus="showSettingSuggestions(
+      'settingPersonLabel',
+      'settingPersonLabelResults',
+      'personLabel',
+      true
+    )"
+    oninput="showSettingSuggestions(
+      'settingPersonLabel',
+      'settingPersonLabelResults',
+      'personLabel',
+      false
+    )"
+  >
 
-          <div
-            id="settingPlaceLabelResults"
-            class="setting-results"
-          ></div>
+  <div
+    id="settingPersonLabelResults"
+    class="setting-results"
+  ></div>
 
-        </div>
+</div>
 
 
-        <div class="field setting-combo">
+<div class="field setting-combo">
 
-          <label>
-            店名ふりがなの表示名
-          </label>
+  <label>
+    店名の表示名
+  </label>
 
-          <input
-            id="settingPlaceKanaLabel"
-            autocomplete="off"
-            onfocus="showSettingSuggestions('settingPlaceKanaLabel','settingPlaceKanaLabelResults','placeKanaLabel')"
-            oninput="showSettingSuggestions('settingPlaceKanaLabel','settingPlaceKanaLabelResults','placeKanaLabel')"
-          >
+  <input
+    id="settingPlaceLabel"
+    autocomplete="off"
+    onfocus="showSettingSuggestions(
+      'settingPlaceLabel',
+      'settingPlaceLabelResults',
+      'placeLabel',
+      true
+    )"
+    oninput="showSettingSuggestions(
+      'settingPlaceLabel',
+      'settingPlaceLabelResults',
+      'placeLabel',
+      false
+    )"
+  >
 
-          <div
-            id="settingPlaceKanaLabelResults"
-            class="setting-results"
-          ></div>
+  <div
+    id="settingPlaceLabelResults"
+    class="setting-results"
+  ></div>
 
-        </div>
+</div>
+
+
+<div class="field setting-combo">
+
+  <label>
+    店名ふりがなの表示名
+  </label>
+
+  <input
+    id="settingPlaceKanaLabel"
+    autocomplete="off"
+    onfocus="showSettingSuggestions(
+      'settingPlaceKanaLabel',
+      'settingPlaceKanaLabelResults',
+      'placeKanaLabel',
+      true
+    )"
+    oninput="showSettingSuggestions(
+      'settingPlaceKanaLabel',
+      'settingPlaceKanaLabelResults',
+      'placeKanaLabel',
+      false
+    )"
+  >
+
+  <div
+    id="settingPlaceKanaLabelResults"
+    class="setting-results"
+  ></div>
+
+</div>
 
 
         <div class="form-actions">
