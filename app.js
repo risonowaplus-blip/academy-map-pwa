@@ -1204,28 +1204,28 @@ function renderJapanMap() {
   var mapWidth;
 
 
-  if (
-    window.innerWidth <=
-    560
-  ) {
+ if (
+  window.innerWidth <=
+  560
+) {
 
-    mapWidth =
-      Math.max(
+  mapWidth =
+    Math.max(
 
-        400,
+      520,
 
-        Math.min(
+      Math.min(
 
-          720,
+        900,
 
-          containerWidth *
-          1.18
+        containerWidth *
+        1.55
 
-        )
+      )
 
-      );
+    );
 
-  } else {
+} else {
 
     mapWidth =
       Math.max(
