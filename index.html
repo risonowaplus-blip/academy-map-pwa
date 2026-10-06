@@ -42,7 +42,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261006-01"
+    href="./style.css?v=20261006-03"
   >
 
   <title>
@@ -188,11 +188,6 @@
               id="japanMap"
               class="japan-map"
             >
-
-              <div class="empty">
-                日本地図を読み込み中…
-              </div>
-
             </div>
 
 
@@ -411,6 +406,10 @@
 </div>
 
 
+<!-- =====================================
+     先生フォーム
+     ===================================== -->
+
 <div
   id="teacherModal"
   class="modal-bg"
@@ -526,7 +525,6 @@
         <input
           id="birthYear"
           type="number"
-          placeholder="不明なら空欄"
         >
 
       </div>
@@ -541,7 +539,6 @@
         <input
           id="ageManual"
           type="number"
-          placeholder="分かる場合だけ"
         >
 
       </div>
@@ -734,16 +731,143 @@
 </div>
 
 
-<script
-  src="https://accounts.google.com/gsi/client"
-  async
-></script>
+<!-- =====================================
+     交流履歴フォーム
+     ===================================== -->
 
-<script src="./config.js?v=20261006-01"></script>
+<div
+  id="interactionModal"
+  class="modal-bg"
+>
 
-<script src="./app.js?v=20261006-01"></script>
+  <div class="modal">
+
+
+    <div class="modal-head">
+
+      <div
+        id="interactionModalTitle"
+        class="modal-title"
+      >
+        交流記録を追加
+      </div>
+
+      <button
+        class="close"
+        onclick="closeInteractionForm()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="form-note">
+      すべて任意項目です。
+    </div>
+
+
+    <input
+      id="interactionId"
+      type="hidden"
+    >
+
+
+    <div class="field">
+
+      <label>
+        日付
+      </label>
+
+      <input
+        id="interactionDate"
+        type="date"
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label>
+        交流した場所・種別
+      </label>
+
+      <input
+        id="interactionType"
+        list="interactionTypeOptions"
+        placeholder="例：研修、Instagram"
+      >
+
+      <datalist id="interactionTypeOptions">
+
+        <option value="研修"></option>
+
+        <option value="勉強会"></option>
+
+        <option value="懇親会"></option>
+
+        <option value="Instagram"></option>
+
+        <option value="LINE"></option>
+
+        <option value="電話"></option>
+
+        <option value="Zoom"></option>
+
+        <option value="その他"></option>
+
+      </datalist>
+
+    </div>
+
+
+    <div class="field">
+
+      <label>
+        メモ
+      </label>
+
+      <textarea
+        id="interactionMemo"
+        style="min-height:180px"
+        placeholder="話したこと・出来事・やりとりなど"
+      ></textarea>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        class="secondary"
+        onclick="closeInteractionForm()"
+      >
+        キャンセル
+      </button>
+
+      <button
+        class="primary"
+        onclick="saveInteractionForm()"
+      >
+        保存
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+<script src="https://accounts.google.com/gsi/client"></script>
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
+
+<script src="./config.js?v=20261006-03"></script>
+
+<script src="./app.js?v=20261006-03"></script>
 
 
 </body>
