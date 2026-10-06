@@ -328,13 +328,12 @@ button {
 
 
 .japan-map {
-  width:
-    calc(100% + 20px);
+  width: calc(100% + 20px);
 
-  margin:
-    4px -10px 0;
+  margin-left: -10px;
+  margin-right: -10px;
 
-  min-height: 330px;
+  min-height: 350px;
 
   display: flex;
   align-items: center;
@@ -345,45 +344,26 @@ button {
 
 
 .japan-map svg {
-  width: 100% !important;
-  height: auto !important;
+  width: 112% !important;
 
   max-width: none !important;
 
-  display: block;
-}
-
-
-.geolonia-svg-map {
-  width: 100% !important;
   height: auto !important;
 
   display: block;
 }
 
 
-.geolonia-svg-map .prefecture {
-  cursor: pointer;
+@media (max-width: 560px) {
 
-  transition:
-    fill .14s ease,
-    opacity .14s ease;
+  .japan-map {
+    min-height: 365px;
+  }
 
-  stroke:
-    #ffffff !important;
+  .japan-map svg {
+    width: 118% !important;
+  }
 
-  stroke-width:
-    1.4 !important;
-}
-
-
-.geolonia-svg-map .prefecture:hover {
-  opacity: .8;
-}
-
-
-.geolonia-svg-map .boundary-line {
-  stroke: #ffffff !important;
 }
 
 
