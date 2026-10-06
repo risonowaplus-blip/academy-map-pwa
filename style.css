@@ -1502,3 +1502,140 @@ button {
 
   line-height: 1.6;
 }
+
+/* ========================================
+   スマホ フォーム表示の微調整
+   ======================================== */
+
+@media (max-width: 560px) {
+
+  /* フォーム全体の文字を少し小さく */
+  .modal {
+    font-size: 14px;
+  }
+
+
+  /* 見出し */
+  .modal .section-title {
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+
+
+  /* 項目ラベル */
+  .modal .field label {
+    font-size: 12px;
+  }
+
+
+  /* 入力欄 */
+  .modal .field input,
+  .modal .field select,
+  .modal .field textarea {
+    font-size: 14px;
+    padding: 10px 11px;
+  }
+
+
+  /* 共通ボタン */
+  .modal .primary,
+  .modal .secondary,
+  .modal .danger {
+    padding: 9px 12px;
+    font-size: 13px;
+    border-radius: 11px;
+  }
+
+
+  /* リンク・SNS / 子ども / 交流履歴 の見出し行 */
+  .modal .children-area > .detail-head {
+    align-items: center;
+    gap: 10px;
+  }
+
+
+  /* 「＋リンクを追加」など右上ボタンをコンパクトに */
+  .modal .children-area > .detail-head > button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+
+
+  /* リンク1件ごとのカード */
+  .modal .link-edit {
+    margin-top: 10px;
+    padding: 11px 0 4px;
+  }
+
+
+  /* リンク内容と編集・削除ボタンを明確に分離 */
+  .modal .link-edit .detail-head {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+
+  .modal .link-edit .link-row-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+
+  /* 編集・削除ボタンエリア */
+  .modal .link-edit .detail-head-actions {
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin-left: auto;
+  }
+
+
+  /* 編集ボタン */
+  .modal .link-edit .detail-head-actions .secondary {
+    padding: 8px 11px;
+    font-size: 13px;
+  }
+
+
+  /* 削除ボタン */
+  .modal .link-edit .detail-delete-button {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+
+  /* リンク種別 */
+  .modal .link-label {
+    font-size: 14px;
+  }
+
+
+  /* @ユーザー名など */
+  .modal .link-value {
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--muted);
+    word-break: break-all;
+  }
+
+
+  /* メモ */
+  .modal textarea {
+    line-height: 1.55;
+  }
+
+
+  /* 子ども・交流履歴のボタンも少し小さく */
+  .modal .child .secondary,
+  .modal .child .detail-delete-button {
+    font-size: 12px;
+    padding: 7px 9px;
+  }
+
+}
