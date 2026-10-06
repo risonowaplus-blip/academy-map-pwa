@@ -1,19 +1,25 @@
 var teachers = [];
+
 var addressMaster = {};
 
 var selectedPrefecture = '';
+
 var selectedTeacherId = '';
 
 var prefMode = 'active';
 
+var tokenClient = null;
+
 var accessToken = '';
+
 var accessTokenExpiresAt = 0;
 
-var tokenClient = null;
 var pendingTokenResolve = null;
+
 var pendingTokenReject = null;
 
-var japanMapSvg = '';
+var mapInstance = null;
+
 
 var STORAGE_TOKEN =
   'academyAccessToken';
@@ -26,13 +32,16 @@ var STORAGE_AUTHORIZED =
 
 
 var prefectures = [
+
   '北海道',
+
   '青森県',
   '岩手県',
   '宮城県',
   '秋田県',
   '山形県',
   '福島県',
+
   '茨城県',
   '栃木県',
   '群馬県',
@@ -40,6 +49,7 @@ var prefectures = [
   '千葉県',
   '東京都',
   '神奈川県',
+
   '新潟県',
   '富山県',
   '石川県',
@@ -49,6 +59,7 @@ var prefectures = [
   '岐阜県',
   '静岡県',
   '愛知県',
+
   '三重県',
   '滋賀県',
   '京都府',
@@ -56,15 +67,18 @@ var prefectures = [
   '兵庫県',
   '奈良県',
   '和歌山県',
+
   '鳥取県',
   '島根県',
   '岡山県',
   '広島県',
   '山口県',
+
   '徳島県',
   '香川県',
   '愛媛県',
   '高知県',
+
   '福岡県',
   '佐賀県',
   '長崎県',
@@ -72,28 +86,37 @@ var prefectures = [
   '大分県',
   '宮崎県',
   '鹿児島県',
+
   '沖縄県'
+
 ];
 
 
 var gradeOptions = [
+
   '',
+
   '年少',
   '年中',
   '年長',
+
   '小1',
   '小2',
   '小3',
   '小4',
   '小5',
   '小6',
+
   '中1',
   '中2',
   '中3',
+
   '高1',
   '高2',
   '高3',
+
   '卒業'
+
 ];
 
 
@@ -147,7 +170,7 @@ function registerServiceWorker() {
 
     navigator.serviceWorker
       .register(
-        './sw.js?v=20261006-01'
+        './sw.js'
       )
       .catch(
         function() {}
@@ -164,11 +187,13 @@ function waitForGoogleIdentity(
 
   var attempts = 0;
 
+
   var timer =
     setInterval(
       function() {
 
         attempts++;
+
 
         if (
           window.google &&
@@ -185,6 +210,7 @@ function waitForGoogleIdentity(
           return;
 
         }
+
 
         if (
           attempts > 100
@@ -246,9 +272,11 @@ function initializeGoogleTokenClient() {
 
             }
 
+
             accessToken =
               resp.access_token ||
               '';
+
 
             var expiresIn =
               Number(
@@ -256,10 +284,12 @@ function initializeGoogleTokenClient() {
                 3600
               );
 
+
             accessTokenExpiresAt =
               Date.now() +
               expiresIn * 1000 -
               60000;
+
 
             try {
 
@@ -282,6 +312,7 @@ function initializeGoogleTokenClient() {
 
             } catch (e) {}
 
+
             if (
               pendingTokenResolve
             ) {
@@ -291,6 +322,7 @@ function initializeGoogleTokenClient() {
               );
 
             }
+
 
             clearPendingTokenPromise();
 
@@ -315,14 +347,19 @@ function clearPendingTokenPromise() {
 function configReady() {
 
   return (
+
     CONFIG.GOOGLE_CLIENT_ID &&
+
     CONFIG.SCRIPT_DEPLOYMENT_ID &&
+
     CONFIG.GOOGLE_CLIENT_ID.indexOf(
       'ここに'
     ) === -1 &&
+
     CONFIG.SCRIPT_DEPLOYMENT_ID.indexOf(
       'ここに'
     ) === -1
+
   );
 
 }
@@ -330,9 +367,15 @@ function configReady() {
 
 async function restoreOrLogin() {
 
-  var savedToken = '';
-  var savedExpiresAt = 0;
-  var wasAuthorized = false;
+  var savedToken =
+    '';
+
+  var savedExpiresAt =
+    0;
+
+  var wasAuthorized =
+    false;
+
 
   try {
 
@@ -342,6 +385,7 @@ async function restoreOrLogin() {
       ) ||
       '';
 
+
     savedExpiresAt =
       Number(
         localStorage.getItem(
@@ -349,6 +393,7 @@ async function restoreOrLogin() {
         ) ||
         0
       );
+
 
     wasAuthorized =
       localStorage.getItem(
@@ -432,19 +477,24 @@ function requestGoogleToken(
 
       }
 
+
       pendingTokenResolve =
         resolve;
 
       pendingTokenReject =
         reject;
 
+
       try {
 
         tokenClient
           .requestAccessToken({
+
             prompt:
               promptMode
+
           });
+
 
       } catch (e) {
 
@@ -468,6 +518,7 @@ async function login() {
     true
   );
 
+
   try {
 
     await requestGoogleToken(
@@ -476,9 +527,11 @@ async function login() {
 
     await startApp();
 
+
   } catch (e) {
 
     showLoginScreen();
+
 
   } finally {
 
@@ -499,6 +552,7 @@ function showLoginScreen() {
     'hidden'
   );
 
+
   document.getElementById(
     'authScreen'
   ).classList.remove(
@@ -516,6 +570,7 @@ function showAppScreen() {
     'hidden'
   );
 
+
   document.getElementById(
     'appShell'
   ).classList.remove(
@@ -530,8 +585,10 @@ function clearAccessToken() {
   accessToken =
     '';
 
+
   accessTokenExpiresAt =
     0;
+
 
   try {
 
@@ -571,11 +628,15 @@ async function runScript(
 
   var response =
     await fetch(
+
       'https://script.googleapis.com/v1/scripts/' +
+
       encodeURIComponent(
         CONFIG.SCRIPT_DEPLOYMENT_ID
       ) +
+
       ':run',
+
       {
 
         method:
@@ -605,6 +666,7 @@ async function runScript(
           })
 
       }
+
     );
 
 
@@ -615,11 +677,13 @@ async function runScript(
 
     clearAccessToken();
 
+
     try {
 
       await requestGoogleToken(
         ''
       );
+
 
       return await runScript(
         functionName,
@@ -627,9 +691,11 @@ async function runScript(
         true
       );
 
+
     } catch (e) {
 
       showLoginScreen();
+
 
       throw new Error(
         'Googleログインの有効期限が切れました。再度ログインしてください。'
@@ -652,6 +718,7 @@ async function runScript(
     var msg =
       'Apps Scriptの実行に失敗しました。';
 
+
     if (
       data.error &&
       data.error.message
@@ -661,6 +728,7 @@ async function runScript(
         data.error.message;
 
     }
+
 
     if (
       data.error &&
@@ -675,6 +743,7 @@ async function runScript(
           .errorMessage;
 
     }
+
 
     throw new Error(
       msg
@@ -700,24 +769,14 @@ async function startApp() {
     true
   );
 
+
   try {
 
-    var results =
-      await Promise.all([
-
-        runScript(
-          'getInitialData'
-        ),
-
-        loadJapanMap(),
-
-        loadAddressMaster()
-
-      ]);
-
-
     var data =
-      results[0];
+      await runScript(
+        'getInitialData'
+      );
+
 
     teachers =
       (
@@ -729,9 +788,12 @@ async function startApp() {
 
     showAppScreen();
 
+
     renderAll();
 
     renderJapanMap();
+
+    loadAddressMaster();
 
 
   } catch (e) {
@@ -739,6 +801,7 @@ async function startApp() {
     handleError(
       e
     );
+
 
   } finally {
 
@@ -752,117 +815,22 @@ async function startApp() {
 
 
 /* ========================================
-   日本地図
+   地方
    ======================================== */
 
-async function loadJapanMap() {
-
-  var cached = '';
-
-  try {
-
-    cached =
-      localStorage.getItem(
-        'academyJapanMapMobileV1'
-      ) ||
-      '';
-
-  } catch (e) {}
-
+function getRegionName(
+  pref
+) {
 
   if (
-    cached
+    pref ===
+    '北海道'
   ) {
 
-    japanMapSvg =
-      cached;
-
-  }
-
-
-  var mapUrls = [
-
-    'https://geolonia.github.io/japanese-prefectures/map-mobile.svg',
-
-    'https://raw.githubusercontent.com/geolonia/japanese-prefectures/master/map-mobile.svg'
-
-  ];
-
-
-  for (
-    var i = 0;
-    i < mapUrls.length;
-    i++
-  ) {
-
-    try {
-
-      var response =
-        await fetch(
-          mapUrls[i],
-          {
-            cache:
-              'force-cache'
-          }
-        );
-
-      if (
-        response.ok
-      ) {
-
-        var svg =
-          await response.text();
-
-        if (
-          svg &&
-          svg.indexOf(
-            'geolonia-svg-map'
-          ) !== -1
-        ) {
-
-          japanMapSvg =
-            svg;
-
-          try {
-
-            localStorage.setItem(
-              'academyJapanMapMobileV1',
-              svg
-            );
-
-          } catch (e) {}
-
-          return;
-
-        }
-
-      }
-
-    } catch (e) {}
-
-  }
-
-
-  if (
-    !japanMapSvg
-  ) {
-
-    throw new Error(
-      '日本地図を読み込めませんでした。'
-    );
-
-  }
-
-}
-
-
-function getRegionName(pref) {
-
-  if (
-    pref === '北海道'
-  ) {
     return '北海道';
+
   }
+
 
   if (
     [
@@ -872,10 +840,15 @@ function getRegionName(pref) {
       '秋田県',
       '山形県',
       '福島県'
-    ].indexOf(pref) !== -1
+    ].indexOf(
+      pref
+    ) !== -1
   ) {
+
     return '東北';
+
   }
+
 
   if (
     [
@@ -886,10 +859,15 @@ function getRegionName(pref) {
       '千葉県',
       '東京都',
       '神奈川県'
-    ].indexOf(pref) !== -1
+    ].indexOf(
+      pref
+    ) !== -1
   ) {
+
     return '関東';
+
   }
+
 
   if (
     [
@@ -902,10 +880,15 @@ function getRegionName(pref) {
       '岐阜県',
       '静岡県',
       '愛知県'
-    ].indexOf(pref) !== -1
+    ].indexOf(
+      pref
+    ) !== -1
   ) {
+
     return '中部';
+
   }
+
 
   if (
     [
@@ -916,10 +899,15 @@ function getRegionName(pref) {
       '兵庫県',
       '奈良県',
       '和歌山県'
-    ].indexOf(pref) !== -1
+    ].indexOf(
+      pref
+    ) !== -1
   ) {
+
     return '近畿';
+
   }
+
 
   if (
     [
@@ -928,10 +916,15 @@ function getRegionName(pref) {
       '岡山県',
       '広島県',
       '山口県'
-    ].indexOf(pref) !== -1
+    ].indexOf(
+      pref
+    ) !== -1
   ) {
+
     return '中国';
+
   }
+
 
   if (
     [
@@ -939,10 +932,15 @@ function getRegionName(pref) {
       '香川県',
       '愛媛県',
       '高知県'
-    ].indexOf(pref) !== -1
+    ].indexOf(
+      pref
+    ) !== -1
   ) {
+
     return '四国';
+
   }
+
 
   if (
     [
@@ -953,22 +951,34 @@ function getRegionName(pref) {
       '大分県',
       '宮崎県',
       '鹿児島県'
-    ].indexOf(pref) !== -1
+    ].indexOf(
+      pref
+    ) !== -1
   ) {
+
     return '九州';
+
   }
+
 
   if (
-    pref === '沖縄県'
+    pref ===
+    '沖縄県'
   ) {
+
     return '沖縄';
+
   }
 
+
   return '';
+
 }
 
 
-function getRegionBaseColor(region) {
+function getRegionBaseColor(
+  region
+) {
 
   var colors = {
 
@@ -1001,13 +1011,18 @@ function getRegionBaseColor(region) {
 
   };
 
-  return colors[region] ||
+
+  return colors[
+    region
+  ] ||
     '#EEF1F3';
 
 }
 
 
-function getRegionTeacherColor(region) {
+function getRegionTeacherColor(
+  region
+) {
 
   var colors = {
 
@@ -1040,11 +1055,18 @@ function getRegionTeacherColor(region) {
 
   };
 
-  return colors[region] ||
+
+  return colors[
+    region
+  ] ||
     '#FF9A8B';
 
 }
 
+
+/* ========================================
+   日本地図
+   ======================================== */
 
 function renderJapanMap() {
 
@@ -1067,14 +1089,16 @@ function renderJapanMap() {
   }
 
 
-  el.innerHTML = '';
+  el.innerHTML =
+    '';
 
 
   var counts =
     getPrefCounts();
 
 
-  var areas = [];
+  var areas =
+    [];
 
 
   for (
@@ -1110,11 +1134,6 @@ function renderJapanMap() {
       );
 
 
-    /*
-      先生がいる県
-      → 地方色を少し濃く
-    */
-
     if (
       count > 0
     ) {
@@ -1126,12 +1145,6 @@ function renderJapanMap() {
 
     }
 
-
-    /*
-      選択中
-      → 地方に関係なく
-         ローズで強調
-    */
 
     if (
       selectedPrefecture ===
@@ -1165,42 +1178,56 @@ function renderJapanMap() {
 
   var containerWidth =
     Math.floor(
-      el.getBoundingClientRect().width ||
+
+      el.getBoundingClientRect()
+        .width ||
+
       el.clientWidth ||
+
       620
+
     );
 
-
-  /*
-    スマホでは、
-    以前より少し大きめに描画
-  */
 
   var mapWidth;
 
 
   if (
-    window.innerWidth <= 560
+    window.innerWidth <=
+    560
   ) {
 
     mapWidth =
       Math.max(
+
         400,
+
         Math.min(
+
           720,
-          containerWidth * 1.18
+
+          containerWidth *
+          1.18
+
         )
+
       );
 
   } else {
 
     mapWidth =
       Math.max(
+
         520,
+
         Math.min(
+
           820,
+
           containerWidth
+
         )
+
       );
 
   }
@@ -1208,7 +1235,9 @@ function renderJapanMap() {
 
   mapInstance =
     new jpmap.japanMap(
+
       el,
+
       {
 
         areas:
@@ -1217,26 +1246,14 @@ function renderJapanMap() {
         width:
           mapWidth,
 
-        /*
-          県名は地図上には表示しない
-        */
-
         showsPrefectureName:
           false,
-
-
-        /*
-          沖縄・離島を
-          別位置に移動表示
-        */
 
         movesIslands:
           true,
 
-
         backgroundColor:
           '#FFFFFF',
-
 
         lineColor:
           '#FFFFFF',
@@ -1244,13 +1261,11 @@ function renderJapanMap() {
         lineWidth:
           1,
 
-
         borderLineColor:
           '#FFFFFF',
 
         borderLineWidth:
           1.4,
-
 
         onSelect:
           function(data) {
@@ -1275,57 +1290,11 @@ function renderJapanMap() {
           }
 
       }
-    );
 
-}
-
-
-function updateSelectedPrefHeading() {
-
-  var el =
-    document.getElementById(
-      'selectedPrefName'
     );
 
 
-  if (
-    selectedPrefecture ===
-    '__UNKNOWN__'
-  ) {
-
-    el.textContent =
-      '所在地不明｜先生 ' +
-      getUnknownCount() +
-      '名';
-
-    return;
-
-  }
-
-
-  if (
-    selectedPrefecture
-  ) {
-
-    var count =
-      getPrefCounts()[
-        selectedPrefecture
-      ] ||
-      0;
-
-    el.textContent =
-      selectedPrefecture +
-      '｜先生 ' +
-      count +
-      '名';
-
-    return;
-
-  }
-
-
-  el.textContent =
-    '都道府県を選択';
+  updateSelectedPrefHeading();
 
 }
 
@@ -1342,6 +1311,7 @@ async function loadAddressMaster() {
       localStorage.getItem(
         'academyAddressMasterV1'
       );
+
 
     if (
       cached
@@ -1361,12 +1331,18 @@ async function loadAddressMaster() {
 
     var response =
       await fetch(
+
         'https://geolonia.github.io/japanese-addresses/api/ja.json',
+
         {
+
           cache:
             'force-cache'
+
         }
+
       );
+
 
     if (
       response.ok
@@ -1375,13 +1351,17 @@ async function loadAddressMaster() {
       addressMaster =
         await response.json();
 
+
       try {
 
         localStorage.setItem(
+
           'academyAddressMasterV1',
+
           JSON.stringify(
             addressMaster
           )
+
         );
 
       } catch (e) {}
@@ -1394,7 +1374,7 @@ async function loadAddressMaster() {
 
 
 /* ========================================
-   共通描画
+   描画
    ======================================== */
 
 function renderAll() {
@@ -1416,7 +1396,9 @@ function renderAll() {
 
 function renderStats() {
 
-  var unknown = 0;
+  var unknown =
+    0;
+
 
   for (
     var i = 0;
@@ -1452,7 +1434,8 @@ function renderStats() {
 
 function getPrefCounts() {
 
-  var result = {};
+  var result =
+    {};
 
 
   for (
@@ -1463,6 +1446,7 @@ function getPrefCounts() {
 
     var pref =
       teachers[i].prefecture;
+
 
     if (
       !pref
@@ -1490,7 +1474,8 @@ function getPrefCounts() {
 
 function getUnknownCount() {
 
-  var count = 0;
+  var count =
+    0;
 
 
   for (
@@ -1515,6 +1500,66 @@ function getUnknownCount() {
 }
 
 
+function updateSelectedPrefHeading() {
+
+  var el =
+    document.getElementById(
+      'selectedPrefName'
+    );
+
+
+  if (
+    selectedPrefecture ===
+    '__UNKNOWN__'
+  ) {
+
+    el.textContent =
+
+      '所在地不明｜先生 ' +
+
+      getUnknownCount() +
+
+      '名';
+
+
+    return;
+
+  }
+
+
+  if (
+    selectedPrefecture
+  ) {
+
+    var count =
+      getPrefCounts()[
+        selectedPrefecture
+      ] ||
+      0;
+
+
+    el.textContent =
+
+      selectedPrefecture +
+
+      '｜先生 ' +
+
+      count +
+
+      '名';
+
+
+    return;
+
+  }
+
+
+  el.textContent =
+    '都道府県を選択';
+
+}
+
+
 /* ========================================
    都道府県一覧
    ======================================== */
@@ -1530,16 +1575,24 @@ function setPrefMode(
   document.getElementById(
     'activePrefBtn'
   ).classList.toggle(
+
     'active',
-    mode === 'active'
+
+    mode ===
+      'active'
+
   );
 
 
   document.getElementById(
     'allPrefBtn'
   ).classList.toggle(
+
     'active',
-    mode === 'all'
+
+    mode ===
+      'all'
+
   );
 
 
@@ -1553,7 +1606,9 @@ function renderPrefList() {
   var counts =
     getPrefCounts();
 
-  var html = '';
+
+  var html =
+    '';
 
 
   for (
@@ -1564,6 +1619,7 @@ function renderPrefList() {
 
     var pref =
       prefectures[i];
+
 
     var count =
       counts[pref] ||
@@ -1609,11 +1665,15 @@ function renderPrefList() {
     html +=
 
       '<button class="' +
+
       cls +
+
       '" onclick="selectPrefecture(\'' +
+
       escapeJs(
         pref
       ) +
+
       '\')">' +
 
       escapeHtml(
@@ -1655,10 +1715,10 @@ function renderPrefList() {
       '" onclick="selectUnknown()">' +
 
       '所在地不明 ' +
-      unknown +
-      '名' +
 
-      '</button>';
+      unknown +
+
+      '名</button>';
 
   }
 
@@ -1677,6 +1737,7 @@ function selectPrefecture(
 
   selectedPrefecture =
     pref;
+
 
   selectedTeacherId =
     '';
@@ -1697,6 +1758,7 @@ function selectUnknown() {
 
   selectedPrefecture =
     '__UNKNOWN__';
+
 
   selectedTeacherId =
     '';
@@ -1734,15 +1796,25 @@ function teacherMatches(
   var text = [
 
     teacher.name,
+
     teacher.kana,
+
     teacher.nickname,
+
     teacher.salonName,
+
     teacher.salonKana,
+
     teacher.instagram,
+
     teacher.prefecture,
+
     teacher.city,
+
     teacher.address1,
+
     teacher.address2,
+
     teacher.memo
 
   ]
@@ -1754,7 +1826,8 @@ function teacherMatches(
 
   return text.indexOf(
     query.toLowerCase()
-  ) !== -1;
+  ) !==
+    -1;
 
 }
 
@@ -1769,9 +1842,11 @@ function teacherCard(
       teacher.prefecture,
       teacher.city
     ]
+
       .filter(
         Boolean
       )
+
       .join(
         ' '
       );
@@ -1849,7 +1924,8 @@ function renderMapTeacherPreview() {
     ).trim();
 
 
-  var list = [];
+  var list =
+    [];
 
 
   for (
@@ -1936,12 +2012,15 @@ function renderMapTeacherPreview() {
     ) +
 
     '　' +
+
     list.length +
+
     '名</div>';
 
 
   if (
-    list.length === 0
+    list.length ===
+    0
   ) {
 
     html +=
@@ -1992,7 +2071,8 @@ function renderFullTeacherList() {
     ).trim();
 
 
-  var html = '';
+  var html =
+    '';
 
 
   for (
@@ -2049,12 +2129,14 @@ function renderSearchResults() {
     ).innerHTML =
       '<div class="empty">検索語を入力してください。</div>';
 
+
     return;
 
   }
 
 
-  var html = '';
+  var html =
+    '';
 
 
   for (
@@ -2123,39 +2205,38 @@ function showPage(
     document.getElementById(
       pages[key]
     ).classList.toggle(
+
       'active',
-      key === name
+
+      key ===
+        name
+
     );
 
   }
 
 
-  var navNames = [
+  [
     'Map',
     'List',
     'Search'
-  ];
+  ].forEach(
+    function(navName) {
 
+      document.getElementById(
+        'nav' +
+        navName
+      ).classList.toggle(
 
-  for (
-    var i = 0;
-    i < navNames.length;
-    i++
-  ) {
+        'active',
 
-    var navName =
-      navNames[i];
+        navName.toLowerCase() ===
+          name
 
-    document.getElementById(
-      'nav' +
-      navName
-    ).classList.toggle(
-      'active',
-      navName.toLowerCase() ===
-        name
-    );
+      );
 
-  }
+    }
+  );
 
 
   if (
@@ -2187,7 +2268,7 @@ function showPage(
 
 
 /* ========================================
-   Detail
+   先生 Detail
    ======================================== */
 
 function findTeacher(
@@ -2258,6 +2339,7 @@ function openTeacherDetail(
     teacher
   );
 
+
   showPage(
     'detail'
   );
@@ -2269,7 +2351,8 @@ function birthdayText(
   obj
 ) {
 
-  var result = '';
+  var result =
+    '';
 
 
   if (
@@ -2524,6 +2607,76 @@ function renderTeacherDetail(
     '</div></div>';
 
 
+  /* ==============================
+     交流履歴
+     ============================== */
+
+  html +=
+
+    '<div class="card">' +
+
+    '<div class="detail-head">' +
+
+    '<div class="section-title">交流履歴 ' +
+
+    (
+      teacher.interactions
+        ? teacher.interactions.length
+        : 0
+    ) +
+
+    '件</div>' +
+
+    '<button class="primary" onclick="openInteractionForm()">＋ 追加</button>' +
+
+    '</div>';
+
+
+  var interactions =
+    teacher.interactions ||
+    [];
+
+
+  if (
+    interactions.length ===
+    0
+  ) {
+
+    html +=
+      '<div class="empty">交流記録はまだありません。</div>';
+
+  } else {
+
+    for (
+      var interactionIndex = 0;
+      interactionIndex < interactions.length;
+      interactionIndex++
+    ) {
+
+      var interaction =
+        interactions[
+          interactionIndex
+        ];
+
+
+      html +=
+        renderInteractionCard(
+          interaction
+        );
+
+    }
+
+  }
+
+
+  html +=
+    '</div>';
+
+
+  /* ==============================
+     子ども
+     ============================== */
+
   html +=
 
     '<div class="card">' +
@@ -2543,7 +2696,8 @@ function renderTeacherDetail(
 
   if (
     !teacher.children ||
-    teacher.children.length === 0
+    teacher.children.length ===
+      0
   ) {
 
     html +=
@@ -2705,6 +2859,476 @@ function renderTeacherDetail(
 
 
 /* ========================================
+   交流履歴
+   ======================================== */
+
+function renderInteractionCard(
+  interaction
+) {
+
+  var dateText =
+    interaction.date ||
+    '日付未登録';
+
+
+  var typeText =
+    interaction.interactionType ||
+    '種別未登録';
+
+
+  var html =
+
+    '<div class="child">' +
+
+    '<div class="detail-head">' +
+
+    '<div>' +
+
+    '<strong>' +
+
+    escapeHtml(
+      dateText
+    ) +
+
+    '</strong>' +
+
+    '<div class="meta">' +
+
+    escapeHtml(
+      typeText
+    ) +
+
+    '</div>' +
+
+    '</div>' +
+
+
+    '<button class="secondary" onclick="openInteractionForm(\'' +
+
+    escapeJs(
+      interaction.interactionId
+    ) +
+
+    '\')">編集</button>' +
+
+    '</div>';
+
+
+  if (
+    interaction.memo
+  ) {
+
+    html +=
+
+      '<div style="margin-top:10px;white-space:pre-wrap;line-height:1.7">' +
+
+      escapeHtml(
+        interaction.memo
+      ) +
+
+      '</div>';
+
+  }
+
+
+  html +=
+
+    '<div class="actions">' +
+
+    '<button class="danger" onclick="deleteInteractionAction(\'' +
+
+    escapeJs(
+      interaction.interactionId
+    ) +
+
+    '\')">削除</button>' +
+
+    '</div>' +
+
+    '</div>';
+
+
+  return html;
+
+}
+
+
+function findInteraction(
+  interactionId
+) {
+
+  var teacher =
+    findTeacher(
+      selectedTeacherId
+    );
+
+
+  if (
+    !teacher
+  ) {
+
+    return null;
+
+  }
+
+
+  var interactions =
+    teacher.interactions ||
+    [];
+
+
+  for (
+    var i = 0;
+    i < interactions.length;
+    i++
+  ) {
+
+    if (
+      interactions[i].interactionId ===
+      interactionId
+    ) {
+
+      return interactions[i];
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+function openInteractionForm(
+  interactionId
+) {
+
+  if (
+    !selectedTeacherId
+  ) {
+
+    return;
+
+  }
+
+
+  setValue(
+    'interactionId',
+    ''
+  );
+
+
+  setValue(
+    'interactionDate',
+    todayYmd()
+  );
+
+
+  setValue(
+    'interactionType',
+    ''
+  );
+
+
+  setValue(
+    'interactionMemo',
+    ''
+  );
+
+
+  var interaction =
+    interactionId
+      ? findInteraction(
+          interactionId
+        )
+      : null;
+
+
+  if (
+    interaction
+  ) {
+
+    document.getElementById(
+      'interactionModalTitle'
+    ).textContent =
+      '交流記録を編集';
+
+
+    setValue(
+      'interactionId',
+      interaction.interactionId
+    );
+
+
+    setValue(
+      'interactionDate',
+      interaction.date
+    );
+
+
+    setValue(
+      'interactionType',
+      interaction.interactionType
+    );
+
+
+    setValue(
+      'interactionMemo',
+      interaction.memo
+    );
+
+
+  } else {
+
+    document.getElementById(
+      'interactionModalTitle'
+    ).textContent =
+      '交流記録を追加';
+
+  }
+
+
+  document.getElementById(
+    'interactionModal'
+  ).classList.add(
+    'show'
+  );
+
+}
+
+
+function closeInteractionForm() {
+
+  document.getElementById(
+    'interactionModal'
+  ).classList.remove(
+    'show'
+  );
+
+}
+
+
+async function saveInteractionForm() {
+
+  if (
+    !selectedTeacherId
+  ) {
+
+    return;
+
+  }
+
+
+  var payload = {
+
+    interactionId:
+      valueOf(
+        'interactionId'
+      ),
+
+    teacherId:
+      selectedTeacherId,
+
+    date:
+      valueOf(
+        'interactionDate'
+      ),
+
+    interactionType:
+      valueOf(
+        'interactionType'
+      ),
+
+    memo:
+      valueOf(
+        'interactionMemo'
+      )
+
+  };
+
+
+  setLoading(
+    true
+  );
+
+
+  try {
+
+    await runScript(
+      'saveInteraction',
+      [
+        payload
+      ]
+    );
+
+
+    closeInteractionForm();
+
+
+    await refreshTeacherData(
+      selectedTeacherId
+    );
+
+
+  } catch (e) {
+
+    handleError(
+      e
+    );
+
+
+  } finally {
+
+    setLoading(
+      false
+    );
+
+  }
+
+}
+
+
+async function deleteInteractionAction(
+  interactionId
+) {
+
+  if (
+    !confirm(
+      'この交流記録を削除しますか？'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  setLoading(
+    true
+  );
+
+
+  try {
+
+    await runScript(
+      'deleteInteraction',
+      [
+        interactionId
+      ]
+    );
+
+
+    await refreshTeacherData(
+      selectedTeacherId
+    );
+
+
+  } catch (e) {
+
+    handleError(
+      e
+    );
+
+
+  } finally {
+
+    setLoading(
+      false
+    );
+
+  }
+
+}
+
+
+function todayYmd() {
+
+  var now =
+    new Date();
+
+
+  var year =
+    now.getFullYear();
+
+
+  var month =
+    String(
+      now.getMonth() +
+      1
+    ).padStart(
+      2,
+      '0'
+    );
+
+
+  var day =
+    String(
+      now.getDate()
+    ).padStart(
+      2,
+      '0'
+    );
+
+
+  return (
+    year +
+    '-' +
+    month +
+    '-' +
+    day
+  );
+
+}
+
+
+async function refreshTeacherData(
+  teacherId
+) {
+
+  teachers =
+    (
+      await runScript(
+        'getTeachers'
+      )
+    ) ||
+    [];
+
+
+  renderAll();
+
+  renderJapanMap();
+
+
+  var teacher =
+    findTeacher(
+      teacherId
+    );
+
+
+  if (
+    teacher
+  ) {
+
+    selectedTeacherId =
+      teacherId;
+
+
+    renderTeacherDetail(
+      teacher
+    );
+
+
+    showPage(
+      'detail'
+    );
+
+  }
+
+}
+
+
+/* ========================================
    先生フォーム
    ======================================== */
 
@@ -2741,20 +3365,24 @@ function openTeacherForm(
       teacher.teacherId
     );
 
+
     setValue(
       'name',
       teacher.name
     );
+
 
     setValue(
       'kana',
       teacher.kana
     );
 
+
     setValue(
       'nickname',
       teacher.nickname
     );
+
 
     setValue(
       'gender',
@@ -2762,65 +3390,78 @@ function openTeacherForm(
       ''
     );
 
+
     setValue(
       'birthYear',
       teacher.birthYear
     );
+
 
     setValue(
       'birthMonth',
       teacher.birthMonth
     );
 
+
     setValue(
       'birthDay',
       teacher.birthDay
     );
+
 
     setValue(
       'ageManual',
       teacher.ageManual
     );
 
+
     setValue(
       'salonName',
       teacher.salonName
     );
+
 
     setValue(
       'salonKana',
       teacher.salonKana
     );
 
+
     setValue(
       'prefecture',
       teacher.prefecture
     );
+
 
     setValue(
       'city',
       teacher.city
     );
 
+
     setValue(
       'address1',
       teacher.address1
     );
+
 
     setValue(
       'address2',
       teacher.address2
     );
 
+
     setValue(
       'instagram',
       teacher.instagram
     );
 
+
     setValue(
       'memo',
       teacher.memo
     );
+
 
   } else {
 
@@ -2857,6 +3498,7 @@ function closeTeacherForm() {
     'show'
   );
 
+
   hideCombos();
 
 }
@@ -2867,20 +3509,35 @@ function clearTeacherForm() {
   var ids = [
 
     'teacherId',
+
     'name',
+
     'kana',
+
     'nickname',
+
     'birthYear',
+
     'birthMonth',
+
     'birthDay',
+
     'ageManual',
+
     'salonName',
+
     'salonKana',
+
     'prefecture',
+
     'city',
+
     'address1',
+
     'address2',
+
     'instagram',
+
     'memo'
 
   ];
@@ -3040,7 +3697,7 @@ async function saveTeacherForm() {
 
 
 /* ========================================
-   子どもフォーム
+   子ども
    ======================================== */
 
 function renderChildrenEditor(
@@ -3124,7 +3781,8 @@ function addChildRow(
       '"' +
 
       (
-        child.grade === grade
+        child.grade ===
+          grade
           ? ' selected'
           : ''
       ) +
@@ -3149,186 +3807,196 @@ function addChildRow(
 
     '<div class="grid2">' +
 
-      '<div class="field">' +
+    '<div class="field">' +
 
-        '<label>名前</label>' +
+    '<label>名前</label>' +
 
-        '<input class="child-name" value="' +
+    '<input class="child-name" value="' +
 
-        escapeAttr(
-          child.name ||
-          ''
-        ) +
+    escapeAttr(
+      child.name ||
+      ''
+    ) +
 
-        '">' +
-
-      '</div>' +
-
-      '<div class="field">' +
-
-        '<label>ふりがな</label>' +
-
-        '<input class="child-kana" value="' +
-
-        escapeAttr(
-          child.kana ||
-          ''
-        ) +
-
-        '">' +
-
-      '</div>' +
-
-    '</div>' +
-
-
-    '<div class="grid2">' +
-
-      '<div class="field">' +
-
-        '<label>呼び名</label>' +
-
-        '<input class="child-nickname" value="' +
-
-        escapeAttr(
-          child.nickname ||
-          ''
-        ) +
-
-        '">' +
-
-      '</div>' +
-
-      '<div class="field">' +
-
-        '<label>性別</label>' +
-
-        '<select class="child-gender">' +
-
-          '<option value=""' +
-          (
-            !child.gender
-              ? ' selected'
-              : ''
-          ) +
-          '>未設定</option>' +
-
-          '<option value="女"' +
-          (
-            child.gender ===
-              '女'
-              ? ' selected'
-              : ''
-          ) +
-          '>女</option>' +
-
-          '<option value="男"' +
-          (
-            child.gender ===
-              '男'
-              ? ' selected'
-              : ''
-          ) +
-          '>男</option>' +
-
-        '</select>' +
-
-      '</div>' +
-
-    '</div>' +
-
-
-    '<div class="grid2">' +
-
-      '<div class="field">' +
-
-        '<label>学年</label>' +
-
-        gradeSelect +
-
-      '</div>' +
-
-      '<div class="field">' +
-
-        '<label>年齢</label>' +
-
-        '<input type="number" class="child-age" value="' +
-
-        escapeAttr(
-          child.ageManual ||
-          ''
-        ) +
-
-        '">' +
-
-      '</div>' +
+    '">' +
 
     '</div>' +
 
 
     '<div class="field">' +
 
-      '<label>生まれ年</label>' +
+    '<label>ふりがな</label>' +
 
-      '<input type="number" class="child-year" value="' +
+    '<input class="child-kana" value="' +
 
-      escapeAttr(
-        child.birthYear ||
-        ''
-      ) +
+    escapeAttr(
+      child.kana ||
+      ''
+    ) +
 
-      '">' +
+    '">' +
+
+    '</div>' +
 
     '</div>' +
 
 
     '<div class="grid2">' +
 
-      '<div class="field">' +
+    '<div class="field">' +
 
-        '<label>誕生月</label>' +
+    '<label>呼び名</label>' +
 
-        '<input type="number" min="1" max="12" class="child-month" value="' +
+    '<input class="child-nickname" value="' +
 
-        escapeAttr(
-          child.birthMonth ||
-          ''
-        ) +
+    escapeAttr(
+      child.nickname ||
+      ''
+    ) +
 
-        '">' +
-
-      '</div>' +
-
-      '<div class="field">' +
-
-        '<label>誕生日</label>' +
-
-        '<input type="number" min="1" max="31" class="child-day" value="' +
-
-        escapeAttr(
-          child.birthDay ||
-          ''
-        ) +
-
-        '">' +
-
-      '</div>' +
+    '">' +
 
     '</div>' +
 
 
     '<div class="field">' +
 
-      '<label>メモ</label>' +
+    '<label>性別</label>' +
 
-      '<textarea class="child-memo">' +
+    '<select class="child-gender">' +
 
-      escapeHtml(
-        child.memo ||
-        ''
-      ) +
+    '<option value=""' +
 
-      '</textarea>' +
+    (
+      !child.gender
+        ? ' selected'
+        : ''
+    ) +
+
+    '>未設定</option>' +
+
+    '<option value="女"' +
+
+    (
+      child.gender ===
+        '女'
+        ? ' selected'
+        : ''
+    ) +
+
+    '>女</option>' +
+
+    '<option value="男"' +
+
+    (
+      child.gender ===
+        '男'
+        ? ' selected'
+        : ''
+    ) +
+
+    '>男</option>' +
+
+    '</select>' +
+
+    '</div>' +
+
+    '</div>' +
+
+
+    '<div class="grid2">' +
+
+    '<div class="field">' +
+
+    '<label>学年</label>' +
+
+    gradeSelect +
+
+    '</div>' +
+
+
+    '<div class="field">' +
+
+    '<label>年齢</label>' +
+
+    '<input type="number" class="child-age" value="' +
+
+    escapeAttr(
+      child.ageManual ||
+      ''
+    ) +
+
+    '">' +
+
+    '</div>' +
+
+    '</div>' +
+
+
+    '<div class="field">' +
+
+    '<label>生まれ年</label>' +
+
+    '<input type="number" class="child-year" value="' +
+
+    escapeAttr(
+      child.birthYear ||
+      ''
+    ) +
+
+    '">' +
+
+    '</div>' +
+
+
+    '<div class="grid2">' +
+
+    '<div class="field">' +
+
+    '<label>誕生月</label>' +
+
+    '<input type="number" min="1" max="12" class="child-month" value="' +
+
+    escapeAttr(
+      child.birthMonth ||
+      ''
+    ) +
+
+    '">' +
+
+    '</div>' +
+
+
+    '<div class="field">' +
+
+    '<label>誕生日</label>' +
+
+    '<input type="number" min="1" max="31" class="child-day" value="' +
+
+    escapeAttr(
+      child.birthDay ||
+      ''
+    ) +
+
+    '">' +
+
+    '</div>' +
+
+    '</div>' +
+
+
+    '<div class="field">' +
+
+    '<label>メモ</label>' +
+
+    '<textarea class="child-memo">' +
+
+    escapeHtml(
+      child.memo ||
+      ''
+    ) +
+
+    '</textarea>' +
 
     '</div>' +
 
@@ -3465,6 +4133,7 @@ async function refreshAfterSave(
 
   closeTeacherForm();
 
+
   renderAll();
 
   renderJapanMap();
@@ -3564,7 +4233,7 @@ async function removeChildRow(
 
 
 /* ========================================
-   削除
+   先生削除
    ======================================== */
 
 async function deleteTeacherAction(
@@ -3573,7 +4242,7 @@ async function deleteTeacherAction(
 
   if (
     !confirm(
-      'この先生と紐づく子ども情報も削除します。\n本当に削除しますか？'
+      'この先生と紐づく子ども情報・交流履歴も削除します。\n本当に削除しますか？'
     )
   ) {
 
@@ -3613,6 +4282,7 @@ async function deleteTeacherAction(
     renderAll();
 
     renderJapanMap();
+
 
     showPage(
       'map'
@@ -3673,7 +4343,8 @@ function showPrefectureResults() {
       query &&
       pref.indexOf(
         query
-      ) === -1
+      ) ===
+        -1
     ) {
 
       continue;
@@ -3758,7 +4429,8 @@ function showCityResults() {
     );
 
 
-  var results = [];
+  var results =
+    [];
 
 
   for (
@@ -3806,7 +4478,8 @@ function showCityResults() {
         query &&
         city.indexOf(
           query
-        ) === -1
+        ) ===
+          -1
       ) {
 
         continue;
@@ -3882,7 +4555,9 @@ function showCityResults() {
     item.textContent =
 
       result.city +
+
       '｜' +
+
       result.prefecture;
 
 
@@ -4054,16 +4729,14 @@ function setValue(
   value
 ) {
 
-  document
-    .getElementById(
-      id
-    )
-    .value =
+  document.getElementById(
+    id
+  ).value =
 
-      value === null ||
-      value === undefined
-        ? ''
-        : value;
+    value === null ||
+    value === undefined
+      ? ''
+      : value;
 
 }
 
@@ -4072,15 +4745,12 @@ function setLoading(
   show
 ) {
 
-  document
-    .getElementById(
-      'loading'
-    )
-    .classList
-    .toggle(
-      'show',
-      show
-    );
+  document.getElementById(
+    'loading'
+  ).classList.toggle(
+    'show',
+    show
+  );
 
 }
 
@@ -4116,22 +4786,27 @@ function escapeHtml(
     str ||
     ''
   )
+
     .replace(
       /&/g,
       '&amp;'
     )
+
     .replace(
       /</g,
       '&lt;'
     )
+
     .replace(
       />/g,
       '&gt;'
     )
+
     .replace(
       /"/g,
       '&quot;'
     )
+
     .replace(
       /'/g,
       '&#039;'
@@ -4159,18 +4834,22 @@ function escapeJs(
     str ||
     ''
   )
+
     .replace(
       /\\/g,
       '\\\\'
     )
+
     .replace(
       /'/g,
       "\\'"
     )
+
     .replace(
       /\r/g,
       ''
     )
+
     .replace(
       /\n/g,
       '\\n'
