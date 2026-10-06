@@ -856,6 +856,196 @@ async function loadJapanMap() {
 }
 
 
+function getRegionName(pref) {
+
+  if (
+    pref === '北海道'
+  ) {
+    return '北海道';
+  }
+
+  if (
+    [
+      '青森県',
+      '岩手県',
+      '宮城県',
+      '秋田県',
+      '山形県',
+      '福島県'
+    ].indexOf(pref) !== -1
+  ) {
+    return '東北';
+  }
+
+  if (
+    [
+      '茨城県',
+      '栃木県',
+      '群馬県',
+      '埼玉県',
+      '千葉県',
+      '東京都',
+      '神奈川県'
+    ].indexOf(pref) !== -1
+  ) {
+    return '関東';
+  }
+
+  if (
+    [
+      '新潟県',
+      '富山県',
+      '石川県',
+      '福井県',
+      '山梨県',
+      '長野県',
+      '岐阜県',
+      '静岡県',
+      '愛知県'
+    ].indexOf(pref) !== -1
+  ) {
+    return '中部';
+  }
+
+  if (
+    [
+      '三重県',
+      '滋賀県',
+      '京都府',
+      '大阪府',
+      '兵庫県',
+      '奈良県',
+      '和歌山県'
+    ].indexOf(pref) !== -1
+  ) {
+    return '近畿';
+  }
+
+  if (
+    [
+      '鳥取県',
+      '島根県',
+      '岡山県',
+      '広島県',
+      '山口県'
+    ].indexOf(pref) !== -1
+  ) {
+    return '中国';
+  }
+
+  if (
+    [
+      '徳島県',
+      '香川県',
+      '愛媛県',
+      '高知県'
+    ].indexOf(pref) !== -1
+  ) {
+    return '四国';
+  }
+
+  if (
+    [
+      '福岡県',
+      '佐賀県',
+      '長崎県',
+      '熊本県',
+      '大分県',
+      '宮崎県',
+      '鹿児島県'
+    ].indexOf(pref) !== -1
+  ) {
+    return '九州';
+  }
+
+  if (
+    pref === '沖縄県'
+  ) {
+    return '沖縄';
+  }
+
+  return '';
+}
+
+
+function getRegionBaseColor(region) {
+
+  var colors = {
+
+    '北海道':
+      '#D9ECF8',
+
+    '東北':
+      '#D8EFF4',
+
+    '関東':
+      '#FFF1C9',
+
+    '中部':
+      '#DDEFD8',
+
+    '近畿':
+      '#FBE4C9',
+
+    '中国':
+      '#F9DCD6',
+
+    '四国':
+      '#F5D9E8',
+
+    '九州':
+      '#E9DDF3',
+
+    '沖縄':
+      '#E5D8F0'
+
+  };
+
+  return colors[region] ||
+    '#EEF1F3';
+
+}
+
+
+function getRegionTeacherColor(region) {
+
+  var colors = {
+
+    '北海道':
+      '#8DC8EB',
+
+    '東北':
+      '#8FD0DB',
+
+    '関東':
+      '#F4CF70',
+
+    '中部':
+      '#9FCD91',
+
+    '近畿':
+      '#F2B978',
+
+    '中国':
+      '#EF9E91',
+
+    '四国':
+      '#DB94BB',
+
+    '九州':
+      '#B697D2',
+
+    '沖縄':
+      '#AE8BCB'
+
+  };
+
+  return colors[region] ||
+    '#FF9A8B';
+
+}
+
+
 function renderJapanMap() {
 
   var el =
@@ -863,8 +1053,10 @@ function renderJapanMap() {
       'japanMap'
     );
 
+
   if (
-    !japanMapSvg
+    !window.jpmap ||
+    !window.jpmap.japanMap
   ) {
 
     el.innerHTML =
@@ -875,156 +1067,215 @@ function renderJapanMap() {
   }
 
 
-  el.innerHTML =
-    japanMapSvg;
+  el.innerHTML = '';
 
 
   var counts =
     getPrefCounts();
 
 
-  var prefElements =
-    el.querySelectorAll(
-      '.geolonia-svg-map .prefecture'
-    );
+  var areas = [];
 
 
   for (
     var i = 0;
-    i < prefElements.length;
+    i < prefectures.length;
     i++
   ) {
 
-    var prefEl =
-      prefElements[i];
-
-    var code =
-      Number(
-        prefEl.getAttribute(
-          'data-code'
-        )
-      );
-
-    var prefName =
-      prefectures[
-        code - 1
-      ];
-
-    if (
-      !prefName
-    ) {
-
-      continue;
-
-    }
+    var pref =
+      prefectures[i];
 
 
     var count =
-      counts[prefName] ||
+      counts[pref] ||
       0;
 
 
-    var fillColor =
-      '#EEF1F3';
+    var region =
+      getRegionName(
+        pref
+      );
 
+
+    var color =
+      getRegionBaseColor(
+        region
+      );
+
+
+    var hoverColor =
+      getRegionTeacherColor(
+        region
+      );
+
+
+    /*
+      先生がいる県
+      → 地方色を少し濃く
+    */
 
     if (
       count > 0
     ) {
 
-      fillColor =
-        '#FF967F';
+      color =
+        getRegionTeacherColor(
+          region
+        );
 
     }
 
+
+    /*
+      選択中
+      → 地方に関係なく
+         ローズで強調
+    */
 
     if (
       selectedPrefecture ===
-      prefName
+      pref
     ) {
 
-      fillColor =
-        '#D94F69';
+      color =
+        '#D95770';
+
+      hoverColor =
+        '#C84660';
 
     }
 
 
-    prefEl.style.fill =
-      fillColor;
+    areas.push({
 
-    prefEl.style.stroke =
-      '#FFFFFF';
+      code:
+        i + 1,
 
-    prefEl.style.cursor =
-      'pointer';
+      color:
+        color,
 
+      hoverColor:
+        hoverColor
 
-    prefEl.setAttribute(
-      'data-pref-name',
-      prefName
-    );
-
-
-    prefEl.addEventListener(
-      'click',
-      function(event) {
-
-        var target =
-          event.currentTarget;
-
-        var name =
-          target.getAttribute(
-            'data-pref-name'
-          );
-
-        selectPrefecture(
-          name
-        );
-
-      }
-    );
-
-
-    prefEl.addEventListener(
-      'mouseenter',
-      function(event) {
-
-        var target =
-          event.currentTarget;
-
-        var name =
-          target.getAttribute(
-            'data-pref-name'
-          );
-
-        if (
-          selectedPrefecture !==
-          name
-        ) {
-
-          target.style.opacity =
-            '.78';
-
-        }
-
-      }
-    );
-
-
-    prefEl.addEventListener(
-      'mouseleave',
-      function(event) {
-
-        event.currentTarget.style.opacity =
-          '1';
-
-      }
-    );
+    });
 
   }
 
 
-  updateSelectedPrefHeading();
+  var containerWidth =
+    Math.floor(
+      el.getBoundingClientRect().width ||
+      el.clientWidth ||
+      620
+    );
+
+
+  /*
+    スマホでは、
+    以前より少し大きめに描画
+  */
+
+  var mapWidth;
+
+
+  if (
+    window.innerWidth <= 560
+  ) {
+
+    mapWidth =
+      Math.max(
+        400,
+        Math.min(
+          720,
+          containerWidth * 1.18
+        )
+      );
+
+  } else {
+
+    mapWidth =
+      Math.max(
+        520,
+        Math.min(
+          820,
+          containerWidth
+        )
+      );
+
+  }
+
+
+  mapInstance =
+    new jpmap.japanMap(
+      el,
+      {
+
+        areas:
+          areas,
+
+        width:
+          mapWidth,
+
+        /*
+          県名は地図上には表示しない
+        */
+
+        showsPrefectureName:
+          false,
+
+
+        /*
+          沖縄・離島を
+          別位置に移動表示
+        */
+
+        movesIslands:
+          true,
+
+
+        backgroundColor:
+          '#FFFFFF',
+
+
+        lineColor:
+          '#FFFFFF',
+
+        lineWidth:
+          1,
+
+
+        borderLineColor:
+          '#FFFFFF',
+
+        borderLineWidth:
+          1.4,
+
+
+        onSelect:
+          function(data) {
+
+            var code =
+              Number(
+                data.code
+              );
+
+
+            var pref =
+              prefectures[
+                code - 1
+              ] ||
+              data.name;
+
+
+            selectPrefecture(
+              pref
+            );
+
+          }
+
+      }
+    );
 
 }
 
