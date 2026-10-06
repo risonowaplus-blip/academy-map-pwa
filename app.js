@@ -5,6 +5,7 @@ var selectedTeacherId = '';
 var prefMode = 'active';
 var tokenClient = null;
 var accessToken = '';
+var accessTokenExpiresAt = 0;
 var mapInstance = null;
 
 var prefectures = [
@@ -23,31 +24,201 @@ var gradeOptions = [
   '高1','高2','高3','卒業'
 ];
 
-window.addEventListener('load', function() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(function(){});
-  }
+window.addEventListener(
+  'load',
+  function() {
 
-  if (!configReady()) {
-    document.getElementById('authMessage').textContent =
-      'config.js にGoogleクライアントIDとApps ScriptデプロイIDを設定してください。';
-    document.getElementById('loginButton').disabled = true;
-    return;
-  }
+    if (
+      'serviceWorker' in navigator
+    ) {
 
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CONFIG.GOOGLE_CLIENT_ID,
-    scope: CONFIG.SCOPES,
-    callback: function(resp) {
-      if (resp.error) {
-        document.getElementById('authMessage').textContent = 'ログインに失敗しました。';
-        return;
-      }
-      accessToken = resp.access_token;
-      startApp();
+      navigator.serviceWorker
+        .register('./sw.js')
+        .catch(
+          function() {}
+        );
+
     }
+
+    if (
+      !configReady()
+    ) {
+
+      document.getElementById(
+        'authMessage'
+      ).textContent =
+        'config.js の設定が完了していません。';
+
+      document.getElementById(
+        'loginButton'
+      ).disabled = true;
+
+      return;
+
+    }
+
+    tokenClient =
+      google.accounts.oauth2
+        .initTokenClient({
+
+          client_id:
+            CONFIG.GOOGLE_CLIENT_ID,
+
+          scope:
+            CONFIG.SCOPES,
+
+          callback:
+            function(resp) {
+
+              if (
+                resp.error
+              ) {
+
+                showLoginScreen();
+                return;
+
+              }
+
+              accessToken =
+                resp.access_token;
+
+              var expiresIn =
+                Number(
+                  resp.expires_in || 3600
+                );
+
+              accessTokenExpiresAt =
+                Date.now() +
+                (
+                  expiresIn * 1000
+                ) -
+                60000;
+
+              try {
+
+                sessionStorage.setItem(
+                  'academyAccessToken',
+                  accessToken
+                );
+
+                sessionStorage.setItem(
+                  'academyAccessTokenExpiresAt',
+                  String(
+                    accessTokenExpiresAt
+                  )
+                );
+
+              } catch (e) {}
+
+              startApp();
+
+            }
+
+        });
+
+
+    restoreLoginSession();
+
+  }
+);
+
+function restoreLoginSession() {
+
+  var savedToken = '';
+
+  var savedExpiresAt = 0;
+
+  try {
+
+    savedToken =
+      sessionStorage.getItem(
+        'academyAccessToken'
+      ) || '';
+
+    savedExpiresAt =
+      Number(
+        sessionStorage.getItem(
+          'academyAccessTokenExpiresAt'
+        ) || 0
+      );
+
+  } catch (e) {}
+
+
+  if (
+    savedToken &&
+    savedExpiresAt >
+      Date.now()
+  ) {
+
+    accessToken =
+      savedToken;
+
+    accessTokenExpiresAt =
+      savedExpiresAt;
+
+    startApp();
+
+    return;
+
+  }
+
+
+  /*
+    以前にログイン済みなら、
+    アカウント選択画面を出さずに
+    トークン取得を試す
+  */
+
+  tokenClient.requestAccessToken({
+    prompt: ''
   });
-});
+
+}
+
+
+function showLoginScreen() {
+
+  document
+    .getElementById(
+      'appShell'
+    )
+    .classList
+    .add(
+      'hidden'
+    );
+
+  document
+    .getElementById(
+      'authScreen'
+    )
+    .classList
+    .remove(
+      'hidden'
+    );
+
+}
+
+
+function clearLoginSession() {
+
+  accessToken = '';
+
+  accessTokenExpiresAt = 0;
+
+  try {
+
+    sessionStorage.removeItem(
+      'academyAccessToken'
+    );
+
+    sessionStorage.removeItem(
+      'academyAccessTokenExpiresAt'
+    );
+
+  } catch (e) {}
+
+}
 
 function configReady() {
   return CONFIG.GOOGLE_CLIENT_ID &&
@@ -57,8 +228,19 @@ function configReady() {
 }
 
 function login() {
-  if (!tokenClient) return;
-  tokenClient.requestAccessToken({prompt: 'select_account'});
+
+  if (
+    !tokenClient
+  ) {
+    return;
+  }
+
+  tokenClient
+    .requestAccessToken({
+      prompt:
+        'select_account'
+    });
+
 }
 
 async function runScript(functionName, parameters) {
@@ -83,12 +265,19 @@ async function runScript(functionName, parameters) {
 
   var data = await response.json();
 
-  if (response.status === 401) {
-    accessToken = '';
-    document.getElementById('appShell').classList.add('hidden');
-    document.getElementById('authScreen').classList.remove('hidden');
-    throw new Error('Googleログインの有効期限が切れました。もう一度ログインしてください。');
-  }
+  if (
+  response.status === 401
+) {
+
+  clearLoginSession();
+
+  showLoginScreen();
+
+  throw new Error(
+    'Googleログインの有効期限が切れました。もう一度ログインしてください。'
+  );
+
+}
 
   if (!response.ok || data.error) {
     var msg = 'Apps Scriptの実行に失敗しました。';
@@ -181,30 +370,31 @@ function renderJapanMap() {
       '#F1F3F5';
 
     var hoverColor =
-      '#FFD4CC';
+      '#FFD3CB';
 
-
-    if (count > 0) {
+    if (
+      count > 0
+    ) {
 
       color =
         '#FF9A8B';
 
       hoverColor =
-        '#FF7E70';
+        '#FF796C';
 
     }
 
-
-    if (isSelected) {
+    if (
+      isSelected
+    ) {
 
       color =
         '#D94F64';
 
       hoverColor =
-        '#C63F54';
+        '#C73E53';
 
     }
-
 
     areas.push({
 
@@ -221,7 +411,6 @@ function renderJapanMap() {
 
   }
 
-
   var mapWidth =
     Math.min(
       720,
@@ -230,7 +419,6 @@ function renderJapanMap() {
         el.clientWidth || 620
       )
     );
-
 
   mapInstance =
     new jpmap.japanMap(
@@ -243,10 +431,6 @@ function renderJapanMap() {
         width:
           mapWidth,
 
-        /*
-          県名は地図内には出さない。
-          一覧との連動で場所を覚える仕様。
-        */
         showsPrefectureName:
           false,
 
@@ -267,7 +451,6 @@ function renderJapanMap() {
 
         borderLineWidth:
           1.5,
-
 
         onSelect:
           function(data) {
