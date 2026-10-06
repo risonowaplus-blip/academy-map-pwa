@@ -4373,7 +4373,7 @@ function updateLinkInputGuide() {
       'アカウント名またはURL';
 
     input.placeholder =
-      '例：awomb8 / @awomb8 / Instagram URL';
+  '例：ユーザー名 / @ユーザー名 / Instagram URL';
 
     note.textContent =
       'Instagramはアカウント名だけでも登録できます。';
