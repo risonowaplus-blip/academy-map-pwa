@@ -2862,9 +2862,11 @@ function renderTeacherDetail(
      子ども
      ============================== */
 
-  html +=
+    html +=
 
     '<div class="card">' +
+
+    '<div class="detail-head">' +
 
     '<div class="section-title">' +
 
@@ -2876,8 +2878,17 @@ function renderTeacherDetail(
         : 0
     ) +
 
-    '人</div>';
+    '人</div>' +
 
+    '<button class="primary" onclick="openTeacherFormForNewChild(\'' +
+
+    escapeJs(
+      teacher.teacherId
+    ) +
+
+    '\')">＋ 追加</button>' +
+
+    '</div>';
 
   if (
     !teacher.children ||
@@ -3189,6 +3200,13 @@ function openInteractionForm(
   interactionId
 ) {
 
+    interactionFormSource =
+    'detail';
+
+
+  editingPendingInteractionIndex =
+    -1;
+
   if (
     !selectedTeacherId
   ) {
@@ -3296,24 +3314,12 @@ function closeInteractionForm() {
 
 async function saveInteractionForm() {
 
-  if (
-    !selectedTeacherId
-  ) {
-
-    return;
-
-  }
-
-
   var payload = {
 
     interactionId:
       valueOf(
         'interactionId'
       ),
-
-    teacherId:
-      selectedTeacherId,
 
     date:
       valueOf(
@@ -3331,6 +3337,63 @@ async function saveInteractionForm() {
       )
 
   };
+
+
+  /* 先生フォーム内からの追加 */
+
+  if (
+    interactionFormSource ===
+    'teacherForm'
+  ) {
+
+    if (
+      editingPendingInteractionIndex >=
+      0
+    ) {
+
+      pendingInteractions[
+        editingPendingInteractionIndex
+      ] =
+        payload;
+
+
+    } else {
+
+      pendingInteractions.push(
+        payload
+      );
+
+    }
+
+
+    closeInteractionForm();
+
+
+    renderTeacherFormInteractions();
+
+
+    editingPendingInteractionIndex =
+      -1;
+
+
+    return;
+
+  }
+
+
+  /* Detailから直接追加 */
+
+  if (
+    !selectedTeacherId
+  ) {
+
+    return;
+
+  }
+
+
+  payload.teacherId =
+    selectedTeacherId;
 
 
   setLoading(
@@ -3710,8 +3773,19 @@ function closeTeacherForm() {
 
   hideCombos();
 
-}
 
+  pendingInteractions =
+    [];
+
+
+  deletedInteractionIds =
+    [];
+
+
+  editingPendingInteractionIndex =
+    -1;
+
+}
 
 function clearTeacherForm() {
 
@@ -3887,6 +3961,16 @@ async function saveTeacherForm() {
     );
 
 
+    await saveInteractionsAfterTeacher(
+      saved.teacherId
+    );
+
+
+    await refreshAfterSave(
+      saved.teacherId
+    );
+
+
   } catch (e) {
 
     handleError(
@@ -3908,6 +3992,340 @@ async function saveTeacherForm() {
 /* ========================================
    子ども
    ======================================== */
+
+function openTeacherFormForNewChild(
+  teacherId
+) {
+
+  openTeacherForm(
+    teacherId
+  );
+
+
+  addChildRow();
+
+
+  setTimeout(
+    function() {
+
+      var area =
+        document.getElementById(
+          'childrenEditArea'
+        );
+
+
+      if (
+        area
+      ) {
+
+        area.scrollIntoView({
+
+          behavior:
+            'smooth',
+
+          block:
+            'start'
+
+        });
+
+      }
+
+    },
+    100
+  );
+
+}
+
+
+/* ========================================
+   先生フォーム内 交流履歴
+   ======================================== */
+
+function renderTeacherFormInteractions() {
+
+  var area =
+    document.getElementById(
+      'interactionEditArea'
+    );
+
+
+  if (
+    !area
+  ) {
+
+    return;
+
+  }
+
+
+  var html =
+
+    '<div class="detail-head">' +
+
+    '<div class="section-title">' +
+
+    '交流履歴 ' +
+
+    pendingInteractions.length +
+
+    '件' +
+
+    '</div>' +
+
+    '<button type="button" class="secondary" onclick="openTeacherFormInteraction()">' +
+
+    '＋ 交流記録' +
+
+    '</button>' +
+
+    '</div>';
+
+
+  if (
+    pendingInteractions.length ===
+    0
+  ) {
+
+    html +=
+
+      '<div class="empty">' +
+
+      '交流記録はまだありません。' +
+
+      '</div>';
+
+  }
+
+
+  for (
+    var i = 0;
+    i < pendingInteractions.length;
+    i++
+  ) {
+
+    var interaction =
+      pendingInteractions[i];
+
+
+    html +=
+
+      '<div class="child">' +
+
+      '<div class="detail-head">' +
+
+      '<div>' +
+
+      '<strong>' +
+
+      escapeHtml(
+        interaction.date ||
+        '日付未登録'
+      ) +
+
+      '</strong>' +
+
+      '<div class="meta">' +
+
+      escapeHtml(
+        interaction.interactionType ||
+        '種別未登録'
+      ) +
+
+      '</div>' +
+
+      '</div>' +
+
+      '<button type="button" class="secondary" onclick="openTeacherFormInteraction(' +
+
+      i +
+
+      ')">' +
+
+      '編集' +
+
+      '</button>' +
+
+      '</div>';
+
+
+    if (
+      interaction.memo
+    ) {
+
+      html +=
+
+        '<div style="margin-top:8px;white-space:pre-wrap;line-height:1.7">' +
+
+        escapeHtml(
+          interaction.memo
+        ) +
+
+        '</div>';
+
+    }
+
+
+    html +=
+
+      '<div class="actions">' +
+
+      '<button type="button" class="danger" onclick="removeTeacherFormInteraction(' +
+
+      i +
+
+      ')">' +
+
+      '削除' +
+
+      '</button>' +
+
+      '</div>' +
+
+      '</div>';
+
+  }
+
+
+  area.innerHTML =
+    html;
+
+}
+
+
+function openTeacherFormInteraction(
+  index
+) {
+
+  interactionFormSource =
+    'teacherForm';
+
+
+  editingPendingInteractionIndex =
+    typeof index ===
+      'number'
+      ? index
+      : -1;
+
+
+  setValue(
+    'interactionId',
+    ''
+  );
+
+
+  setValue(
+    'interactionDate',
+    todayYmd()
+  );
+
+
+  setValue(
+    'interactionType',
+    ''
+  );
+
+
+  setValue(
+    'interactionMemo',
+    ''
+  );
+
+
+  if (
+    editingPendingInteractionIndex >=
+    0
+  ) {
+
+    var interaction =
+      pendingInteractions[
+        editingPendingInteractionIndex
+      ];
+
+
+    document.getElementById(
+      'interactionModalTitle'
+    ).textContent =
+      '交流記録を編集';
+
+
+    setValue(
+      'interactionId',
+      interaction.interactionId ||
+      ''
+    );
+
+
+    setValue(
+      'interactionDate',
+      interaction.date ||
+      ''
+    );
+
+
+    setValue(
+      'interactionType',
+      interaction.interactionType ||
+      ''
+    );
+
+
+    setValue(
+      'interactionMemo',
+      interaction.memo ||
+      ''
+    );
+
+
+  } else {
+
+    document.getElementById(
+      'interactionModalTitle'
+    ).textContent =
+      '交流記録を追加';
+
+  }
+
+
+  document.getElementById(
+    'interactionModal'
+  ).classList.add(
+    'show'
+  );
+
+}
+
+
+function removeTeacherFormInteraction(
+  index
+) {
+
+  var interaction =
+    pendingInteractions[
+      index
+    ];
+
+
+  if (
+    interaction &&
+    interaction.interactionId
+  ) {
+
+    deletedInteractionIds.push(
+      interaction.interactionId
+    );
+
+  }
+
+
+  pendingInteractions.splice(
+    index,
+    1
+  );
+
+
+  renderTeacherFormInteractions();
+
+}
 
 function renderChildrenEditor(
   children
@@ -4320,9 +4738,69 @@ async function saveChildrenAfterTeacher(
   }
 
 
-  await refreshAfterSave(
-    teacher.teacherId
-  );
+}
+
+async function saveInteractionsAfterTeacher(
+  teacherId
+) {
+
+  for (
+    var deleteIndex = 0;
+    deleteIndex < deletedInteractionIds.length;
+    deleteIndex++
+  ) {
+
+    await runScript(
+      'deleteInteraction',
+      [
+        deletedInteractionIds[
+          deleteIndex
+        ]
+      ]
+    );
+
+  }
+
+
+  for (
+    var i = 0;
+    i < pendingInteractions.length;
+    i++
+  ) {
+
+    var interaction =
+      pendingInteractions[i];
+
+
+    await runScript(
+      'saveInteraction',
+      [
+        {
+
+          interactionId:
+            interaction.interactionId ||
+            '',
+
+          teacherId:
+            teacherId,
+
+          date:
+            interaction.date ||
+            '',
+
+          interactionType:
+            interaction.interactionType ||
+            '',
+
+          memo:
+            interaction.memo ||
+            ''
+
+        }
+      ]
+    );
+
+  }
 
 }
 
