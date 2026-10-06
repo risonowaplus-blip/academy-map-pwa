@@ -1212,13 +1212,14 @@ if (
   mapWidth =
     Math.max(
 
-      330,
+      420,
 
       Math.min(
 
-        720,
+        820,
 
-        containerWidth
+        containerWidth *
+        1.22
 
       )
 
