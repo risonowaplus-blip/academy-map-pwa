@@ -5781,6 +5781,16 @@ document.addEventListener(
 
     }
 
+    if (
+      !e.target.closest(
+        '.setting-combo'
+      )
+    ) {
+
+      hideSettingSuggestions();
+
+    }
+
   }
 );
 
@@ -5821,6 +5831,212 @@ function openGoogleMap(
 /* ========================================
    設定
    ======================================== */
+var settingCandidates = {
+
+  appName: [
+    'つながりマップ',
+    'メンバーマップ',
+    '先生マップ',
+    '講師マップ',
+    '仲間マップ',
+    'スタッフマップ',
+    'コミュニティマップ',
+    'Academy Map',
+    'Member Map',
+    'Teacher Map'
+  ],
+
+  personLabel: [
+    '先生',
+    '講師',
+    'メンバー',
+    'スタッフ',
+    '仲間',
+    '担当者',
+    '受講生'
+  ],
+
+  placeLabel: [
+    '店名',
+    'サロン名',
+    '店舗名',
+    '教室名',
+    '所属先',
+    '勤務先',
+    '会社名',
+    '施設名'
+  ],
+
+  placeKanaLabel: [
+    '店名ふりがな',
+    'サロン名ふりがな',
+    '店舗名ふりがな',
+    '教室名ふりがな',
+    '所属先ふりがな',
+    '勤務先ふりがな',
+    '会社名ふりがな',
+    '施設名ふりがな'
+  ]
+
+};
+
+
+function showSettingSuggestions(
+  inputId,
+  resultId,
+  type
+) {
+
+  hideSettingSuggestions();
+
+  var input =
+    document.getElementById(
+      inputId
+    );
+
+  var box =
+    document.getElementById(
+      resultId
+    );
+
+  if (
+    !input ||
+    !box
+  ) {
+
+    return;
+
+  }
+
+  var query =
+    String(
+      input.value ||
+      ''
+    )
+      .trim()
+      .toLowerCase();
+
+  var list =
+    settingCandidates[
+      type
+    ] ||
+    [];
+
+  box.innerHTML =
+    '';
+
+  var filtered =
+    list.filter(
+      function(item) {
+
+        if (
+          !query
+        ) {
+
+          return true;
+
+        }
+
+        return String(
+          item
+        )
+          .toLowerCase()
+          .indexOf(
+            query
+          ) !==
+          -1;
+
+      }
+    );
+
+  if (
+    filtered.length ===
+    0
+  ) {
+
+    var empty =
+      document.createElement(
+        'div'
+      );
+
+    empty.className =
+      'setting-no-result';
+
+    empty.textContent =
+      '候補にない名称も自由に入力できます。';
+
+    box.appendChild(
+      empty
+    );
+
+  } else {
+
+    filtered.forEach(
+      function(item) {
+
+        var button =
+          document.createElement(
+            'button'
+          );
+
+        button.type =
+          'button';
+
+        button.className =
+          'setting-option';
+
+        button.textContent =
+          item;
+
+        button.addEventListener(
+          'click',
+          function(e) {
+
+            e.preventDefault();
+
+            e.stopPropagation();
+
+            input.value =
+              item;
+
+            hideSettingSuggestions();
+
+          }
+        );
+
+        box.appendChild(
+          button
+        );
+
+      }
+    );
+
+  }
+
+  box.classList.add(
+    'show'
+  );
+
+}
+
+
+function hideSettingSuggestions() {
+
+  document
+    .querySelectorAll(
+      '.setting-results'
+    )
+    .forEach(
+      function(box) {
+
+        box.classList.remove(
+          'show'
+        );
+
+      }
+    );
+
+}
 
 function personLabel() {
 
