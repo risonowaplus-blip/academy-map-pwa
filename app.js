@@ -1212,7 +1212,7 @@ function renderJapanMap() {
 
   }
 
-  mapInstance =
+   mapInstance =
     new jpmap.japanMap(
 
       el,
@@ -1270,10 +1270,313 @@ function renderJapanMap() {
 
     );
 
+
+  enableMobileMapTouch();
+
+
   updateSelectedPrefHeading();
 
 }
 
+/* ========================================
+   スマホ地図タップ対応
+   japan-map-js はマウスイベントしか持たないため
+   touch を mousemove → mousedown に変換する
+   ======================================== */
+
+function enableMobileMapTouch() {
+
+  if (
+    window.innerWidth >
+    560
+  ) {
+
+    return;
+
+  }
+
+
+  var map =
+    document.getElementById(
+      'japanMap'
+    );
+
+
+  if (
+    !map
+  ) {
+
+    return;
+
+  }
+
+
+  var canvas =
+    map.querySelector(
+      'canvas'
+    );
+
+
+  if (
+    !canvas
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    canvas.dataset.mobileTouchReady ===
+    '1'
+  ) {
+
+    return;
+
+  }
+
+
+  canvas.dataset.mobileTouchReady =
+    '1';
+
+
+  var startX =
+    0;
+
+  var startY =
+    0;
+
+  var moved =
+    false;
+
+
+  canvas.addEventListener(
+
+    'touchstart',
+
+    function(event) {
+
+      if (
+        event.touches.length !==
+        1
+      ) {
+
+        moved =
+          true;
+
+        return;
+
+      }
+
+
+      var touch =
+        event.touches[0];
+
+
+      startX =
+        touch.clientX;
+
+      startY =
+        touch.clientY;
+
+      moved =
+        false;
+
+    },
+
+    {
+      passive:
+        true
+    }
+
+  );
+
+
+  canvas.addEventListener(
+
+    'touchmove',
+
+    function(event) {
+
+      if (
+        event.touches.length !==
+        1
+      ) {
+
+        moved =
+          true;
+
+        return;
+
+      }
+
+
+      var touch =
+        event.touches[0];
+
+
+      var diffX =
+        Math.abs(
+          touch.clientX -
+          startX
+        );
+
+
+      var diffY =
+        Math.abs(
+          touch.clientY -
+          startY
+        );
+
+
+      if (
+        diffX > 12 ||
+        diffY > 12
+      ) {
+
+        moved =
+          true;
+
+      }
+
+    },
+
+    {
+      passive:
+        true
+    }
+
+  );
+
+
+  canvas.addEventListener(
+
+    'touchend',
+
+    function(event) {
+
+      if (
+        moved
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        !event.changedTouches ||
+        !event.changedTouches.length
+      ) {
+
+        return;
+
+      }
+
+
+      var touch =
+        event.changedTouches[0];
+
+
+      /*
+       * 通常のスマホ側の疑似マウスイベントとの
+       * 二重発火を防ぐ
+       */
+      event.preventDefault();
+
+
+      /*
+       * japan-map-js は mousemove で
+       * 「今どの県にいるか」を判定する。
+       */
+      canvas.dispatchEvent(
+
+        new MouseEvent(
+
+          'mousemove',
+
+          {
+
+            bubbles:
+              true,
+
+            cancelable:
+              true,
+
+            view:
+              window,
+
+            clientX:
+              touch.clientX,
+
+            clientY:
+              touch.clientY,
+
+            screenX:
+              touch.screenX,
+
+            screenY:
+              touch.screenY
+
+          }
+
+        )
+
+      );
+
+
+      /*
+       * その直後の mousedown で
+       * onSelect が実行される。
+       */
+      canvas.dispatchEvent(
+
+        new MouseEvent(
+
+          'mousedown',
+
+          {
+
+            bubbles:
+              true,
+
+            cancelable:
+              true,
+
+            view:
+              window,
+
+            clientX:
+              touch.clientX,
+
+            clientY:
+              touch.clientY,
+
+            screenX:
+              touch.screenX,
+
+            screenY:
+              touch.screenY,
+
+            button:
+              0
+
+          }
+
+        )
+
+      );
+
+    },
+
+    {
+      passive:
+        false
+    }
+
+  );
+
+}
 
 /* ========================================
    住所
