@@ -352,7 +352,7 @@ button {
 
   display: block;
 
-  transform: translateX(-6%);
+  transform: translateX(-10%);
 }
 
 
@@ -364,7 +364,7 @@ button {
 
   .japan-map svg {
     width: 118% !important;
-    transform: translateX(-8%);
+    transform: translateX(-12%);
   }
 
 }
