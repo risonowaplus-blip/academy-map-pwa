@@ -1089,3 +1089,104 @@ button {
   }
 
 }
+
+/* ========================================
+   地方別 都道府県一覧
+   ======================================== */
+
+.pref-region-group {
+  margin:
+    10px 4px 14px;
+
+  padding:
+    10px;
+
+  border-radius:
+    14px;
+
+  background:
+    var(--region-base);
+
+  border:
+    1px solid
+    rgba(0, 0, 0, .04);
+}
+
+
+.pref-region-title {
+  margin:
+    0 0 8px;
+
+  font-size:
+    14px;
+
+  font-weight:
+    700;
+
+  color:
+    #4f4745;
+}
+
+
+.pref-region-chips {
+  display:
+    flex;
+
+  flex-wrap:
+    wrap;
+
+  gap:
+    7px;
+}
+
+
+.pref-region-group .chip {
+  margin:
+    0;
+
+  background:
+    rgba(255, 255, 255, .72);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, .9);
+}
+
+
+.pref-region-group .chip.has {
+  background:
+    var(--region-active);
+
+  color:
+    #3e3735;
+
+  border-color:
+    rgba(0, 0, 0, .04);
+}
+
+
+.pref-region-group .chip.selected {
+  background:
+    #D95770 !important;
+
+  color:
+    #ffffff !important;
+
+  border-color:
+    #D95770 !important;
+
+  font-weight:
+    700;
+}
+
+
+.unknown-region {
+  background:
+    #F1F1F1;
+}
+
+
+.unknown-region .chip {
+  background:
+    #ffffff;
+}
