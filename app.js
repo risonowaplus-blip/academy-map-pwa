@@ -1607,8 +1607,37 @@ function renderPrefList() {
     getPrefCounts();
 
 
-  var html =
-    '';
+  var regionOrder = [
+
+    '北海道',
+    '東北',
+    '関東',
+    '中部',
+    '近畿',
+    '中国',
+    '四国',
+    '九州',
+    '沖縄'
+
+  ];
+
+
+  var grouped =
+    {};
+
+
+  for (
+    var r = 0;
+    r < regionOrder.length;
+    r++
+  ) {
+
+    grouped[
+      regionOrder[r]
+    ] =
+      [];
+
+  }
 
 
   for (
@@ -1637,58 +1666,190 @@ function renderPrefList() {
     }
 
 
-    var cls =
-      'chip';
+    var region =
+      getRegionName(
+        pref
+      );
 
 
     if (
-      count > 0
+      !grouped[
+        region
+      ]
     ) {
 
-      cls +=
-        ' has';
+      grouped[
+        region
+      ] =
+        [];
 
     }
 
 
+    grouped[
+      region
+    ].push({
+
+      prefecture:
+        pref,
+
+      count:
+        count
+
+    });
+
+  }
+
+
+  var html =
+    '';
+
+
+  for (
+    var regionIndex = 0;
+    regionIndex < regionOrder.length;
+    regionIndex++
+  ) {
+
+    var regionName =
+      regionOrder[
+        regionIndex
+      ];
+
+
+    var regionPrefs =
+      grouped[
+        regionName
+      ] ||
+      [];
+
+
     if (
-      selectedPrefecture ===
-      pref
+      regionPrefs.length ===
+      0
     ) {
 
-      cls +=
-        ' selected';
+      continue;
+
+    }
+
+
+    var baseColor =
+      getRegionBaseColor(
+        regionName
+      );
+
+
+    var teacherColor =
+      getRegionTeacherColor(
+        regionName
+      );
+
+
+    html +=
+
+      '<div class="pref-region-group"' +
+
+      ' style="' +
+
+      '--region-base:' +
+      baseColor +
+      ';' +
+
+      '--region-active:' +
+      teacherColor +
+      ';">';
+
+
+    html +=
+
+      '<div class="pref-region-title">' +
+
+      escapeHtml(
+        regionName
+      ) +
+
+      '</div>';
+
+
+    html +=
+
+      '<div class="pref-region-chips">';
+
+
+    for (
+      var prefIndex = 0;
+      prefIndex < regionPrefs.length;
+      prefIndex++
+    ) {
+
+      var row =
+        regionPrefs[
+          prefIndex
+        ];
+
+
+      var cls =
+        'chip';
+
+
+      if (
+        row.count > 0
+      ) {
+
+        cls +=
+          ' has';
+
+      }
+
+
+      if (
+        selectedPrefecture ===
+        row.prefecture
+      ) {
+
+        cls +=
+          ' selected';
+
+      }
+
+
+      html +=
+
+        '<button class="' +
+
+        cls +
+
+        '" onclick="selectPrefecture(\'' +
+
+        escapeJs(
+          row.prefecture
+        ) +
+
+        '\')">' +
+
+        escapeHtml(
+          row.prefecture
+        ) +
+
+        (
+          row.count
+            ? ' ' +
+              row.count +
+              '名'
+            : ''
+        ) +
+
+        '</button>';
 
     }
 
 
     html +=
 
-      '<button class="' +
+      '</div>' +
 
-      cls +
-
-      '" onclick="selectPrefecture(\'' +
-
-      escapeJs(
-        pref
-      ) +
-
-      '\')">' +
-
-      escapeHtml(
-        pref
-      ) +
-
-      (
-        count
-          ? ' ' +
-            count +
-            '名'
-          : ''
-      ) +
-
-      '</button>';
+      '</div>';
 
   }
 
@@ -1702,6 +1863,12 @@ function renderPrefList() {
   ) {
 
     html +=
+
+      '<div class="pref-region-group unknown-region">' +
+
+      '<div class="pref-region-title">所在地不明</div>' +
+
+      '<div class="pref-region-chips">' +
 
       '<button class="chip' +
 
@@ -1718,7 +1885,13 @@ function renderPrefList() {
 
       unknown +
 
-      '名</button>';
+      '名' +
+
+      '</button>' +
+
+      '</div>' +
+
+      '</div>';
 
   }
 
