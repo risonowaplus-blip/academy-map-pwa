@@ -23,8 +23,23 @@ button{cursor:pointer}
 .search{width:100%;border:1px solid var(--line);background:#fff;border-radius:14px;padding:13px 14px;font-size:15px}
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.stat{background:#f2eeec;border-radius:11px;padding:8px 11px;font-size:13px}
 .label{font-size:11px;color:var(--muted);margin-bottom:4px}.selected-pref{font-size:20px;font-weight:800}
-.japan-map{width:100%;min-height:390px;display:flex;align-items:center;justify-content:center;overflow:auto}
-.japan-map svg{max-width:100%;height:auto}
+.japan-map{
+  width:calc(100% + 16px);
+  margin-left:-8px;
+  margin-right:-8px;
+  min-height:360px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
+}
+
+.japan-map svg{
+  width:100% !important;
+  height:auto !important;
+  max-width:none !important;
+  display:block;
+}
 .segmented{display:flex;background:#eee9e6;border-radius:12px;padding:3px;margin:10px 0}
 .segmented button{flex:1;border:0;border-radius:10px;padding:9px;background:transparent;color:#6f6662;font-size:13px}
 .segmented button.active{background:#fff;color:var(--text);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.06)}
