@@ -1789,3 +1789,448 @@ button {
   }
 
 }
+
+/* =========================================================
+   Mirel Map Enhancements
+   2026-10-07
+   ========================================================= */
+
+
+/* -------------------------
+   検索付き生年月日セレクト
+   ------------------------- */
+
+.mirel-search-select {
+  position: relative;
+}
+
+
+.mirel-search-select > input {
+  padding-right: 38px;
+}
+
+
+.mirel-select-arrow {
+  position: absolute;
+
+  right: 7px;
+  bottom: 6px;
+
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #988d8b;
+
+  font-size: 12px;
+
+  z-index: 4;
+}
+
+
+.mirel-select-panel {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  top: calc(100% - 4px);
+
+  z-index: 220;
+
+  display: none;
+
+  padding: 7px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 14px;
+
+  background: #fff;
+
+  box-shadow:
+    0 9px 28px
+    rgba(50, 35, 38, .15);
+}
+
+
+.mirel-select-panel.show {
+  display: block;
+}
+
+
+.mirel-select-search {
+  width: 100%;
+
+  margin-bottom: 6px;
+
+  padding: 9px 10px;
+
+  border:
+    1px solid #e2dbd8;
+
+  border-radius: 10px;
+
+  background: #fafafa;
+
+  font-size: 13px;
+}
+
+
+.mirel-select-options {
+  max-height: 230px;
+
+  overflow-y: auto;
+}
+
+
+.mirel-select-option {
+  display: block;
+
+  width: 100%;
+
+  padding: 9px 10px;
+
+  border: 0;
+
+  border-bottom:
+    1px solid #f2eeec;
+
+  background: #fff;
+
+  color: #433d3b;
+
+  text-align: left;
+
+  font-size: 13px;
+}
+
+
+.mirel-select-option:last-child {
+  border-bottom: 0;
+}
+
+
+.mirel-select-option:active {
+  background: #fff4f6;
+}
+
+
+/* -------------------------
+   町名検索
+   ------------------------- */
+
+.combo-search-note {
+  padding: 9px 10px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  line-height: 1.5;
+
+  background: #faf8f7;
+}
+
+
+/* -------------------------
+   先生一覧 地域ジャンプ
+   ------------------------- */
+
+.mirel-region-jump {
+  margin-bottom: 13px;
+}
+
+
+.mirel-region-jump select {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 12px;
+
+  background: #fff;
+
+  color: var(--text);
+
+  font-size: 13px;
+}
+
+
+/* -------------------------
+   先生一覧 地域
+   ------------------------- */
+
+.mirel-region {
+  margin-bottom: 20px;
+
+  scroll-margin-top: 90px;
+}
+
+
+.mirel-region-title {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin:
+    2px
+    2px
+    8px;
+
+  color: #4d4644;
+
+  font-size: 15px;
+
+  font-weight: 800;
+}
+
+
+.mirel-region-count {
+  color: var(--muted);
+
+  font-size: 11px;
+
+  font-weight: 500;
+}
+
+
+/* -------------------------
+   先生一覧 コンパクト3行
+   ------------------------- */
+
+.mirel-list-card {
+  padding:
+    9px
+    11px;
+
+  border-radius: 13px;
+}
+
+
+.mirel-list-first {
+  display: flex;
+
+  align-items: baseline;
+  justify-content: space-between;
+
+  gap: 10px;
+}
+
+
+.mirel-list-card .teacher-name {
+  min-width: 0;
+
+  font-size: 15px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.mirel-list-address {
+  flex: 0 1 48%;
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  text-align: right;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.mirel-list-line {
+  min-height: 16px;
+
+  margin-top: 2px;
+
+  color: #6f6765;
+
+  font-size: 12px;
+
+  line-height: 1.25;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.mirel-list-place {
+  color: var(--muted);
+}
+
+
+/* -------------------------
+   詳細 SNSカード
+   ------------------------- */
+
+.link-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-top: 6px;
+}
+
+
+.mirel-social-card {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding:
+    10px
+    10px
+    10px
+    12px;
+
+  border:
+    1px solid #f0c9cf;
+
+  border-radius: 13px;
+
+  background: #fff7f8;
+}
+
+
+.mirel-social-main {
+  flex: 1;
+
+  min-width: 0;
+}
+
+
+.mirel-social-name {
+  color: #443c3a;
+
+  font-size: 13px;
+
+  font-weight: 800;
+}
+
+
+.mirel-social-value {
+  margin-top: 3px;
+
+  color: #8c7476;
+
+  font-size: 12px;
+
+  line-height: 1.4;
+
+  word-break: break-all;
+}
+
+
+/* -------------------------
+   詳細 小ボタン
+   ------------------------- */
+
+.mirel-mini-button {
+  flex: 0 0 auto;
+
+  padding:
+    6px
+    9px;
+
+  border:
+    1px solid #e7d6d3;
+
+  border-radius: 9px;
+
+  background: #fff;
+
+  color: #685e5c;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+
+.mirel-mini-button:active {
+  background: #f5efed;
+}
+
+
+.mirel-map-button {
+  display: block;
+
+  width: fit-content;
+
+  margin-top: 7px;
+}
+
+
+/* -------------------------
+   設定 ▽
+   ------------------------- */
+
+.setting-combo {
+  position: relative;
+}
+
+
+.setting-combo > input {
+  padding-right: 35px;
+}
+
+
+.mirel-setting-arrow {
+  position: absolute;
+
+  right: 12px;
+  bottom: 12px;
+
+  z-index: 3;
+
+  color: #998e8c;
+
+  font-size: 12px;
+
+  pointer-events: none;
+}
+
+
+/* -------------------------
+   スマホ
+   ------------------------- */
+
+@media (max-width: 560px) {
+
+  #pageList .teacher-list {
+    gap: 6px;
+  }
+
+
+  .mirel-region {
+    margin-bottom: 17px;
+  }
+
+
+  .mirel-social-card {
+    padding: 9px 10px;
+  }
+
+}
