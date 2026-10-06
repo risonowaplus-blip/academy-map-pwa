@@ -1212,21 +1212,20 @@ if (
   mapWidth =
     Math.max(
 
-      420,
+      485,
 
       Math.min(
 
-        820,
+        860,
 
         containerWidth *
-        1.22
+        1.40
 
       )
 
     );
 
 } else {
-
     mapWidth =
       Math.max(
 
