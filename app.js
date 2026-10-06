@@ -28,14 +28,9 @@ var appSettings = {
   placeKanaLabel: '店名ふりがな'
 };
 
-var STORAGE_TOKEN =
-  'academyAccessToken';
-
-var STORAGE_EXPIRES =
-  'academyAccessTokenExpiresAt';
-
-var STORAGE_AUTHORIZED =
-  'academyGoogleAuthorized';
+var STORAGE_TOKEN = 'academyAccessToken';
+var STORAGE_EXPIRES = 'academyAccessTokenExpiresAt';
+var STORAGE_AUTHORIZED = 'academyGoogleAuthorized';
 
 
 var prefectures = [
@@ -125,9 +120,7 @@ window.addEventListener(
     waitForGoogleIdentity(
       function() {
 
-        if (
-          !configReady()
-        ) {
+        if (!configReady()) {
 
           document.getElementById(
             'authMessage'
@@ -136,11 +129,9 @@ window.addEventListener(
 
           document.getElementById(
             'loginButton'
-          ).disabled =
-            true;
+          ).disabled = true;
 
           return;
-
         }
 
         initializeGoogleTokenClient();
@@ -156,14 +147,10 @@ window.addEventListener(
 
 function registerServiceWorker() {
 
-  if (
-    'serviceWorker' in navigator
-  ) {
+  if ('serviceWorker' in navigator) {
 
     navigator.serviceWorker
-      .register(
-        './sw.js'
-      )
+      .register('./sw.js')
       .then(
         function(registration) {
           registration.update();
@@ -178,53 +165,42 @@ function registerServiceWorker() {
 }
 
 
-function waitForGoogleIdentity(
-  callback
-) {
+function waitForGoogleIdentity(callback) {
 
-  var attempts =
-    0;
+  var attempts = 0;
 
-  var timer =
-    setInterval(
-      function() {
+  var timer = setInterval(
+    function() {
 
-        attempts++;
+      attempts++;
 
-        if (
-          window.google &&
-          google.accounts &&
-          google.accounts.oauth2
-        ) {
+      if (
+        window.google &&
+        google.accounts &&
+        google.accounts.oauth2
+      ) {
 
-          clearInterval(
-            timer
-          );
+        clearInterval(timer);
 
-          callback();
+        callback();
 
-          return;
+        return;
+      }
 
-        }
+      if (attempts > 100) {
 
-        if (
-          attempts > 100
-        ) {
+        clearInterval(timer);
 
-          clearInterval(
-            timer
-          );
+        document.getElementById(
+          'authMessage'
+        ).textContent =
+          'Googleログインを読み込めませんでした。画面を再読み込みしてください。';
 
-          document.getElementById(
-            'authMessage'
-          ).textContent =
-            'Googleログインを読み込めませんでした。画面を再読み込みしてください。';
+      }
 
-        }
-
-      },
-      100
-    );
+    },
+    100
+  );
 
 }
 
@@ -232,103 +208,90 @@ function waitForGoogleIdentity(
 function initializeGoogleTokenClient() {
 
   tokenClient =
-    google.accounts.oauth2
-      .initTokenClient({
+    google.accounts.oauth2.initTokenClient({
 
-        client_id:
-          CONFIG.GOOGLE_CLIENT_ID,
+      client_id: CONFIG.GOOGLE_CLIENT_ID,
 
-        scope:
-          CONFIG.SCOPES,
+      scope: CONFIG.SCOPES,
 
-        callback:
-          function(resp) {
+      callback:
+        function(resp) {
 
-            if (
-              resp.error
-            ) {
+          if (resp.error) {
 
-              if (
-                pendingTokenReject
-              ) {
+            if (pendingTokenReject) {
 
-                pendingTokenReject(
-                  new Error(
-                    resp.error_description ||
-                    resp.error
-                  )
-                );
-
-              }
-
-              clearPendingTokenPromise();
-
-              return;
-
-            }
-
-            accessToken =
-              resp.access_token ||
-              '';
-
-            var expiresIn =
-              Number(
-                resp.expires_in ||
-                3600
-              );
-
-            accessTokenExpiresAt =
-              Date.now() +
-              expiresIn * 1000 -
-              60000;
-
-            try {
-
-              localStorage.setItem(
-                STORAGE_TOKEN,
-                accessToken
-              );
-
-              localStorage.setItem(
-                STORAGE_EXPIRES,
-                String(
-                  accessTokenExpiresAt
+              pendingTokenReject(
+                new Error(
+                  resp.error_description ||
+                  resp.error
                 )
-              );
-
-              localStorage.setItem(
-                STORAGE_AUTHORIZED,
-                '1'
-              );
-
-            } catch (e) {}
-
-            if (
-              pendingTokenResolve
-            ) {
-
-              pendingTokenResolve(
-                accessToken
               );
 
             }
 
             clearPendingTokenPromise();
 
+            return;
           }
 
-      });
+          accessToken =
+            resp.access_token ||
+            '';
+
+          var expiresIn =
+            Number(
+              resp.expires_in ||
+              3600
+            );
+
+          accessTokenExpiresAt =
+            Date.now() +
+            expiresIn * 1000 -
+            60000;
+
+          try {
+
+            localStorage.setItem(
+              STORAGE_TOKEN,
+              accessToken
+            );
+
+            localStorage.setItem(
+              STORAGE_EXPIRES,
+              String(
+                accessTokenExpiresAt
+              )
+            );
+
+            localStorage.setItem(
+              STORAGE_AUTHORIZED,
+              '1'
+            );
+
+          } catch (e) {}
+
+          if (pendingTokenResolve) {
+
+            pendingTokenResolve(
+              accessToken
+            );
+
+          }
+
+          clearPendingTokenPromise();
+
+        }
+
+    });
 
 }
 
 
 function clearPendingTokenPromise() {
 
-  pendingTokenResolve =
-    null;
-
-  pendingTokenReject =
-    null;
+  pendingTokenResolve = null;
+  pendingTokenReject = null;
 
 }
 
@@ -351,66 +314,49 @@ function configReady() {
 
 async function restoreOrLogin() {
 
-  var savedToken =
-    '';
-
-  var savedExpiresAt =
-    0;
-
-  var wasAuthorized =
-    false;
+  var savedToken = '';
+  var savedExpiresAt = 0;
+  var wasAuthorized = false;
 
   try {
 
     savedToken =
       localStorage.getItem(
         STORAGE_TOKEN
-      ) ||
-      '';
+      ) || '';
 
     savedExpiresAt =
       Number(
         localStorage.getItem(
           STORAGE_EXPIRES
-        ) ||
-        0
+        ) || 0
       );
 
     wasAuthorized =
       localStorage.getItem(
         STORAGE_AUTHORIZED
-      ) ===
-      '1';
+      ) === '1';
 
   } catch (e) {}
 
   if (
     savedToken &&
-    savedExpiresAt >
-      Date.now()
+    savedExpiresAt > Date.now()
   ) {
 
-    accessToken =
-      savedToken;
-
-    accessTokenExpiresAt =
-      savedExpiresAt;
+    accessToken = savedToken;
+    accessTokenExpiresAt = savedExpiresAt;
 
     await startApp();
 
     return;
-
   }
 
-  if (
-    wasAuthorized
-  ) {
+  if (wasAuthorized) {
 
     try {
 
-      await requestGoogleToken(
-        ''
-      );
+      await requestGoogleToken('');
 
       await startApp();
 
@@ -431,19 +377,12 @@ async function restoreOrLogin() {
 }
 
 
-function requestGoogleToken(
-  promptMode
-) {
+function requestGoogleToken(promptMode) {
 
   return new Promise(
-    function(
-      resolve,
-      reject
-    ) {
+    function(resolve, reject) {
 
-      if (
-        !tokenClient
-      ) {
+      if (!tokenClient) {
 
         reject(
           new Error(
@@ -452,30 +391,22 @@ function requestGoogleToken(
         );
 
         return;
-
       }
 
-      pendingTokenResolve =
-        resolve;
-
-      pendingTokenReject =
-        reject;
+      pendingTokenResolve = resolve;
+      pendingTokenReject = reject;
 
       try {
 
-        tokenClient
-          .requestAccessToken({
-            prompt:
-              promptMode
-          });
+        tokenClient.requestAccessToken({
+          prompt: promptMode
+        });
 
       } catch (e) {
 
         clearPendingTokenPromise();
 
-        reject(
-          e
-        );
+        reject(e);
 
       }
 
@@ -487,9 +418,7 @@ function requestGoogleToken(
 
 async function login() {
 
-  setLoading(
-    true
-  );
+  setLoading(true);
 
   try {
 
@@ -505,9 +434,7 @@ async function login() {
 
   } finally {
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
   }
 
@@ -550,11 +477,8 @@ function showAppScreen() {
 
 function clearAccessToken() {
 
-  accessToken =
-    '';
-
-  accessTokenExpiresAt =
-    0;
+  accessToken = '';
+  accessTokenExpiresAt = 0;
 
   try {
 
@@ -581,9 +505,7 @@ async function runScript(
   retried
 ) {
 
-  if (
-    !accessToken
-  ) {
+  if (!accessToken) {
 
     throw new Error(
       'Googleログインが必要です。'
@@ -604,8 +526,7 @@ async function runScript(
 
       {
 
-        method:
-          'POST',
+        method: 'POST',
 
         headers: {
 
@@ -621,8 +542,7 @@ async function runScript(
         body:
           JSON.stringify({
 
-            function:
-              functionName,
+            function: functionName,
 
             parameters:
               parameters ||
@@ -643,9 +563,7 @@ async function runScript(
 
     try {
 
-      await requestGoogleToken(
-        ''
-      );
+      await requestGoogleToken('');
 
       return await runScript(
         functionName,
@@ -700,9 +618,7 @@ async function runScript(
 
     }
 
-    throw new Error(
-      msg
-    );
+    throw new Error(msg);
 
   }
 
@@ -719,9 +635,7 @@ async function runScript(
 
 async function startApp() {
 
-  setLoading(
-    true
-  );
+  setLoading(true);
 
   try {
 
@@ -762,15 +676,11 @@ async function startApp() {
 
   } catch (e) {
 
-    handleError(
-      e
-    );
+    handleError(e);
 
   } finally {
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
   }
 
@@ -786,17 +696,13 @@ function restoreCachedUiSettings() {
         'academyUiSettings'
       );
 
-    if (
-      cached
-    ) {
+    if (cached) {
 
       appSettings =
         Object.assign(
           {},
           appSettings,
-          JSON.parse(
-            cached
-          )
+          JSON.parse(cached)
         );
 
       applySettingsToUi();
@@ -828,14 +734,9 @@ function cacheUiSettings() {
    地方
    ======================================== */
 
-function getRegionName(
-  pref
-) {
+function getRegionName(pref) {
 
-  if (
-    pref ===
-    '北海道'
-  ) {
+  if (pref === '北海道') {
     return '北海道';
   }
 
@@ -847,9 +748,7 @@ function getRegionName(
       '秋田県',
       '山形県',
       '福島県'
-    ].indexOf(
-      pref
-    ) !== -1
+    ].indexOf(pref) !== -1
   ) {
     return '東北';
   }
@@ -863,9 +762,7 @@ function getRegionName(
       '千葉県',
       '東京都',
       '神奈川県'
-    ].indexOf(
-      pref
-    ) !== -1
+    ].indexOf(pref) !== -1
   ) {
     return '関東';
   }
@@ -881,9 +778,7 @@ function getRegionName(
       '岐阜県',
       '静岡県',
       '愛知県'
-    ].indexOf(
-      pref
-    ) !== -1
+    ].indexOf(pref) !== -1
   ) {
     return '中部';
   }
@@ -897,9 +792,7 @@ function getRegionName(
       '兵庫県',
       '奈良県',
       '和歌山県'
-    ].indexOf(
-      pref
-    ) !== -1
+    ].indexOf(pref) !== -1
   ) {
     return '近畿';
   }
@@ -911,9 +804,7 @@ function getRegionName(
       '岡山県',
       '広島県',
       '山口県'
-    ].indexOf(
-      pref
-    ) !== -1
+    ].indexOf(pref) !== -1
   ) {
     return '中国';
   }
@@ -924,9 +815,7 @@ function getRegionName(
       '香川県',
       '愛媛県',
       '高知県'
-    ].indexOf(
-      pref
-    ) !== -1
+    ].indexOf(pref) !== -1
   ) {
     return '四国';
   }
@@ -940,17 +829,12 @@ function getRegionName(
       '大分県',
       '宮崎県',
       '鹿児島県'
-    ].indexOf(
-      pref
-    ) !== -1
+    ].indexOf(pref) !== -1
   ) {
     return '九州';
   }
 
-  if (
-    pref ===
-    '沖縄県'
-  ) {
+  if (pref === '沖縄県') {
     return '沖縄';
   }
 
@@ -959,87 +843,45 @@ function getRegionName(
 }
 
 
-function getRegionBaseColor(
-  region
-) {
+function getRegionBaseColor(region) {
 
   var colors = {
 
-    '北海道':
-      '#D9ECF8',
-
-    '東北':
-      '#D8EFF4',
-
-    '関東':
-      '#FFF1C9',
-
-    '中部':
-      '#DDEFD8',
-
-    '近畿':
-      '#FBE4C9',
-
-    '中国':
-      '#F9DCD6',
-
-    '四国':
-      '#F5D9E8',
-
-    '九州':
-      '#E9DDF3',
-
-    '沖縄':
-      '#E5D8F0'
+    '北海道': '#D9ECF8',
+    '東北': '#D8EFF4',
+    '関東': '#FFF1C9',
+    '中部': '#DDEFD8',
+    '近畿': '#FBE4C9',
+    '中国': '#F9DCD6',
+    '四国': '#F5D9E8',
+    '九州': '#E9DDF3',
+    '沖縄': '#E5D8F0'
 
   };
 
-  return colors[
-    region
-  ] ||
+  return colors[region] ||
     '#EEF1F3';
 
 }
 
 
-function getRegionTeacherColor(
-  region
-) {
+function getRegionTeacherColor(region) {
 
   var colors = {
 
-    '北海道':
-      '#8DC8EB',
-
-    '東北':
-      '#8FD0DB',
-
-    '関東':
-      '#F4CF70',
-
-    '中部':
-      '#9FCD91',
-
-    '近畿':
-      '#F2B978',
-
-    '中国':
-      '#EF9E91',
-
-    '四国':
-      '#DB94BB',
-
-    '九州':
-      '#B697D2',
-
-    '沖縄':
-      '#AE8BCB'
+    '北海道': '#8DC8EB',
+    '東北': '#8FD0DB',
+    '関東': '#F4CF70',
+    '中部': '#9FCD91',
+    '近畿': '#F2B978',
+    '中国': '#EF9E91',
+    '四国': '#DB94BB',
+    '九州': '#B697D2',
+    '沖縄': '#AE8BCB'
 
   };
 
-  return colors[
-    region
-  ] ||
+  return colors[region] ||
     '#FF9A8B';
 
 }
@@ -1065,17 +907,14 @@ function renderJapanMap() {
       '<div class="empty">日本地図を読み込めませんでした。</div>';
 
     return;
-
   }
 
-  el.innerHTML =
-    '';
+  el.innerHTML = '';
 
   var counts =
     getPrefCounts();
 
-  var areas =
-    [];
+  var areas = [];
 
   for (
     var i = 0;
@@ -1091,9 +930,7 @@ function renderJapanMap() {
       0;
 
     var region =
-      getRegionName(
-        pref
-      );
+      getRegionName(pref);
 
     var color =
       getRegionBaseColor(
@@ -1105,9 +942,7 @@ function renderJapanMap() {
         region
       );
 
-    if (
-      count > 0
-    ) {
+    if (count > 0) {
 
       color =
         getRegionTeacherColor(
@@ -1275,14 +1110,10 @@ async function loadAddressMaster() {
         'academyAddressMasterV1'
       );
 
-    if (
-      cached
-    ) {
+    if (cached) {
 
       addressMaster =
-        JSON.parse(
-          cached
-        );
+        JSON.parse(cached);
 
     }
 
@@ -1296,15 +1127,12 @@ async function loadAddressMaster() {
         'https://geolonia.github.io/japanese-addresses/api/ja.json',
 
         {
-          cache:
-            'force-cache'
+          cache: 'force-cache'
         }
 
       );
 
-    if (
-      response.ok
-    ) {
+    if (response.ok) {
 
       addressMaster =
         await response.json();
@@ -1334,15 +1162,10 @@ async function loadAddressMaster() {
 function renderAll() {
 
   renderStats();
-
   renderPrefList();
-
   renderMapTeacherPreview();
-
   renderFullTeacherList();
-
   renderSearchResults();
-
   updateSelectedPrefHeading();
 
 }
@@ -1370,8 +1193,7 @@ function renderStats() {
 
 function getPrefCounts() {
 
-  var result =
-    {};
+  var result = {};
 
   for (
     var i = 0;
@@ -1382,12 +1204,8 @@ function getPrefCounts() {
     var pref =
       teachers[i].prefecture;
 
-    if (
-      !pref
-    ) {
-
+    if (!pref) {
       continue;
-
     }
 
     result[pref] =
@@ -1406,8 +1224,7 @@ function getPrefCounts() {
 
 function getUnknownCount() {
 
-  var count =
-    0;
+  var count = 0;
 
   for (
     var i = 0;
@@ -1461,9 +1278,7 @@ function updateSelectedPrefHeading() {
 
   }
 
-  if (
-    selectedPrefecture
-  ) {
+  if (selectedPrefecture) {
 
     var count =
       getPrefCounts()[
@@ -1495,27 +1310,22 @@ function updateSelectedPrefHeading() {
 }
 
 
-function setPrefMode(
-  mode
-) {
+function setPrefMode(mode) {
 
-  prefMode =
-    mode;
+  prefMode = mode;
 
   document.getElementById(
     'activePrefBtn'
   ).classList.toggle(
     'active',
-    mode ===
-      'active'
+    mode === 'active'
   );
 
   document.getElementById(
     'allPrefBtn'
   ).classList.toggle(
     'active',
-    mode ===
-      'all'
+    mode === 'all'
   );
 
   renderPrefList();
@@ -1544,8 +1354,7 @@ function renderPrefList() {
     '沖縄'
   ];
 
-  var grouped =
-    {};
+  var grouped = {};
 
   for (
     var r = 0;
@@ -1555,8 +1364,7 @@ function renderPrefList() {
 
     grouped[
       regionOrder[r]
-    ] =
-      [];
+    ] = [];
 
   }
 
@@ -1574,36 +1382,20 @@ function renderPrefList() {
       0;
 
     if (
-      prefMode ===
-        'active' &&
+      prefMode === 'active' &&
       count === 0
     ) {
-
       continue;
-
     }
 
     var region =
-      getRegionName(
-        pref
-      );
+      getRegionName(pref);
 
-    if (
-      !grouped[
-        region
-      ]
-    ) {
-
-      grouped[
-        region
-      ] =
-        [];
-
+    if (!grouped[region]) {
+      grouped[region] = [];
     }
 
-    grouped[
-      region
-    ].push({
+    grouped[region].push({
 
       prefecture:
         pref,
@@ -1615,8 +1407,7 @@ function renderPrefList() {
 
   }
 
-  var html =
-    '';
+  var html = '';
 
   for (
     var regionIndex = 0;
@@ -1636,12 +1427,9 @@ function renderPrefList() {
       [];
 
     if (
-      regionPrefs.length ===
-      0
+      regionPrefs.length === 0
     ) {
-
       continue;
-
     }
 
     html +=
@@ -1747,9 +1535,7 @@ function renderPrefList() {
   var unknown =
     getUnknownCount();
 
-  if (
-    unknown > 0
-  ) {
+  if (unknown > 0) {
 
     html +=
 
@@ -1792,22 +1578,14 @@ function renderPrefList() {
 }
 
 
-function selectPrefecture(
-  pref
-) {
+function selectPrefecture(pref) {
 
-  selectedPrefecture =
-    pref;
-
-  selectedTeacherId =
-    '';
+  selectedPrefecture = pref;
+  selectedTeacherId = '';
 
   updateSelectedPrefHeading();
-
   renderPrefList();
-
   renderMapTeacherPreview();
-
   renderJapanMap();
 
 }
@@ -1822,11 +1600,8 @@ function selectUnknown() {
     '';
 
   updateSelectedPrefHeading();
-
   renderPrefList();
-
   renderMapTeacherPreview();
-
   renderJapanMap();
 
 }
@@ -1841,16 +1616,11 @@ function teacherMatches(
   query
 ) {
 
-  if (
-    !query
-  ) {
-
+  if (!query) {
     return true;
-
   }
 
-  var linkText =
-    '';
+  var linkText = '';
 
   var links =
     teacher.links ||
@@ -1890,44 +1660,29 @@ function teacherMatches(
   var text = [
 
     teacher.name,
-
     teacher.kana,
-
     teacher.nickname,
-
     teacher.salonName,
-
     teacher.salonKana,
-
     teacher.prefecture,
-
     teacher.city,
-
     teacher.address1,
-
     teacher.address2,
-
     teacher.memo,
-
     linkText
 
   ]
-    .join(
-      ' '
-    )
+    .join(' ')
     .toLowerCase();
 
   return text.indexOf(
     query.toLowerCase()
-  ) !==
-    -1;
+  ) !== -1;
 
 }
 
 
-function teacherCard(
-  teacher
-) {
+function teacherCard(teacher) {
 
   var location =
 
@@ -1936,13 +1691,9 @@ function teacherCard(
       teacher.city
     ]
 
-      .filter(
-        Boolean
-      )
+      .filter(Boolean)
 
-      .join(
-        ' '
-      );
+      .join(' ');
 
   return (
 
@@ -2010,8 +1761,7 @@ function renderMapTeacherPreview() {
       ''
     ).trim();
 
-  var list =
-    [];
+  var list = [];
 
   for (
     var i = 0;
@@ -2027,9 +1777,7 @@ function renderMapTeacherPreview() {
         '__UNKNOWN__' &&
       teacher.prefecture
     ) {
-
       continue;
-
     }
 
     if (
@@ -2039,9 +1787,7 @@ function renderMapTeacherPreview() {
       teacher.prefecture !==
         selectedPrefecture
     ) {
-
       continue;
-
     }
 
     if (
@@ -2050,9 +1796,7 @@ function renderMapTeacherPreview() {
         query
       )
     ) {
-
       continue;
-
     }
 
     list.push(
@@ -2097,8 +1841,7 @@ function renderMapTeacherPreview() {
     '名</div>';
 
   if (
-    list.length ===
-    0
+    list.length === 0
   ) {
 
     html +=
@@ -2152,8 +1895,7 @@ function renderFullTeacherList() {
       ''
     ).trim();
 
-  var html =
-    '';
+  var html = '';
 
   for (
     var i = 0;
@@ -2206,9 +1948,7 @@ function renderSearchResults() {
       ''
     ).trim();
 
-  if (
-    !query
-  ) {
+  if (!query) {
 
     document.getElementById(
       'searchResults'
@@ -2216,11 +1956,9 @@ function renderSearchResults() {
       '<div class="empty">検索語を入力してください。</div>';
 
     return;
-
   }
 
-  var html =
-    '';
+  var html = '';
 
   for (
     var i = 0;
@@ -2267,9 +2005,7 @@ function renderSearchResults() {
    ページ
    ======================================== */
 
-function showPage(
-  name
-) {
+function showPage(name) {
 
   var pages = {
 
@@ -2300,8 +2036,7 @@ function showPage(
 
       'active',
 
-      key ===
-      name
+      key === name
 
     );
 
@@ -2311,59 +2046,40 @@ function showPage(
     'navMap'
   ).classList.toggle(
     'active',
-    name ===
-      'map'
+    name === 'map'
   );
 
   document.getElementById(
     'navList'
   ).classList.toggle(
     'active',
-    name ===
-      'list'
+    name === 'list'
   );
 
   document.getElementById(
     'navSearch'
   ).classList.toggle(
     'active',
-    name ===
-      'search'
+    name === 'search'
   );
 
   document.getElementById(
     'navSettings'
   ).classList.toggle(
     'active',
-    name ===
-      'settings'
+    name === 'settings'
   );
 
-  if (
-    name ===
-    'list'
-  ) {
-
+  if (name === 'list') {
     renderFullTeacherList();
-
   }
 
-  if (
-    name ===
-    'search'
-  ) {
-
+  if (name === 'search') {
     renderSearchResults();
-
   }
 
-  if (
-    name ===
-    'settings'
-  ) {
-
+  if (name === 'settings') {
     fillSettingsForm();
-
   }
 
   window.scrollTo(
@@ -2378,9 +2094,7 @@ function showPage(
    先生 Detail
    ======================================== */
 
-function findTeacher(
-  id
-) {
+function findTeacher(id) {
 
   for (
     var i = 0;
@@ -2404,21 +2118,13 @@ function findTeacher(
 }
 
 
-function openTeacherDetail(
-  id
-) {
+function openTeacherDetail(id) {
 
   var teacher =
-    findTeacher(
-      id
-    );
+    findTeacher(id);
 
-  if (
-    !teacher
-  ) {
-
+  if (!teacher) {
     return;
-
   }
 
   selectedTeacherId =
@@ -2448,16 +2154,11 @@ function openTeacherDetail(
 }
 
 
-function birthdayText(
-  obj
-) {
+function birthdayText(obj) {
 
-  var result =
-    '';
+  var result = '';
 
-  if (
-    obj.birthYear
-  ) {
+  if (obj.birthYear) {
 
     result +=
       obj.birthYear +
@@ -2465,9 +2166,7 @@ function birthdayText(
 
   }
 
-  if (
-    obj.birthMonth
-  ) {
+  if (obj.birthMonth) {
 
     result +=
       obj.birthMonth +
@@ -2475,9 +2174,7 @@ function birthdayText(
 
   }
 
-  if (
-    obj.birthDay
-  ) {
+  if (obj.birthDay) {
 
     result +=
       obj.birthDay +
@@ -2502,7 +2199,6 @@ function detailRow(
   ) {
 
     return '';
-
   }
 
   return (
@@ -2511,18 +2207,14 @@ function detailRow(
 
     '<div class="label">' +
 
-    escapeHtml(
-      label
-    ) +
+    escapeHtml(label) +
 
     '</div>' +
 
     '<div class="value">' +
 
     escapeHtml(
-      String(
-        value
-      )
+      String(value)
     ) +
 
     '</div>' +
@@ -2723,8 +2415,7 @@ function renderTeacherDetail(
     '</div>';
 
   if (
-    interactions.length ===
-    0
+    interactions.length === 0
   ) {
 
     html +=
@@ -2782,8 +2473,7 @@ function renderTeacherDetail(
     '</div>';
 
   if (
-    children.length ===
-    0
+    children.length === 0
   ) {
 
     html +=
@@ -3033,12 +2723,8 @@ function findInteraction(
       selectedTeacherId
     );
 
-  if (
-    !teacher
-  ) {
-
+  if (!teacher) {
     return null;
-
   }
 
   var interactions =
@@ -3082,7 +2768,6 @@ function openInteractionForm(
   ) {
 
     return;
-
   }
 
   setValue(
@@ -3227,7 +2912,6 @@ async function saveInteractionForm() {
       -1;
 
     return;
-
   }
 
   if (
@@ -3235,15 +2919,12 @@ async function saveInteractionForm() {
   ) {
 
     return;
-
   }
 
   payload.teacherId =
     selectedTeacherId;
 
-  setLoading(
-    true
-  );
+  setLoading(true);
 
   try {
 
@@ -3262,15 +2943,11 @@ async function saveInteractionForm() {
 
   } catch (e) {
 
-    handleError(
-      e
-    );
+    handleError(e);
 
   } finally {
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
   }
 
@@ -3289,12 +2966,9 @@ async function deleteInteractionAction(
   ) {
 
     return;
-
   }
 
-  setLoading(
-    true
-  );
+  setLoading(true);
 
   try {
 
@@ -3311,15 +2985,11 @@ async function deleteInteractionAction(
 
   } catch (e) {
 
-    handleError(
-      e
-    );
+    handleError(e);
 
   } finally {
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
   }
 
@@ -3553,15 +3223,33 @@ function openTeacherForm(
 
   }
 
-  document.getElementById(
-    'placeNameLabel'
-  ).textContent =
-    placeLabel();
+  var placeNameLabelEl =
+    document.getElementById(
+      'placeNameLabel'
+    );
 
-  document.getElementById(
-    'placeKanaLabel'
-  ).textContent =
-    placeKanaLabel();
+  if (
+    placeNameLabelEl
+  ) {
+
+    placeNameLabelEl.textContent =
+      placeLabel();
+
+  }
+
+  var placeKanaLabelEl =
+    document.getElementById(
+      'placeKanaLabel'
+    );
+
+  if (
+    placeKanaLabelEl
+  ) {
+
+    placeKanaLabelEl.textContent =
+      placeKanaLabel();
+
+  }
 
   renderLinksEditor();
 
@@ -3751,9 +3439,7 @@ async function saveTeacherForm() {
 
   };
 
-  setLoading(
-    true
-  );
+  setLoading(true);
 
   try {
 
@@ -3783,15 +3469,11 @@ async function saveTeacherForm() {
 
   } catch (e) {
 
-    handleError(
-      e
-    );
+    handleError(e);
 
   } finally {
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
   }
 
@@ -3850,12 +3532,8 @@ function renderTeacherFormInteractions() {
       'interactionEditArea'
     );
 
-  if (
-    !area
-  ) {
-
+  if (!area) {
     return;
-
   }
 
   var html =
@@ -4085,7 +3763,6 @@ async function removeTeacherFormInteraction(
   ) {
 
     return;
-
   }
 
   if (
@@ -4120,12 +3797,8 @@ function renderLinksEditor() {
       'linkEditArea'
     );
 
-  if (
-    !area
-  ) {
-
+  if (!area) {
     return;
-
   }
 
   var html =
@@ -4149,8 +3822,7 @@ function renderLinksEditor() {
     '</div>';
 
   if (
-    pendingLinks.length ===
-    0
+    pendingLinks.length === 0
   ) {
 
     html +=
@@ -4340,11 +4012,15 @@ function closeLinkForm() {
 }
 
 
+/* SNSごとに入力案内を切り替える */
+
 function updateLinkInputGuide() {
 
   var type =
-    valueOf(
-      'linkType'
+    normalizeLinkType(
+      valueOf(
+        'linkType'
+      )
     );
 
   var label =
@@ -4363,33 +4039,132 @@ function updateLinkInputGuide() {
     );
 
   if (
-    normalizeLinkType(
-      type
-    ) ===
-    'instagram'
+    type === 'instagram'
   ) {
 
     label.textContent =
       'アカウント名またはURL';
 
     input.placeholder =
-  '例：ユーザー名 / @ユーザー名 / Instagram URL';
+      '例：ユーザー名 / @ユーザー名 / Instagram URL';
 
     note.textContent =
-      'Instagramはアカウント名だけでも登録できます。';
+      'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
-  } else {
+    return;
+  }
+
+
+  if (
+    type === 'facebook'
+  ) {
 
     label.textContent =
-      'URL';
+      'ユーザー名・ページ名またはURL';
 
     input.placeholder =
-      'https://...';
+      '例：ユーザー名 / Facebook URL';
 
     note.textContent =
-      '';
+      'ユーザー名・ページ名・URLのどれでも登録できます。';
 
+    return;
   }
+
+
+  if (
+    type === 'x'
+  ) {
+
+    label.textContent =
+      'アカウント名またはURL';
+
+    input.placeholder =
+      '例：ユーザー名 / @ユーザー名 / X URL';
+
+    note.textContent =
+      'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
+
+    return;
+  }
+
+
+  if (
+    type === 'threads'
+  ) {
+
+    label.textContent =
+      'アカウント名またはURL';
+
+    input.placeholder =
+      '例：ユーザー名 / @ユーザー名 / Threads URL';
+
+    note.textContent =
+      'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
+
+    return;
+  }
+
+
+  if (
+    type === 'tiktok'
+  ) {
+
+    label.textContent =
+      'アカウント名またはURL';
+
+    input.placeholder =
+      '例：ユーザー名 / @ユーザー名 / TikTok URL';
+
+    note.textContent =
+      'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
+
+    return;
+  }
+
+
+  if (
+    type === 'youtube'
+  ) {
+
+    label.textContent =
+      'ハンドル名またはURL';
+
+    input.placeholder =
+      '例：@ハンドル名 / YouTube URL';
+
+    note.textContent =
+      '@ハンドル名またはチャンネルURLを登録できます。';
+
+    return;
+  }
+
+
+  if (
+    type === 'line'
+  ) {
+
+    label.textContent =
+      'LINE公式アカウントIDまたはURL';
+
+    input.placeholder =
+      '例：@アカウントID / LINE URL';
+
+    note.textContent =
+      'LINE公式アカウントIDまたはURLを登録できます。';
+
+    return;
+  }
+
+
+  label.textContent =
+    'URL';
+
+  input.placeholder =
+    'https://...';
+
+  note.textContent =
+    'URLを入力してください。';
 
 }
 
@@ -4462,7 +4237,6 @@ async function removeTeacherFormLink(
   ) {
 
     return;
-
   }
 
   if (
@@ -4547,58 +4321,138 @@ function renderDetailLink(
 }
 
 
+/* 登録値を画面上で見やすく表示 */
+
 function displayLinkValue(
   link
 ) {
 
-  if (
+  var type =
     normalizeLinkType(
       link.type
-    ) ===
-    'instagram'
-  ) {
+    );
 
-    var account =
-      instagramAccount(
-        link.value ||
-        ''
-      );
+  var value =
+    String(
+      link.value ||
+      ''
+    ).trim();
 
-    return account
-      ? '@' +
-        account
-      : (
-          link.value ||
-          ''
-        );
-
+  if (!value) {
+    return '';
   }
 
-  return link.value ||
-    '';
+  if (
+    isHttpUrl(value)
+  ) {
+
+    return value;
+  }
+
+  if (
+    type === 'facebook'
+  ) {
+
+    return stripLeadingAt(
+      value
+    );
+  }
+
+  if (
+    type === 'line'
+  ) {
+
+    return value.charAt(0) === '@'
+      ? value
+      : '@' + value;
+  }
+
+  if (
+    isAccountBasedSocial(
+      type
+    )
+  ) {
+
+    return '@' +
+      stripLeadingAt(
+        value
+      );
+  }
+
+  return value;
 
 }
 
+
+/* SNS種別を統一 */
 
 function normalizeLinkType(
   type
 ) {
 
-  return String(
-    type ||
-    ''
-  )
-    .trim()
-    .toLowerCase()
-    .replace(
-      /\s+/g,
+  var value =
+    String(
+      type ||
       ''
-    );
+    )
+      .trim()
+      .toLowerCase()
+      .replace(
+        /\s+/g,
+        ''
+      );
+
+  if (
+    value === 'twitter'
+  ) {
+    return 'x';
+  }
+
+  if (
+    value === 'tik tok'
+  ) {
+    return 'tiktok';
+  }
+
+  return value;
 
 }
 
 
-function instagramAccount(
+function isAccountBasedSocial(
+  type
+) {
+
+  return [
+    'instagram',
+    'facebook',
+    'x',
+    'threads',
+    'tiktok',
+    'youtube',
+    'line'
+  ].indexOf(
+    type
+  ) !== -1;
+
+}
+
+
+function isHttpUrl(
+  value
+) {
+
+  return /^https?:\/\//i.test(
+    String(
+      value ||
+      ''
+    ).trim()
+  );
+
+}
+
+
+function stripLeadingAt(
   value
 ) {
 
@@ -4607,29 +4461,295 @@ function instagramAccount(
     ''
   )
     .trim()
-
     .replace(
-      /^https?:\/\/(www\.)?instagram\.com\//i,
-      ''
-    )
-
-    .replace(
-      /^@/,
-      ''
-    )
-
-    .replace(
-      /[/?#].*$/,
-      ''
-    )
-
-    .replace(
-      /\/$/,
+      /^@+/,
       ''
     );
 
 }
 
+
+/* SNS URLからアカウント名を拾える場合は拾う */
+
+function extractAccountFromSocialUrl(
+  type,
+  value
+) {
+
+  var v =
+    String(
+      value ||
+      ''
+    ).trim();
+
+  if (
+    !isHttpUrl(v)
+  ) {
+
+    return stripLeadingAt(v);
+  }
+
+  try {
+
+    var url =
+      new URL(v);
+
+    var path =
+      url.pathname
+        .replace(
+          /^\/+/,
+          ''
+        )
+        .replace(
+          /\/+$/,
+          ''
+        );
+
+    if (
+      type === 'instagram'
+    ) {
+
+      return path
+        .split('/')[0]
+        .replace(
+          /^@/,
+          ''
+        );
+
+    }
+
+    if (
+      type === 'facebook'
+    ) {
+
+      if (
+        path === 'profile.php'
+      ) {
+
+        return v;
+      }
+
+      return path
+        .split('/')[0]
+        .replace(
+          /^@/,
+          ''
+        );
+
+    }
+
+    if (
+      type === 'x'
+    ) {
+
+      return path
+        .split('/')[0]
+        .replace(
+          /^@/,
+          ''
+        );
+
+    }
+
+    if (
+      type === 'threads'
+    ) {
+
+      return path
+        .split('/')[0]
+        .replace(
+          /^@/,
+          ''
+        );
+
+    }
+
+    if (
+      type === 'tiktok'
+    ) {
+
+      return path
+        .split('/')[0]
+        .replace(
+          /^@/,
+          ''
+        );
+
+    }
+
+    if (
+      type === 'youtube'
+    ) {
+
+      var first =
+        path.split('/')[0];
+
+      if (
+        first &&
+        first.charAt(0) === '@'
+      ) {
+
+        return first.replace(
+          /^@/,
+          ''
+        );
+
+      }
+
+      return v;
+
+    }
+
+    if (
+      type === 'line'
+    ) {
+
+      return path
+        .split('/')
+        .pop()
+        .replace(
+          /^@/,
+          ''
+        );
+
+    }
+
+  } catch (e) {}
+
+  return v;
+
+}
+
+
+/* SNSアカウント名 → 開けるURLへ変換 */
+
+function socialUrlFromValue(
+  type,
+  value
+) {
+
+  var v =
+    String(
+      value ||
+      ''
+    ).trim();
+
+  if (!v) {
+    return '';
+  }
+
+  if (
+    isHttpUrl(v)
+  ) {
+
+    return v;
+  }
+
+  var account =
+    stripLeadingAt(v);
+
+  if (!account) {
+    return '';
+  }
+
+  if (
+    type === 'instagram'
+  ) {
+
+    return (
+      'https://www.instagram.com/' +
+      encodeURIComponent(
+        account
+      ) +
+      '/'
+    );
+
+  }
+
+  if (
+    type === 'facebook'
+  ) {
+
+    return (
+      'https://www.facebook.com/' +
+      encodeURIComponent(
+        account
+      )
+    );
+
+  }
+
+  if (
+    type === 'x'
+  ) {
+
+    return (
+      'https://x.com/' +
+      encodeURIComponent(
+        account
+      )
+    );
+
+  }
+
+  if (
+    type === 'threads'
+  ) {
+
+    return (
+      'https://www.threads.net/@' +
+      encodeURIComponent(
+        account
+      )
+    );
+
+  }
+
+  if (
+    type === 'tiktok'
+  ) {
+
+    return (
+      'https://www.tiktok.com/@' +
+      encodeURIComponent(
+        account
+      )
+    );
+
+  }
+
+  if (
+    type === 'youtube'
+  ) {
+
+    return (
+      'https://www.youtube.com/@' +
+      encodeURIComponent(
+        account
+      )
+    );
+
+  }
+
+  if (
+    type === 'line'
+  ) {
+
+    return (
+      'https://page.line.me/' +
+      encodeURIComponent(
+        account
+      )
+    );
+
+  }
+
+  return '';
+
+}
+
+
+/* Instagram旧列との互換 */
 
 function firstInstagramAccountFromPendingLinks() {
 
@@ -4646,10 +4766,25 @@ function firstInstagramAccountFromPendingLinks() {
       'instagram'
     ) {
 
-      return instagramAccount(
+      var value =
         pendingLinks[i].value ||
-        ''
-      );
+        '';
+
+      var account =
+        extractAccountFromSocialUrl(
+          'instagram',
+          value
+        );
+
+      if (
+        account &&
+        !isHttpUrl(account)
+      ) {
+
+        return account;
+      }
+
+      return '';
 
     }
 
@@ -4660,54 +4795,35 @@ function firstInstagramAccountFromPendingLinks() {
 }
 
 
+/* リンクを開く */
+
 function openLink(
   type,
   value
 ) {
 
-  if (
-    !value
-  ) {
-
+  if (!value) {
     return;
-
   }
-
-  var url =
-    '';
 
   var normalizedType =
     normalizeLinkType(
       type
     );
 
+  var url = '';
+
   if (
-    normalizedType ===
-    'instagram'
+    isAccountBasedSocial(
+      normalizedType
+    )
   ) {
 
-    var account =
-      instagramAccount(
+    url =
+      socialUrlFromValue(
+        normalizedType,
         value
       );
-
-    if (
-      !account
-    ) {
-
-      return;
-
-    }
-
-    url =
-
-      'https://www.instagram.com/' +
-
-      encodeURIComponent(
-        account
-      ) +
-
-      '/';
 
   } else {
 
@@ -4728,6 +4844,10 @@ function openLink(
 
     }
 
+  }
+
+  if (!url) {
+    return;
   }
 
   window.open(
@@ -5293,9 +5413,7 @@ async function refreshAfterSave(
       teacherId
     );
 
-  if (
-    teacher
-  ) {
+  if (teacher) {
 
     openTeacherDetail(
       teacherId
@@ -5320,14 +5438,11 @@ async function removeChildRow(
       'data-child-id'
     );
 
-  if (
-    !childId
-  ) {
+  if (!childId) {
 
     row.remove();
 
     return;
-
   }
 
   if (
@@ -5338,12 +5453,9 @@ async function removeChildRow(
   ) {
 
     return;
-
   }
 
-  setLoading(
-    true
-  );
+  setLoading(true);
 
   try {
 
@@ -5358,15 +5470,11 @@ async function removeChildRow(
 
   } catch (e) {
 
-    handleError(
-      e
-    );
+    handleError(e);
 
   } finally {
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
   }
 
@@ -5390,12 +5498,9 @@ async function deleteTeacherAction(
   ) {
 
     return;
-
   }
 
-  setLoading(
-    true
-  );
+  setLoading(true);
 
   try {
 
@@ -5414,8 +5519,7 @@ async function deleteTeacherAction(
       ) ||
       [];
 
-    selectedTeacherId =
-      '';
+    selectedTeacherId = '';
 
     renderAll();
 
@@ -5427,15 +5531,11 @@ async function deleteTeacherAction(
 
   } catch (e) {
 
-    handleError(
-      e
-    );
+    handleError(e);
 
   } finally {
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
   }
 
@@ -5458,8 +5558,7 @@ function showPrefectureResults() {
       'prefResults'
     );
 
-  box.innerHTML =
-    '';
+  box.innerHTML = '';
 
   for (
     var i = 0;
@@ -5472,14 +5571,10 @@ function showPrefectureResults() {
 
     if (
       query &&
-      pref.indexOf(
-        query
-      ) ===
-        -1
+      pref.indexOf(query) === -1
     ) {
 
       continue;
-
     }
 
     var item =
@@ -5511,9 +5606,7 @@ function showPrefectureResults() {
 }
 
 
-function makePrefSelector(
-  pref
-) {
+function makePrefSelector(pref) {
 
   return function() {
 
@@ -5550,8 +5643,7 @@ function showCityResults() {
       'prefecture'
     );
 
-  var results =
-    [];
+  var results = [];
 
   for (
     var pref in addressMaster
@@ -5562,19 +5654,14 @@ function showCityResults() {
         pref
       )
     ) {
-
       continue;
-
     }
 
     if (
       selectedPref &&
-      pref !==
-        selectedPref
+      pref !== selectedPref
     ) {
-
       continue;
-
     }
 
     var cities =
@@ -5592,14 +5679,9 @@ function showCityResults() {
 
       if (
         query &&
-        city.indexOf(
-          query
-        ) ===
-          -1
+        city.indexOf(query) === -1
       ) {
-
         continue;
-
       }
 
       results.push({
@@ -5613,23 +5695,17 @@ function showCityResults() {
       });
 
       if (
-        results.length >=
-        100
+        results.length >= 100
       ) {
-
         break;
-
       }
 
     }
 
     if (
-      results.length >=
-      100
+      results.length >= 100
     ) {
-
       break;
-
     }
 
   }
@@ -5639,8 +5715,7 @@ function showCityResults() {
       'cityResults'
     );
 
-  box.innerHTML =
-    '';
+  box.innerHTML = '';
 
   for (
     var j = 0;
@@ -5685,9 +5760,7 @@ function showCityResults() {
 }
 
 
-function makeCitySelector(
-  row
-) {
+function makeCitySelector(row) {
 
   return function() {
 
@@ -5765,12 +5838,8 @@ function openGoogleMap(
   address
 ) {
 
-  if (
-    !address
-  ) {
-
+  if (!address) {
     return;
-
   }
 
   window.open(
@@ -5868,9 +5937,7 @@ function showSettingSuggestions(
     return;
   }
 
-
   hideSettingSuggestions();
-
 
   var query =
     String(
@@ -5878,24 +5945,17 @@ function showSettingSuggestions(
       ''
     ).trim();
 
-
   var candidates =
     settingCandidates[
       candidateType
     ] ||
     [];
 
-
-  box.innerHTML =
-    '';
-
+  box.innerHTML = '';
 
   var matched;
 
-
-  if (
-    showAll
-  ) {
+  if (showAll) {
 
     matched =
       candidates.slice();
@@ -5906,22 +5966,18 @@ function showSettingSuggestions(
       candidates.filter(
         function(candidate) {
 
-          if (
-            !query
-          ) {
+          if (!query) {
             return true;
           }
 
           return candidate.indexOf(
             query
-          ) !==
-            -1;
+          ) !== -1;
 
         }
       );
 
   }
-
 
   matched.forEach(
     function(candidate) {
@@ -5940,12 +5996,10 @@ function showSettingSuggestions(
       item.textContent =
         candidate;
 
-
       item.onclick =
         function(event) {
 
           event.preventDefault();
-
           event.stopPropagation();
 
           input.value =
@@ -5955,7 +6009,6 @@ function showSettingSuggestions(
 
         };
 
-
       box.appendChild(
         item
       );
@@ -5963,10 +6016,8 @@ function showSettingSuggestions(
     }
   );
 
-
   if (
-    matched.length ===
-    0
+    matched.length === 0
   ) {
 
     var note =
@@ -5985,7 +6036,6 @@ function showSettingSuggestions(
     );
 
   }
-
 
   box.classList.add(
     'show'
@@ -6112,9 +6162,7 @@ async function saveSettingsForm() {
 
   };
 
-  setLoading(
-    true
-  );
+  setLoading(true);
 
   try {
 
@@ -6140,15 +6188,11 @@ async function saveSettingsForm() {
 
   } catch (e) {
 
-    handleError(
-      e
-    );
+    handleError(e);
 
   } finally {
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
   }
 
@@ -6168,9 +6212,7 @@ function applySettingsToUi() {
       'brandName'
     );
 
-  if (
-    brandName
-  ) {
+  if (brandName) {
 
     brandName.textContent =
       app;
@@ -6182,9 +6224,7 @@ function applySettingsToUi() {
       'brandSub'
     );
 
-  if (
-    brandSub
-  ) {
+  if (brandSub) {
 
     brandSub.textContent =
 
@@ -6201,9 +6241,7 @@ function applySettingsToUi() {
       'authAppName'
     );
 
-  if (
-    authAppName
-  ) {
+  if (authAppName) {
 
     authAppName.textContent =
       app;
@@ -6215,9 +6253,7 @@ function applySettingsToUi() {
       'authDescription'
     );
 
-  if (
-    authDescription
-  ) {
+  if (authDescription) {
 
     authDescription.textContent =
 
@@ -6237,9 +6273,7 @@ function applySettingsToUi() {
       'appleAppTitle'
     );
 
-  if (
-    appleAppTitle
-  ) {
+  if (appleAppTitle) {
 
     appleAppTitle.setAttribute(
       'content',
@@ -6253,9 +6287,7 @@ function applySettingsToUi() {
       'listPageTitle'
     );
 
-  if (
-    listPageTitle
-  ) {
+  if (listPageTitle) {
 
     listPageTitle.textContent =
 
@@ -6270,9 +6302,7 @@ function applySettingsToUi() {
       'navListText'
     );
 
-  if (
-    navListText
-  ) {
+  if (navListText) {
 
     navListText.textContent =
 
@@ -6287,9 +6317,7 @@ function applySettingsToUi() {
       'mapLegendActive'
     );
 
-  if (
-    mapLegendActive
-  ) {
+  if (mapLegendActive) {
 
     mapLegendActive.textContent =
 
@@ -6304,9 +6332,7 @@ function applySettingsToUi() {
       'activePrefBtn'
     );
 
-  if (
-    activePrefBtn
-  ) {
+  if (activePrefBtn) {
 
     activePrefBtn.textContent =
 
@@ -6321,9 +6347,7 @@ function applySettingsToUi() {
       'mapSearch'
     );
 
-  if (
-    mapSearch
-  ) {
+  if (mapSearch) {
 
     mapSearch.placeholder =
 
@@ -6340,9 +6364,7 @@ function applySettingsToUi() {
       'listSearch'
     );
 
-  if (
-    listSearch
-  ) {
+  if (listSearch) {
 
     listSearch.placeholder =
 
@@ -6359,9 +6381,7 @@ function applySettingsToUi() {
       'globalSearch'
     );
 
-  if (
-    globalSearch
-  ) {
+  if (globalSearch) {
 
     globalSearch.placeholder =
 
@@ -6378,9 +6398,7 @@ function applySettingsToUi() {
       'placeNameLabel'
     );
 
-  if (
-    placeNameLabel
-  ) {
+  if (placeNameLabel) {
 
     placeNameLabel.textContent =
       placeLabel();
@@ -6392,9 +6410,7 @@ function applySettingsToUi() {
       'placeKanaLabel'
     );
 
-  if (
-    placeKanaLabelEl
-  ) {
+  if (placeKanaLabelEl) {
 
     placeKanaLabelEl.textContent =
       placeKanaLabel();
@@ -6413,12 +6429,8 @@ function updateDynamicManifest() {
       'appManifest'
     );
 
-  if (
-    !manifestLink
-  ) {
-
+  if (!manifestLink) {
     return;
-
   }
 
   try {
@@ -6554,15 +6566,10 @@ function appConfirm(
           'show'
         );
 
-        cancel.onclick =
-          null;
+        cancel.onclick = null;
+        ok.onclick = null;
 
-        ok.onclick =
-          null;
-
-        resolve(
-          result
-        );
+        resolve(result);
 
       }
 
@@ -6590,9 +6597,7 @@ function appConfirm(
    共通
    ======================================== */
 
-function valueOf(
-  id
-) {
+function valueOf(id) {
 
   var el =
     document.getElementById(
@@ -6619,12 +6624,8 @@ function setValue(
       id
     );
 
-  if (
-    !el
-  ) {
-
+  if (!el) {
     return;
-
   }
 
   el.value =
@@ -6637,9 +6638,7 @@ function setValue(
 }
 
 
-function setLoading(
-  show
-) {
+function setLoading(show) {
 
   document.getElementById(
     'loading'
@@ -6651,31 +6650,23 @@ function setLoading(
 }
 
 
-function handleError(
-  error
-) {
+function handleError(error) {
 
-  setLoading(
-    false
-  );
+  setLoading(false);
 
   alert(
 
     error &&
     error.message
       ? error.message
-      : String(
-          error
-        )
+      : String(error)
 
   );
 
 }
 
 
-function escapeHtml(
-  str
-) {
+function escapeHtml(str) {
 
   return String(
 
@@ -6714,20 +6705,14 @@ function escapeHtml(
 }
 
 
-function escapeAttr(
-  str
-) {
+function escapeAttr(str) {
 
-  return escapeHtml(
-    str
-  );
+  return escapeHtml(str);
 
 }
 
 
-function escapeJs(
-  str
-) {
+function escapeJs(str) {
 
   return String(
 
