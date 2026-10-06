@@ -1221,12 +1221,15 @@ button {
   border-radius: 8px;
 }
 
-/* スマホの日本地図 */
+/* スマホの日本地図を左へ移動 */
 @media (max-width: 560px) {
 
   .japan-map canvas {
     position: relative;
-    left: -28px;
+    left: -45px;
+
+    width: 115% !important;
+    height: auto !important;
   }
 
 }
