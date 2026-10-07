@@ -3122,12 +3122,30 @@ openTeacherFormInteraction =
 
 
 /* =========================================================
-   地図下の先生一覧も
-   一覧画面と同じ3行表示へ統一
+   地図下の先生一覧
+   ・県未選択＋検索なしでは表示しない
+   ・県選択時は選択県のみ表示
+   ・検索時は検索結果を表示
+   ・一覧画面と同じ3行表示
    ========================================================= */
 
 renderMapTeacherPreview =
   function() {
+
+    var mapSide =
+      document.getElementById(
+        'mapSide'
+      );
+
+
+    if (
+      !mapSide
+    ) {
+
+      return;
+
+    }
+
 
     var query =
       (
@@ -3136,6 +3154,36 @@ renderMapTeacherPreview =
         ).value ||
         ''
       ).trim();
+
+
+    /*
+     * 県未選択
+     * ＋
+     * 検索なし
+     *
+     * → 先生一覧を表示しない
+     */
+    if (
+      !selectedPrefecture &&
+      !query
+    ) {
+
+      mapSide.innerHTML =
+        '';
+
+      mapSide.style.display =
+        'none';
+
+      return;
+
+    }
+
+
+    /*
+     * 県選択または検索時のみ表示
+     */
+    mapSide.style.display =
+      '';
 
 
     var list = [];
@@ -3247,7 +3295,7 @@ renderMapTeacherPreview =
 
     if (
       selectedPrefecture ===
-      '__UNKNOWN__'
+        '__UNKNOWN__'
     ) {
 
       title =
@@ -3259,6 +3307,13 @@ renderMapTeacherPreview =
 
       title =
         selectedPrefecture;
+
+    } else if (
+      query
+    ) {
+
+      title =
+        '検索結果';
 
     }
 
@@ -3319,9 +3374,7 @@ renderMapTeacherPreview =
     }
 
 
-    document.getElementById(
-      'mapSide'
-    ).innerHTML =
+    mapSide.innerHTML =
       html;
 
   };
