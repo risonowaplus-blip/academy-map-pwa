@@ -7177,3 +7177,317 @@ renderTeacherDetail =
     mirelEnhanceChildrenList();
 
   };
+
+/* =========================================================
+   2026-10-07
+   子ども専用フォーム
+   生年月日入力を先生フォームと統一
+   ========================================================= */
+
+mirelEnsureChildEditModal =
+  function() {
+
+    var existing =
+      document.getElementById(
+        'mirelChildEditModal'
+      );
+
+
+    if (
+      existing &&
+      existing.dataset
+        .mirelBirthdayVersion ===
+        '2'
+    ) {
+
+      return existing;
+
+    }
+
+
+    if (existing) {
+
+      existing.remove();
+
+    }
+
+
+    var modal =
+      document.createElement(
+        'div'
+      );
+
+
+    modal.id =
+      'mirelChildEditModal';
+
+    modal.className =
+      'modal-bg';
+
+    modal.dataset
+      .mirelBirthdayVersion =
+      '2';
+
+
+    modal.innerHTML =
+
+      '<div class="modal">' +
+
+
+        '<div class="modal-head">' +
+
+          '<div class="modal-title">' +
+            '子ども情報を編集' +
+          '</div>' +
+
+          '<button type="button" class="close" onclick="mirelCloseChildEditor()">' +
+            '×' +
+          '</button>' +
+
+        '</div>' +
+
+
+        '<input type="hidden" id="mirelChildId">' +
+
+
+        '<div class="grid2">' +
+
+          '<div class="field">' +
+
+            '<label>名前</label>' +
+
+            '<input id="mirelChildName">' +
+
+          '</div>' +
+
+
+          '<div class="field">' +
+
+            '<label>ふりがな</label>' +
+
+            '<input id="mirelChildKana">' +
+
+          '</div>' +
+
+        '</div>' +
+
+
+        '<div class="grid2">' +
+
+          '<div class="field">' +
+
+            '<label>呼び名</label>' +
+
+            '<input id="mirelChildNickname">' +
+
+          '</div>' +
+
+
+          '<div class="field">' +
+
+            '<label>性別</label>' +
+
+            '<select id="mirelChildGender">' +
+
+              '<option value="">未設定</option>' +
+              '<option value="女">女</option>' +
+              '<option value="男">男</option>' +
+
+            '</select>' +
+
+          '</div>' +
+
+        '</div>' +
+
+
+        '<div class="field">' +
+
+          '<label>学年</label>' +
+
+          '<select id="mirelChildGrade"></select>' +
+
+        '</div>' +
+
+
+        /* 生まれ年 */
+        '<div class="field">' +
+
+          '<label>生まれ年</label>' +
+
+          '<input ' +
+            'id="mirelChildBirthYear" ' +
+            'type="number"' +
+          '>' +
+
+        '</div>' +
+
+
+        /* 誕生月 */
+        '<div class="field">' +
+
+          '<label>誕生月</label>' +
+
+          '<input ' +
+            'id="mirelChildBirthMonth" ' +
+            'type="number" ' +
+            'min="1" ' +
+            'max="12"' +
+          '>' +
+
+        '</div>' +
+
+
+        /* 誕生日 */
+        '<div class="field">' +
+
+          '<label>誕生日</label>' +
+
+          '<input ' +
+            'id="mirelChildBirthDay" ' +
+            'type="number" ' +
+            'min="1" ' +
+            'max="31"' +
+          '>' +
+
+        '</div>' +
+
+
+        /* 年齢 */
+        '<div class="field">' +
+
+          '<label>年齢</label>' +
+
+          '<input ' +
+            'id="mirelChildAge" ' +
+            'type="number" ' +
+            'min="0" ' +
+            'placeholder="生年月日入力時は自動計算。手入力も可"' +
+          '>' +
+
+        '</div>' +
+
+
+        '<div class="field">' +
+
+          '<label>メモ</label>' +
+
+          '<textarea id="mirelChildMemo"></textarea>' +
+
+        '</div>' +
+
+
+        '<div class="form-actions">' +
+
+          '<button type="button" class="secondary" onclick="mirelCloseChildEditor()">' +
+            'キャンセル' +
+          '</button>' +
+
+          '<button type="button" class="primary" onclick="mirelSaveChildEditor()">' +
+            '保存' +
+          '</button>' +
+
+        '</div>' +
+
+
+      '</div>';
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    /* ===============================
+       学年候補
+       =============================== */
+
+    var grade =
+      document.getElementById(
+        'mirelChildGrade'
+      );
+
+
+    gradeOptions.forEach(
+      function(value) {
+
+        var option =
+          document.createElement(
+            'option'
+          );
+
+
+        option.value =
+          value;
+
+        option.textContent =
+          value ||
+          '未設定';
+
+
+        grade.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+    /* ===============================
+       先生フォームと同じ
+       検索付き生年月日選択
+       =============================== */
+
+    mirelAttachSearchSelect(
+
+      document.getElementById(
+        'mirelChildBirthYear'
+      ),
+
+      'year'
+
+    );
+
+
+    mirelAttachSearchSelect(
+
+      document.getElementById(
+        'mirelChildBirthMonth'
+      ),
+
+      'month'
+
+    );
+
+
+    mirelAttachSearchSelect(
+
+      document.getElementById(
+        'mirelChildBirthDay'
+      ),
+
+      'day'
+
+    );
+
+
+    /* 年齢のマイナス値防止 */
+
+    if (
+      typeof mirelProtectAgeInput ===
+      'function'
+    ) {
+
+      mirelProtectAgeInput(
+
+        document.getElementById(
+          'mirelChildAge'
+        )
+
+      );
+
+    }
+
+
+    return modal;
+
+  };
