@@ -136,131 +136,133 @@
 
 
     <section
-      id="pageMap"
-      class="page active"
-    >
+  id="pageMap"
+  class="page active"
+>
 
-      <div class="desktop-grid">
-
-
-        <div>
+  <div class="desktop-grid">
 
 
-          <div class="card">
-
-            <input
-              id="mapSearch"
-              class="search"
-              type="search"
-              placeholder="先生・サロン・地域を検索"
-              oninput="renderMapTeacherPreview()"
-            >
-
-            <div
-              id="stats"
-              class="stats"
-            ></div>
-
-          </div>
+    <div>
 
 
-          <div class="card map-card">
+      <div class="card">
 
-            <div class="map-heading">
+        <input
+          id="mapSearch"
+          class="search"
+          type="search"
+          placeholder="名前・店名・地域を検索"
+          oninput="renderMapTeacherPreview()"
+        >
 
-              <div>
-
-                <div class="label">
-                  日本地図
-                </div>
-
-                <div
-                  id="selectedPrefName"
-                  class="selected-pref"
-                >
-                  都道府県を選択
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <div
-              id="japanMap"
-              class="japan-map"
-            >
-            </div>
-
-
-            <div class="map-legend">
-
-              <span class="legend-item">
-
-                <span class="legend-dot teacher-dot"></span>
-
-                <span id="mapLegendActive">先生あり</span>
-
-              </span>
-
-              <span class="legend-item">
-
-                <span class="legend-dot selected-dot"></span>
-
-                選択中
-
-              </span>
-
-            </div>
-
-
-            <div class="segmented">
-
-              <button
-                id="activePrefBtn"
-                class="active"
-                onclick="setPrefMode('active')"
-              >
-                先生がいる県のみ
-              </button>
-
-              <button
-                id="allPrefBtn"
-                onclick="setPrefMode('all')"
-              >
-                全都道府県
-              </button>
-
-            </div>
-
-
-            <div
-              id="prefList"
-              class="chips"
-            ></div>
-
-          </div>
-
-
-        </div>
-
-
-        <div class="card">
-
-          <div id="mapSide">
-
-            <div class="empty">
-              日本地図または都道府県名を選択してください。
-            </div>
-
-          </div>
-
-        </div>
-
+        <div
+          id="stats"
+          class="stats"
+        ></div>
 
       </div>
 
-    </section>
+
+      <div class="card map-card">
+
+        <div class="map-heading">
+
+          <div>
+
+            <div class="label">
+              日本地図
+            </div>
+
+            <div
+              id="selectedPrefName"
+              class="selected-pref"
+            >
+              都道府県を選択
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="japanMap"
+          class="japan-map"
+        >
+        </div>
+
+
+        <div class="map-legend">
+
+          <span class="legend-item">
+
+            <span class="legend-dot teacher-dot"></span>
+
+            <span id="mapLegendActive">
+              先生あり
+            </span>
+
+          </span>
+
+          <span class="legend-item">
+
+            <span class="legend-dot selected-dot"></span>
+
+            選択中
+
+          </span>
+
+        </div>
+
+
+        <!-- 選択した県の先生情報をここに表示 -->
+        <div
+          id="mapSide"
+          class="map-selected-teachers"
+        >
+
+          <div class="empty">
+            日本地図または都道府県名を選択してください。
+          </div>
+
+        </div>
+
+
+        <div class="segmented">
+
+          <button
+            id="activePrefBtn"
+            class="active"
+            onclick="setPrefMode('active')"
+          >
+            先生がいる県のみ
+          </button>
+
+          <button
+            id="allPrefBtn"
+            onclick="setPrefMode('all')"
+          >
+            全都道府県
+          </button>
+
+        </div>
+
+
+        <div
+          id="prefList"
+          class="chips"
+        ></div>
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+</section>
 
 
     <section
