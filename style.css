@@ -2289,3 +2289,244 @@ button {
   right: 7px;
   bottom: 6px;
 }
+
+/* =========================================================
+   2026-10-07 追加修正
+   ========================================================= */
+
+
+/* -------------------------
+   先生一覧 地域見出し
+   ------------------------- */
+
+.mirel-region {
+  padding-top: 4px;
+}
+
+
+.mirel-region-title {
+  margin:
+    0
+    0
+    8px;
+
+  padding:
+    8px
+    11px;
+
+  border-left:
+    4px solid #d88c9a;
+
+  border-radius:
+    8px;
+
+  background:
+    #f8ecef;
+
+  color:
+    #584b4d;
+}
+
+
+.mirel-region-count {
+  color:
+    #9a7d82;
+}
+
+
+/* 地域と地域の間にも少し区切り */
+.mirel-region + .mirel-region {
+  margin-top: 6px;
+
+  padding-top: 17px;
+
+  border-top:
+    1px solid #eee4e5;
+}
+
+
+/* -------------------------
+   交流した場所・種別
+   ------------------------- */
+
+.mirel-interaction-select {
+  position: relative;
+}
+
+
+.mirel-interaction-select > input {
+  padding-right: 40px;
+}
+
+
+/* selectと同系統の矢印 */
+.mirel-interaction-arrow {
+  position: absolute;
+
+  right: 7px;
+  bottom: 6px;
+
+  z-index: 5;
+
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+}
+
+
+.mirel-interaction-arrow::after {
+  content: "";
+
+  display: block;
+
+  width: 7px;
+  height: 7px;
+
+  margin:
+    -4px
+    auto
+    0;
+
+  border-right:
+    1.5px solid #777;
+
+  border-bottom:
+    1.5px solid #777;
+
+  transform:
+    rotate(45deg);
+}
+
+
+.mirel-interaction-panel {
+  position: absolute;
+
+  top: calc(100% - 4px);
+  left: 0;
+  right: 0;
+
+  z-index: 250;
+
+  display: none;
+
+  padding: 7px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 14px;
+
+  background: #fff;
+
+  box-shadow:
+    0 9px 28px
+    rgba(50, 35, 38, .15);
+}
+
+
+.mirel-interaction-panel.show {
+  display: block;
+}
+
+
+.mirel-interaction-search {
+  width: 100%;
+
+  margin-bottom: 6px;
+
+  padding: 9px 10px;
+
+  border:
+    1px solid #e2dbd8;
+
+  border-radius: 10px;
+
+  background: #fafafa;
+
+  font-size: 13px;
+}
+
+
+.mirel-interaction-options {
+  max-height: 240px;
+
+  overflow-y: auto;
+}
+
+
+.mirel-interaction-option,
+.mirel-interaction-add {
+  display: block;
+
+  width: 100%;
+
+  padding:
+    9px
+    10px;
+
+  border: 0;
+
+  border-bottom:
+    1px solid #f2eeec;
+
+  background: #fff;
+
+  color: #433d3b;
+
+  text-align: left;
+
+  font-size: 13px;
+}
+
+
+.mirel-interaction-option:active {
+  background:
+    #fff4f6;
+}
+
+
+.mirel-interaction-add {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  color: var(--accent);
+
+  font-weight: 700;
+
+  background:
+    #fff8f9;
+}
+
+
+.mirel-add-mark {
+  font-size: 17px;
+  line-height: 1;
+}
+
+
+.mirel-interaction-empty {
+  padding: 12px;
+
+  color: var(--muted);
+
+  text-align: center;
+
+  font-size: 12px;
+}
+
+
+/* -------------------------
+   地図下先生一覧もコンパクト
+   ------------------------- */
+
+.mirel-map-teacher-list {
+  gap: 6px;
+}
