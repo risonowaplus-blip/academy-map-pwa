@@ -3509,3 +3509,618 @@ if (
 
   }
 );
+
+/* =========================================================
+   2026-10-07
+   住所連動・年齢入力・保存高速化
+   ========================================================= */
+
+
+/* =========================================================
+   市区町村を選び直した時
+   自動セットした町名も連動更新
+   ========================================================= */
+
+mirelRenderCityResults =
+  function(
+    rows,
+    message
+  ) {
+
+    var box =
+      document.getElementById(
+        'cityResults'
+      );
+
+
+    if (!box) {
+      return;
+    }
+
+
+    box.innerHTML =
+      '';
+
+
+    rows
+      .slice(
+        0,
+        80
+      )
+      .forEach(
+        function(row) {
+
+          var item =
+            document.createElement(
+              'div'
+            );
+
+
+          item.className =
+            'combo-option';
+
+
+          item.textContent =
+
+            row.city +
+
+            '｜' +
+
+            row.prefecture +
+
+            (
+              row.town
+                ? '｜' + row.town
+                : ''
+            );
+
+
+          item.onclick =
+            function() {
+
+              var address1 =
+                document.getElementById(
+                  'address1'
+                );
+
+
+              var previousAutoTown =
+                address1
+                  ? (
+                      address1.dataset
+                        .mirelAutoTown ||
+                      ''
+                    )
+                  : '';
+
+
+              var currentAddress =
+                address1
+                  ? address1.value
+                  : '';
+
+
+              setValue(
+                'city',
+                row.city
+              );
+
+
+              setValue(
+                'prefecture',
+                row.prefecture
+              );
+
+
+              if (
+                address1
+              ) {
+
+                /*
+                 * 町名候補を選んだ場合
+                 * 新しい町名へ置き換える
+                 */
+                if (
+                  row.town
+                ) {
+
+                  address1.value =
+                    row.town;
+
+
+                  address1.dataset
+                    .mirelAutoTown =
+                    row.town;
+
+                /*
+                 * 市区町村だけを選び直した場合、
+                 * 前回アプリが自動入力した町名なら消す
+                 */
+                } else if (
+                  previousAutoTown &&
+                  currentAddress ===
+                    previousAutoTown
+                ) {
+
+                  address1.value =
+                    '';
+
+
+                  delete address1.dataset
+                    .mirelAutoTown;
+
+                }
+
+              }
+
+
+              box.classList.remove(
+                'show'
+              );
+
+            };
+
+
+          box.appendChild(
+            item
+          );
+
+        }
+      );
+
+
+    if (
+      message
+    ) {
+
+      var note =
+        document.createElement(
+          'div'
+        );
+
+
+      note.className =
+        'combo-search-note';
+
+
+      note.textContent =
+        message;
+
+
+      box.appendChild(
+        note
+      );
+
+    }
+
+
+    box.classList.add(
+      'show'
+    );
+
+  };
+
+
+/* =========================================================
+   年齢：0未満を禁止
+   ========================================================= */
+
+function mirelProtectAgeInput(
+  input
+) {
+
+  if (
+    !input ||
+    input.dataset.mirelAgeReady ===
+      '1'
+  ) {
+    return;
+  }
+
+
+  input.dataset.mirelAgeReady =
+    '1';
+
+
+  input.min =
+    '0';
+
+
+  input.addEventListener(
+    'change',
+    function() {
+
+      if (
+        this.value !== '' &&
+        Number(
+          this.value
+        ) < 0
+      ) {
+
+        this.value =
+          '0';
+
+      }
+
+    }
+  );
+
+}
+
+
+/* 先生の年齢 */
+mirelProtectAgeInput(
+  document.getElementById(
+    'ageManual'
+  )
+);
+
+
+/* =========================================================
+   子ども行追加時も
+   年齢0未満禁止＋生年月日候補
+   ========================================================= */
+
+var mirelOriginalEnhancedAddChildRow =
+  addChildRow;
+
+
+addChildRow =
+  function(child) {
+
+    mirelOriginalEnhancedAddChildRow(
+      child
+    );
+
+
+    var rows =
+      document.querySelectorAll(
+        '.child-edit'
+      );
+
+
+    if (!rows.length) {
+      return;
+    }
+
+
+    var row =
+      rows[
+        rows.length - 1
+      ];
+
+
+    mirelProtectAgeInput(
+      row.querySelector(
+        '.child-age'
+      )
+    );
+
+
+    mirelAttachSearchSelect(
+      row.querySelector(
+        '.child-year'
+      ),
+      'year'
+    );
+
+
+    mirelAttachSearchSelect(
+      row.querySelector(
+        '.child-month'
+      ),
+      'month'
+    );
+
+
+    mirelAttachSearchSelect(
+      row.querySelector(
+        '.child-day'
+      ),
+      'day'
+    );
+
+
+    var age =
+      row.querySelector(
+        '.child-age'
+      );
+
+
+    if (age) {
+
+      age.placeholder =
+        '生年月日・学年から自動計算。手入力も可';
+
+    }
+
+  };
+
+
+/* =========================================================
+   保存用：子ども情報をまとめて取得
+   ========================================================= */
+
+function mirelCollectChildren() {
+
+  var rows =
+    document.querySelectorAll(
+      '.child-edit'
+    );
+
+
+  var result =
+    [];
+
+
+  rows.forEach(
+    function(row) {
+
+      result.push({
+
+        childId:
+          row.getAttribute(
+            'data-child-id'
+          ) ||
+          '',
+
+        name:
+          row.querySelector(
+            '.child-name'
+          ).value,
+
+        kana:
+          row.querySelector(
+            '.child-kana'
+          ).value,
+
+        nickname:
+          row.querySelector(
+            '.child-nickname'
+          ).value,
+
+        gender:
+          row.querySelector(
+            '.child-gender'
+          ).value,
+
+        grade:
+          row.querySelector(
+            '.child-grade'
+          ).value,
+
+        birthYear:
+          row.querySelector(
+            '.child-year'
+          ).value,
+
+        birthMonth:
+          row.querySelector(
+            '.child-month'
+          ).value,
+
+        birthDay:
+          row.querySelector(
+            '.child-day'
+          ).value,
+
+        ageManual:
+          row.querySelector(
+            '.child-age'
+          ).value,
+
+        memo:
+          row.querySelector(
+            '.child-memo'
+          ).value
+
+      });
+
+    }
+  );
+
+
+  return result;
+
+}
+
+
+/* =========================================================
+   保存を1回のAPI通信へまとめる
+   ========================================================= */
+
+saveTeacherForm =
+  async function() {
+
+    var teacherPayload = {
+
+      teacherId:
+        valueOf(
+          'teacherId'
+        ),
+
+      name:
+        valueOf(
+          'name'
+        ),
+
+      kana:
+        valueOf(
+          'kana'
+        ),
+
+      nickname:
+        valueOf(
+          'nickname'
+        ),
+
+      gender:
+        valueOf(
+          'gender'
+        ),
+
+      birthYear:
+        valueOf(
+          'birthYear'
+        ),
+
+      birthMonth:
+        valueOf(
+          'birthMonth'
+        ),
+
+      birthDay:
+        valueOf(
+          'birthDay'
+        ),
+
+      ageManual:
+        valueOf(
+          'ageManual'
+        ),
+
+      salonName:
+        valueOf(
+          'salonName'
+        ),
+
+      salonKana:
+        valueOf(
+          'salonKana'
+        ),
+
+      prefecture:
+        valueOf(
+          'prefecture'
+        ),
+
+      city:
+        valueOf(
+          'city'
+        ),
+
+      address1:
+        valueOf(
+          'address1'
+        ),
+
+      address2:
+        valueOf(
+          'address2'
+        ),
+
+      instagram:
+        firstInstagramAccountFromPendingLinks(),
+
+      memo:
+        valueOf(
+          'memo'
+        )
+
+    };
+
+
+    var bundle = {
+
+      teacher:
+        teacherPayload,
+
+      children:
+        mirelCollectChildren(),
+
+      links:
+        pendingLinks.slice(),
+
+      deletedLinkIds:
+        deletedLinkIds.slice(),
+
+      interactions:
+        pendingInteractions.slice(),
+
+      deletedInteractionIds:
+        deletedInteractionIds.slice()
+
+    };
+
+
+    setLoading(
+      true
+    );
+
+
+    try {
+
+      var result =
+        await runScript(
+
+          'saveTeacherBundle',
+
+          [
+            bundle
+          ]
+
+        );
+
+
+      teachers =
+        (
+          result &&
+          result.teachers
+        ) ||
+        [];
+
+
+      var savedTeacherId =
+        result &&
+        result.teacherId
+          ? result.teacherId
+          : '';
+
+
+      closeTeacherForm();
+
+
+      renderAll();
+
+      renderJapanMap();
+
+
+      if (
+        savedTeacherId
+      ) {
+
+        var teacher =
+          findTeacher(
+            savedTeacherId
+          );
+
+
+        if (
+          teacher
+        ) {
+
+          openTeacherDetail(
+            savedTeacherId
+          );
+
+        }
+
+      }
+
+
+    } catch (e) {
+
+      handleError(
+        e
+      );
+
+
+    } finally {
+
+      setLoading(
+        false
+      );
+
+    }
+
+  };
