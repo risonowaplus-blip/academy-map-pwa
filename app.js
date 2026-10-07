@@ -1080,7 +1080,9 @@ function renderJapanMap() {
 
     );
 
-  updateSelectedPrefHeading();
+  enableMobileMapTouch();
+
+updateSelectedPrefHeading();
 
 }
 
