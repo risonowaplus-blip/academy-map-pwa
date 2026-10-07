@@ -2234,3 +2234,58 @@ button {
   }
 
 }
+
+/* =========================================================
+   プルダウン矢印をselectと同じ見た目に統一
+   ========================================================= */
+
+.mirel-select-arrow,
+.mirel-setting-arrow {
+  font-size: 0;
+}
+
+
+/* 下向きシェブロン */
+.mirel-select-arrow::after,
+.mirel-setting-arrow::after {
+  content: "";
+
+  display: block;
+
+  width: 7px;
+  height: 7px;
+
+  border-right: 1.5px solid #777;
+  border-bottom: 1.5px solid #777;
+
+  transform: rotate(45deg);
+
+  margin:
+    -3px
+    auto
+    0;
+}
+
+
+/* 生年月日の矢印 */
+.mirel-select-arrow {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* 設定画面の矢印位置 */
+.mirel-setting-arrow {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+
+  right: 7px;
+  bottom: 6px;
+}
