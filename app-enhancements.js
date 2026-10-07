@@ -3376,6 +3376,135 @@ document.addEventListener(
 
       }
 
+       /* =========================================================
+   地図の都道府県選択を解除できるようにする
+   ========================================================= */
+
+
+/* 同じ県をもう一度押したら選択解除 */
+var mirelOriginalSelectPrefecture =
+  selectPrefecture;
+
+
+selectPrefecture =
+  function(pref) {
+
+    if (
+      selectedPrefecture ===
+      pref
+    ) {
+
+      selectedPrefecture =
+        '';
+
+      selectedTeacherId =
+        '';
+
+      updateSelectedPrefHeading();
+
+      renderPrefList();
+
+      renderMapTeacherPreview();
+
+      renderJapanMap();
+
+      return;
+
+    }
+
+
+    mirelOriginalSelectPrefecture(
+      pref
+    );
+
+  };
+
+
+/* 所在地不明も再タップで解除 */
+var mirelOriginalSelectUnknown =
+  selectUnknown;
+
+
+selectUnknown =
+  function() {
+
+    if (
+      selectedPrefecture ===
+      '__UNKNOWN__'
+    ) {
+
+      selectedPrefecture =
+        '';
+
+      selectedTeacherId =
+        '';
+
+      updateSelectedPrefHeading();
+
+      renderPrefList();
+
+      renderMapTeacherPreview();
+
+      renderJapanMap();
+
+      return;
+
+    }
+
+
+    mirelOriginalSelectUnknown();
+
+  };
+
+
+/* 地図ボタンを押したら初期状態へ戻す */
+function mirelResetMapSelection() {
+
+  selectedPrefecture =
+    '';
+
+  selectedTeacherId =
+    '';
+
+  updateSelectedPrefHeading();
+
+  renderPrefList();
+
+  renderMapTeacherPreview();
+
+  renderJapanMap();
+
+}
+
+
+/* 下部の地図ボタンだけ動作を上書き */
+var mirelNavMap =
+  document.getElementById(
+    'navMap'
+  );
+
+
+if (
+  mirelNavMap
+) {
+
+  mirelNavMap.onclick =
+    function() {
+
+      showPage(
+        'map'
+      );
+
+      mirelResetMapSelection();
+
+      window.scrollTo(
+        0,
+        0
+      );
+
+    };
+
+}
     }
 
   }
