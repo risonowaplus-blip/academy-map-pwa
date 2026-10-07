@@ -3,53 +3,53 @@
 
 <head>
 
-<meta charset="utf-8">
+  <meta charset="utf-8">
 
-<meta
-name="viewport"
-content="width=device-width,initial-scale=1,viewport-fit=cover"
->
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
 
-<meta
-name="theme-color"
-content="#d95b72"
->
+  <meta
+    name="theme-color"
+    content="#d95b72"
+  >
 
-<meta
-name="apple-mobile-web-app-capable"
-content="yes"
->
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
 
-<meta
-name="apple-mobile-web-app-status-bar-style"
-content="default"
->
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="default"
+  >
 
-<meta
-id="appleAppTitle"
-name="apple-mobile-web-app-title"
-content="Academy Map"
->
+  <meta
+    id="appleAppTitle"
+    name="apple-mobile-web-app-title"
+    content="Academy Map"
+  >
 
-<link
-id="appManifest"
-rel="manifest"
-href="./manifest.webmanifest"
->
+  <link
+    id="appManifest"
+    rel="manifest"
+    href="./manifest.webmanifest"
+  >
 
-<link
-rel="apple-touch-icon"
-href="./icon-192.png"
->
+  <link
+    rel="apple-touch-icon"
+    href="./icon-192.png"
+  >
 
-<link
-rel="stylesheet"
-href="./style.css?v=20261006-07"
->
+  <link
+    rel="stylesheet"
+    href="./style.css?v=20261006-07"
+  >
 
-<title>
-Academy Map
-</title>
+  <title>
+    Academy Map
+  </title>
 
 </head>
 
@@ -58,106 +58,101 @@ Academy Map
 
 
 <div
-id="authScreen"
-class="auth-screen"
+  id="authScreen"
+  class="auth-screen"
 >
 
-<div class="auth-card">
+  <div class="auth-card">
 
-<div class="app-mark">
-A
-</div>
+    <div class="app-mark">
+      A
+    </div>
 
-<h1 id="authAppName">
-Academy Map
-</h1>
+    <h1 id="authAppName">
+      Academy Map
+    </h1>
 
-<p id="authDescription">
-Googleアカウントでログインして先生情報を開きます。
-</p>
+    <p id="authDescription">
+      Googleアカウントでログインして先生情報を開きます。
+    </p>
 
-<button
-id="loginButton"
-class="primary big"
-onclick="login()"
->
-Googleでログイン
-</button>
+    <button
+      id="loginButton"
+      class="primary big"
+      onclick="login()"
+    >
+      Googleでログイン
+    </button>
 
-<div
-id="authMessage"
-class="small-note"
-></div>
+    <div
+      id="authMessage"
+      class="small-note"
+    ></div>
 
-</div>
+  </div>
 
-</div>
-
-
-<div
-id="loading"
-class="loading"
->
-読み込み中…
 </div>
 
 
 <div
-id="appShell"
-class="app-shell hidden"
+  id="loading"
+  class="loading"
+>
+  読み込み中…
+</div>
+
+
+<div
+  id="appShell"
+  class="app-shell hidden"
 >
 
 
-<header class="topbar">
+  <header class="topbar">
 
-<div>
+    <div>
 
-<div id="brandName" class="brand">
-Academy Map
-</div>
+      <div id="brandName" class="brand">
+        Academy Map
+      </div>
 
-<div id="brandSub" class="sub">
-全国の先生管理
-</div>
+      <div id="brandSub" class="sub">
+        全国の先生管理
+      </div>
 
-</div>
+    </div>
 
-<button
-class="round-add"
-onclick="openTeacherForm()"
->
-＋
-</button>
+    <button
+      class="round-add"
+      onclick="openTeacherForm()"
+    >
+      ＋
+    </button>
 
-</header>
-
-
-<main class="main">
+  </header>
 
 
-<section
+  <main class="main">
+
+
+    <section
       id="pageMap"
       class="page active"
     >
 
       <div class="desktop-grid">
 
-  id="pageMap"
-  class="page active"
->
 
         <div>
-  <div class="desktop-grid">
 
 
           <div class="card">
-    <div>
 
             <input
               id="mapSearch"
               class="search"
               type="search"
-              placeholder="先生・サロン・地域を検索"
+              placeholder="名前・店名・地域を検索"
               oninput="renderMapTeacherPreview()"
             >
 
@@ -167,31 +162,17 @@ onclick="openTeacherForm()"
             ></div>
 
           </div>
-      <div class="card">
 
-        <input
-          id="mapSearch"
-          class="search"
-          type="search"
-          placeholder="名前・店名・地域を検索"
-          oninput="renderMapTeacherPreview()"
-        >
 
           <div class="card map-card">
-        <div
-          id="stats"
-          class="stats"
-        ></div>
 
             <div class="map-heading">
-      </div>
 
               <div>
 
                 <div class="label">
                   日本地図
                 </div>
-      <div class="card map-card">
 
                 <div
                   id="selectedPrefName"
@@ -199,64 +180,55 @@ onclick="openTeacherForm()"
                 >
                   都道府県を選択
                 </div>
-        <div class="map-heading">
 
               </div>
-          <div>
 
-            <div class="label">
-              日本地図
-</div>
+            </div>
 
 
-<div
+            <div
               id="japanMap"
               class="japan-map"
-              id="selectedPrefName"
-              class="selected-pref"
->
-              都道府県を選択
-</div>
+            >
+            </div>
 
-          </div>
 
             <div class="map-legend">
 
               <span class="legend-item">
-        </div>
 
                 <span class="legend-dot teacher-dot"></span>
 
-                <span id="mapLegendActive">先生あり</span>
-        <div
-          id="japanMap"
-          class="japan-map"
-        >
-        </div>
+                <span id="mapLegendActive">
+                  先生あり
+                </span>
 
               </span>
 
               <span class="legend-item">
-        <div class="map-legend">
 
                 <span class="legend-dot selected-dot"></span>
-          <span class="legend-item">
 
                 選択中
-            <span class="legend-dot teacher-dot"></span>
 
               </span>
-            <span id="mapLegendActive">
-              先生あり
-            </span>
 
             </div>
-          </span>
 
-          <span class="legend-item">
+
+            <div
+              id="mapSide"
+              class="map-selected-teachers"
+            >
+
+              <div class="empty">
+                日本地図または都道府県名を選択してください。
+              </div>
+
+            </div>
+
 
             <div class="segmented">
-            <span class="legend-dot selected-dot"></span>
 
               <button
                 id="activePrefBtn"
@@ -265,7 +237,6 @@ onclick="openTeacherForm()"
               >
                 先生がいる県のみ
               </button>
-            選択中
 
               <button
                 id="allPrefBtn"
@@ -273,993 +244,948 @@ onclick="openTeacherForm()"
               >
                 全都道府県
               </button>
-          </span>
 
             </div>
-        </div>
 
 
             <div
               id="prefList"
               class="chips"
             ></div>
-        <!-- 選択した県の先生情報をここに表示 -->
-        <div
-          id="mapSide"
-          class="map-selected-teachers"
-        >
-
-          <div class="empty">
-            日本地図または都道府県名を選択してください。
-</div>
-
-
-</div>
-
-
-        <div class="card">
-
-          <div id="mapSide">
-        <div class="segmented">
-
-            <div class="empty">
-              日本地図または都道府県名を選択してください。
-            </div>
-          <button
-            id="activePrefBtn"
-            class="active"
-            onclick="setPrefMode('active')"
-          >
-            先生がいる県のみ
-          </button>
 
           </div>
-          <button
-            id="allPrefBtn"
-            onclick="setPrefMode('all')"
-          >
-            全都道府県
-          </button>
-
-</div>
 
 
-        <div
-          id="prefList"
-          class="chips"
-        ></div>
+        </div>
 
-</div>
+
+      </div>
 
     </section>
+
+
+    <section
+      id="pageList"
+      class="page"
+    >
+
+      <div class="card">
+
+        <div
+          id="listPageTitle"
+          class="section-title"
+        >
+          先生一覧
+        </div>
+
+        <input
+          id="listSearch"
+          class="search"
+          type="search"
+          placeholder="名前・呼び名・サロン名・地域で検索"
+          oninput="renderFullTeacherList()"
+        >
+
+        <div
+          id="fullTeacherList"
+          class="teacher-list top-gap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <section
+      id="pageSearch"
+      class="page"
+    >
+
+      <div class="card">
+
+        <div class="section-title">
+          検索
+        </div>
+
+        <input
+          id="globalSearch"
+          class="search"
+          type="search"
+          placeholder="先生名・ふりがな・呼び名・サロン・Instagram・住所"
+          oninput="renderSearchResults()"
+        >
+
+        <div
+          id="searchResults"
+          class="teacher-list top-gap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <section
+      id="pageSettings"
+      class="page"
+    >
+
+      <div class="card">
+
+        <div class="section-title">
+          設定
+        </div>
+
+        <div class="form-note">
+          表示名は候補から選んでも、自由に入力しても構いません。
+        </div>
+
+
+        <div class="field setting-combo">
+
+          <label>
+            アプリ名
+          </label>
+
+          <input
+            id="settingAppName"
+            autocomplete="off"
+            onfocus="showSettingSuggestions(
+              'settingAppName',
+              'settingAppNameResults',
+              'appName',
+              true
+            )"
+            oninput="showSettingSuggestions(
+              'settingAppName',
+              'settingAppNameResults',
+              'appName',
+              false
+            )"
+          >
+
+          <div
+            id="settingAppNameResults"
+            class="setting-results"
+          ></div>
+
+        </div>
+
+
+        <div class="field setting-combo">
+
+          <label>
+            人物名称
+          </label>
+
+          <input
+            id="settingPersonLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions(
+              'settingPersonLabel',
+              'settingPersonLabelResults',
+              'personLabel',
+              true
+            )"
+            oninput="showSettingSuggestions(
+              'settingPersonLabel',
+              'settingPersonLabelResults',
+              'personLabel',
+              false
+            )"
+          >
+
+          <div
+            id="settingPersonLabelResults"
+            class="setting-results"
+          ></div>
+
+        </div>
+
+
+        <div class="field setting-combo">
+
+          <label>
+            店名の表示名
+          </label>
+
+          <input
+            id="settingPlaceLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions(
+              'settingPlaceLabel',
+              'settingPlaceLabelResults',
+              'placeLabel',
+              true
+            )"
+            oninput="showSettingSuggestions(
+              'settingPlaceLabel',
+              'settingPlaceLabelResults',
+              'placeLabel',
+              false
+            )"
+          >
+
+          <div
+            id="settingPlaceLabelResults"
+            class="setting-results"
+          ></div>
+
+        </div>
+
+
+        <div class="field setting-combo">
+
+          <label>
+            店名ふりがなの表示名
+          </label>
+
+          <input
+            id="settingPlaceKanaLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions(
+              'settingPlaceKanaLabel',
+              'settingPlaceKanaLabelResults',
+              'placeKanaLabel',
+              true
+            )"
+            oninput="showSettingSuggestions(
+              'settingPlaceKanaLabel',
+              'settingPlaceKanaLabelResults',
+              'placeKanaLabel',
+              false
+            )"
+          >
+
+          <div
+            id="settingPlaceKanaLabelResults"
+            class="setting-results"
+          ></div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            class="primary"
+            onclick="saveSettingsForm()"
+          >
+            設定を保存
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section
+      id="pageDetail"
+      class="page"
+    >
+
+      <div id="detailContent"></div>
+
+    </section>
+
+
+  </main>
+
+
+  <nav class="bottom-nav">
+
+    <button
+      id="navMap"
+      class="nav-btn active"
+      onclick="showPage('map')"
+    >
+
+      <span class="nav-icon">
+        🗾
+      </span>
+
+      <span>
+        地図
+      </span>
+
+    </button>
+
+
+    <button
+      id="navList"
+      class="nav-btn"
+      onclick="showPage('list')"
+    >
+
+      <span class="nav-icon">
+        👥
+      </span>
+
+      <span id="navListText">
+        先生一覧
+      </span>
+
+    </button>
+
+
+    <button
+      id="navSearch"
+      class="nav-btn"
+      onclick="showPage('search')"
+    >
+
+      <span class="nav-icon">
+        ⌕
+      </span>
+
+      <span>
+        検索
+      </span>
+
+    </button>
+
+
+    <button
+      class="nav-btn"
+      onclick="openTeacherForm()"
+    >
+
+      <span class="nav-icon">
+        ＋
+      </span>
+
+      <span>
+        追加
+      </span>
+
+    </button>
+
+
+    <button
+      id="navSettings"
+      class="nav-btn"
+      onclick="showPage('settings')"
+    >
+
+      <span class="nav-icon">
+        ⚙
+      </span>
+
+      <span>
+        設定
+      </span>
+
+    </button>
+
+  </nav>
+
+
+</div>
+
+
+<!-- =====================================
+     先生フォーム
+     ===================================== -->
+
+<div
+  id="teacherModal"
+  class="modal-bg"
+>
+
+  <div class="modal">
+
+
+    <div class="modal-head">
+
+      <div
+        id="modalTitle"
+        class="modal-title"
+      >
+        先生を追加
+      </div>
+
+      <button
+        class="close"
+        onclick="closeTeacherForm()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="form-note">
+      すべて任意項目です。分かる内容だけ入力してください。
+    </div>
+
+
+    <input
+      id="teacherId"
+      type="hidden"
+    >
+
+
+    <div class="grid2">
+
+      <div class="field">
+
+        <label>
+          名前
+        </label>
+
+        <input id="name">
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          ふりがな
+        </label>
+
+        <input id="kana">
+
+      </div>
+
+    </div>
+
+
+    <div class="grid2">
+
+      <div class="field">
+
+        <label>
+          呼び名
+        </label>
+
+        <input id="nickname">
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          性別
+        </label>
+
+        <select id="gender">
+
+          <option value="">未設定</option>
+          <option value="女">女</option>
+          <option value="男">男</option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div class="grid2">
+
+      <div class="field">
+
+        <label>
+          生まれ年
+        </label>
+
+        <input
+          id="birthYear"
+          type="number"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          年齢
+        </label>
+
+        <input
+          id="ageManual"
+          type="number"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div class="grid2">
+
+      <div class="field">
+
+        <label>
+          誕生月
+        </label>
+
+        <input
+          id="birthMonth"
+          type="number"
+          min="1"
+          max="12"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          誕生日
+        </label>
+
+        <input
+          id="birthDay"
+          type="number"
+          min="1"
+          max="31"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div class="field">
+
+      <label id="placeNameLabel">
+        サロン名
+      </label>
+
+      <input id="salonName">
+
+    </div>
+
+
+    <div class="field">
+
+      <label id="placeKanaLabel">
+        サロン名ふりがな
+      </label>
+
+      <input id="salonKana">
+
+    </div>
+
+
+    <div class="grid2">
+
+
+      <div class="field combo">
+
+        <label>
+          都道府県
+        </label>
+
+        <input
+          id="prefecture"
+          autocomplete="off"
+          placeholder="検索して選択"
+          onfocus="showPrefectureResults()"
+          oninput="showPrefectureResults()"
+        >
+
+        <div
+          id="prefResults"
+          class="combo-results"
+        ></div>
+
+      </div>
+
+
+      <div class="field combo">
+
+        <label>
+          市区町村
+        </label>
+
+        <input
+          id="city"
+          autocomplete="off"
+          placeholder="検索して選択"
+          onfocus="showCityResults()"
+          oninput="showCityResults()"
+        >
+
+        <div
+          id="cityResults"
+          class="combo-results"
+        ></div>
+
+      </div>
+
+
+    </div>
+
+
+    <div class="field">
+
+      <label>
+        町名・番地
+      </label>
+
+      <input id="address1">
+
+    </div>
+
+
+    <div class="field">
+
+      <label>
+        建物名・部屋番号
+      </label>
+
+      <input id="address2">
+
+    </div>
+
+
+    <div
+      id="linkEditArea"
+      class="children-area"
+    ></div>
+
+
+    <div class="field">
+
+      <label>
+        メモ
+      </label>
+
+      <textarea id="memo"></textarea>
+
+    </div>
+
+
+    <div
+      id="childrenEditArea"
+      class="children-area"
+    ></div>
+
+
+    <div
+      id="interactionEditArea"
+      class="children-area"
+    ></div>
+
+
+    <div class="form-actions">
+
+      <button
+        class="secondary"
+        onclick="closeTeacherForm()"
+      >
+        キャンセル
+      </button>
+
+      <button
+        class="primary"
+        onclick="saveTeacherForm()"
+      >
+        保存
+      </button>
 
     </div>
 
 
   </div>
 
-</section>
-
-
-<section
-id="pageList"
-class="page"
->
-
-<div class="card">
-
-<div id="listPageTitle" class="section-title">
-先生一覧
 </div>
 
-<input
-id="listSearch"
-class="search"
-type="search"
-placeholder="名前・呼び名・サロン名・地域で検索"
-oninput="renderFullTeacherList()"
->
+
+<!-- =====================================
+     交流履歴フォーム
+     ===================================== -->
 
 <div
-id="fullTeacherList"
-class="teacher-list top-gap"
-></div>
-
-</div>
-
-</section>
-
-
-<section
-id="pageSearch"
-class="page"
+  id="interactionModal"
+  class="modal-bg"
 >
 
-<div class="card">
-
-<div class="section-title">
-検索
-</div>
-
-<input
-id="globalSearch"
-class="search"
-type="search"
-placeholder="先生名・ふりがな・呼び名・サロン・Instagram・住所"
-oninput="renderSearchResults()"
->
-
-<div
-id="searchResults"
-class="teacher-list top-gap"
-></div>
-
-</div>
-
-</section>
-
-
-<section
-id="pageSettings"
-class="page"
->
-
-<div class="card">
-
-<div class="section-title">
-設定
-</div>
-
-<div class="form-note">
-表示名は候補から選んでも、自由に入力しても構いません。
-</div>
-
-
-<div class="field setting-combo">
-
-<label>
-アプリ名
-</label>
-
-<input
-id="settingAppName"
-autocomplete="off"
-onfocus="showSettingSuggestions(
-     'settingAppName',
-     'settingAppNameResults',
-     'appName',
-     true
-   )"
-oninput="showSettingSuggestions(
-     'settingAppName',
-     'settingAppNameResults',
-     'appName',
-     false
-   )"
->
-
-<div
-id="settingAppNameResults"
-class="setting-results"
-></div>
-
-</div>
-
-
-<div class="field setting-combo">
-
-<label>
-人物名称
-</label>
-
-<input
-id="settingPersonLabel"
-autocomplete="off"
-onfocus="showSettingSuggestions(
-     'settingPersonLabel',
-     'settingPersonLabelResults',
-     'personLabel',
-     true
-   )"
-oninput="showSettingSuggestions(
-     'settingPersonLabel',
-     'settingPersonLabelResults',
-     'personLabel',
-     false
-   )"
->
-
-<div
-id="settingPersonLabelResults"
-class="setting-results"
-></div>
-
-</div>
-
+  <div class="modal">
 
-<div class="field setting-combo">
 
-<label>
-店名の表示名
-</label>
+    <div class="modal-head">
 
-<input
-id="settingPlaceLabel"
-autocomplete="off"
-onfocus="showSettingSuggestions(
-     'settingPlaceLabel',
-     'settingPlaceLabelResults',
-     'placeLabel',
-     true
-   )"
-oninput="showSettingSuggestions(
-     'settingPlaceLabel',
-     'settingPlaceLabelResults',
-     'placeLabel',
-     false
-   )"
->
+      <div
+        id="interactionModalTitle"
+        class="modal-title"
+      >
+        交流記録を追加
+      </div>
 
-<div
-id="settingPlaceLabelResults"
-class="setting-results"
-></div>
+      <button
+        class="close"
+        onclick="closeInteractionForm()"
+      >
+        ×
+      </button>
 
-</div>
+    </div>
 
 
-<div class="field setting-combo">
+    <div class="form-note">
+      すべて任意項目です。
+    </div>
 
-<label>
-店名ふりがなの表示名
-</label>
 
-<input
-id="settingPlaceKanaLabel"
-autocomplete="off"
-onfocus="showSettingSuggestions(
-     'settingPlaceKanaLabel',
-     'settingPlaceKanaLabelResults',
-     'placeKanaLabel',
-     true
-   )"
-oninput="showSettingSuggestions(
-     'settingPlaceKanaLabel',
-     'settingPlaceKanaLabelResults',
-     'placeKanaLabel',
-     false
-   )"
->
+    <input
+      id="interactionId"
+      type="hidden"
+    >
 
-<div
-id="settingPlaceKanaLabelResults"
-class="setting-results"
-></div>
 
-</div>
+    <div class="field">
 
+      <label>
+        日付
+      </label>
 
-<div class="form-actions">
+      <input
+        id="interactionDate"
+        type="date"
+      >
 
-<button
-class="primary"
-onclick="saveSettingsForm()"
->
-設定を保存
-</button>
+    </div>
 
-</div>
 
-</div>
+    <div class="field">
 
-</section>
+      <label>
+        交流した場所・種別
+      </label>
 
+      <input
+        id="interactionType"
+        list="interactionTypeOptions"
+        placeholder="例：研修、Instagram"
+      >
 
-<section
-id="pageDetail"
-class="page"
->
+      <datalist id="interactionTypeOptions">
 
-<div id="detailContent"></div>
+        <option value="研修"></option>
+        <option value="勉強会"></option>
+        <option value="懇親会"></option>
+        <option value="Instagram"></option>
+        <option value="LINE"></option>
+        <option value="電話"></option>
+        <option value="Zoom"></option>
+        <option value="その他"></option>
 
-</section>
+      </datalist>
 
+    </div>
 
-</main>
 
+    <div class="field">
 
-<nav class="bottom-nav">
+      <label>
+        メモ
+      </label>
 
-<button
-id="navMap"
-class="nav-btn active"
-onclick="showPage('map')"
->
+      <textarea
+        id="interactionMemo"
+        style="min-height:180px"
+        placeholder="話したこと・出来事・やりとりなど"
+      ></textarea>
 
-<span class="nav-icon">
-🗾
-</span>
+    </div>
 
-<span>
-地図
-</span>
 
-</button>
+    <div class="form-actions">
 
+      <button
+        class="secondary"
+        onclick="closeInteractionForm()"
+      >
+        キャンセル
+      </button>
 
-<button
-id="navList"
-class="nav-btn"
-onclick="showPage('list')"
->
+      <button
+        class="primary"
+        onclick="saveInteractionForm()"
+      >
+        保存
+      </button>
 
-<span class="nav-icon">
-👥
-</span>
+    </div>
 
-<span id="navListText">
-先生一覧
-</span>
 
-</button>
-
-
-<button
-id="navSearch"
-class="nav-btn"
-onclick="showPage('search')"
->
-
-<span class="nav-icon">
-⌕
-</span>
-
-<span>
-検索
-</span>
-
-</button>
-
-
-<button
-class="nav-btn"
-onclick="openTeacherForm()"
->
-
-<span class="nav-icon">
-＋
-</span>
-
-<span>
-追加
-</span>
-
-</button>
-
-
-<button
-id="navSettings"
-class="nav-btn"
-onclick="showPage('settings')"
->
-
-<span class="nav-icon">
-⚙
-</span>
-
-<span>
-設定
-</span>
-
-</button>
-
-</nav>
-
+  </div>
 
 </div>
 
 
 <!-- =====================================
-    先生フォーム
-    ===================================== -->
+     リンク・SNSフォーム
+     ===================================== -->
 
 <div
-id="teacherModal"
-class="modal-bg"
+  id="linkModal"
+  class="modal-bg"
 >
 
-<div class="modal">
+  <div class="modal">
 
+    <div class="modal-head">
 
-<div class="modal-head">
+      <div
+        id="linkModalTitle"
+        class="modal-title"
+      >
+        リンク・SNSを追加
+      </div>
 
-<div
-id="modalTitle"
-class="modal-title"
->
-先生を追加
-</div>
+      <button
+        class="close"
+        onclick="closeLinkForm()"
+      >
+        ×
+      </button>
 
-<button
-class="close"
-onclick="closeTeacherForm()"
->
-×
-</button>
+    </div>
 
-</div>
 
+    <input
+      id="linkId"
+      type="hidden"
+    >
 
-<div class="form-note">
-すべて任意項目です。分かる内容だけ入力してください。
-</div>
 
+    <div class="field">
 
-<input
-id="teacherId"
-type="hidden"
->
+      <label>
+        種類
+      </label>
 
+      <select
+        id="linkType"
+        onchange="updateLinkInputGuide()"
+      >
 
-<div class="grid2">
+        <option value="Instagram">Instagram</option>
+        <option value="ホームページ">ホームページ</option>
+        <option value="Facebook">Facebook</option>
+        <option value="X">X</option>
+        <option value="Threads">Threads</option>
+        <option value="TikTok">TikTok</option>
+        <option value="YouTube">YouTube</option>
+        <option value="LINE">LINE</option>
+        <option value="ブログ">ブログ</option>
+        <option value="その他">その他</option>
 
-<div class="field">
+      </select>
 
-<label>
-名前
-</label>
+    </div>
 
-<input id="name">
 
-</div>
+    <div class="field">
 
+      <label>
+        表示名
+      </label>
 
-<div class="field">
+      <input
+        id="linkDisplayName"
+        placeholder="空欄なら種類名を表示"
+      >
 
-<label>
-ふりがな
-</label>
+    </div>
 
-<input id="kana">
 
-</div>
+    <div class="field">
 
-</div>
+      <label id="linkValueLabel">
+        アカウント名またはURL
+      </label>
 
+      <input
+        id="linkValue"
+        placeholder="例：ユーザー名 / @ユーザー名 / Instagram URL"
+      >
 
-<div class="grid2">
+      <div
+        id="linkValueNote"
+        class="small-note"
+      >
+        Instagramはアカウント名だけでも登録できます。
+      </div>
 
-<div class="field">
+    </div>
 
-<label>
-呼び名
-</label>
 
-<input id="nickname">
+    <div class="form-actions">
 
-</div>
+      <button
+        class="secondary"
+        onclick="closeLinkForm()"
+      >
+        キャンセル
+      </button>
 
+      <button
+        class="primary"
+        onclick="saveLinkForm()"
+      >
+        保存
+      </button>
 
-<div class="field">
+    </div>
 
-<label>
-性別
-</label>
-
-<select id="gender">
-
-<option value="">未設定</option>
-<option value="女">女</option>
-<option value="男">男</option>
-
-</select>
-
-</div>
-
-</div>
-
-
-<div class="grid2">
-
-<div class="field">
-
-<label>
-生まれ年
-</label>
-
-<input
-id="birthYear"
-type="number"
->
-
-</div>
-
-
-<div class="field">
-
-<label>
-年齢
-</label>
-
-<input
-id="ageManual"
-type="number"
->
-
-</div>
-
-</div>
-
-
-<div class="grid2">
-
-<div class="field">
-
-<label>
-誕生月
-</label>
-
-<input
-id="birthMonth"
-type="number"
-min="1"
-max="12"
->
-
-</div>
-
-
-<div class="field">
-
-<label>
-誕生日
-</label>
-
-<input
-id="birthDay"
-type="number"
-min="1"
-max="31"
->
-
-</div>
-
-</div>
-
-
-<div class="field">
-
-<label id="placeNameLabel">
-サロン名
-</label>
-
-<input id="salonName">
-
-</div>
-
-
-<div class="field">
-
-<label id="placeKanaLabel">
-サロン名ふりがな
-</label>
-
-<input id="salonKana">
-
-</div>
-
-
-<div class="grid2">
-
-
-<div class="field combo">
-
-<label>
-都道府県
-</label>
-
-<input
-id="prefecture"
-autocomplete="off"
-placeholder="検索して選択"
-onfocus="showPrefectureResults()"
-oninput="showPrefectureResults()"
->
-
-<div
-id="prefResults"
-class="combo-results"
-></div>
-
-</div>
-
-
-<div class="field combo">
-
-<label>
-市区町村
-</label>
-
-<input
-id="city"
-autocomplete="off"
-placeholder="検索して選択"
-onfocus="showCityResults()"
-oninput="showCityResults()"
->
-
-<div
-id="cityResults"
-class="combo-results"
-></div>
-
-</div>
-
-
-</div>
-
-
-<div class="field">
-
-<label>
-町名・番地
-</label>
-
-<input id="address1">
-
-</div>
-
-
-<div class="field">
-
-<label>
-建物名・部屋番号
-</label>
-
-<input id="address2">
-
-</div>
-
-
-<div
-id="linkEditArea"
-class="children-area"
-></div>
-
-
-<div class="field">
-
-<label>
-メモ
-</label>
-
-<textarea id="memo"></textarea>
-
-</div>
-
-
-<div
-id="childrenEditArea"
-class="children-area"
-></div>
-
-
-<div
-id="interactionEditArea"
-class="children-area"
-></div>
-
-
-<div class="form-actions">
-
-<button
-class="secondary"
-onclick="closeTeacherForm()"
->
-キャンセル
-</button>
-
-<button
-class="primary"
-onclick="saveTeacherForm()"
->
-保存
-</button>
-
-</div>
-
-
-</div>
+  </div>
 
 </div>
 
 
 <!-- =====================================
-    交流履歴フォーム
-    ===================================== -->
+     アプリ内確認ダイアログ
+     ===================================== -->
 
 <div
-id="interactionModal"
-class="modal-bg"
+  id="confirmModal"
+  class="confirm-bg"
 >
 
-<div class="modal">
-
-
-<div class="modal-head">
-
-<div
-id="interactionModalTitle"
-class="modal-title"
->
-交流記録を追加
-</div>
-
-<button
-class="close"
-onclick="closeInteractionForm()"
->
-×
-</button>
-
-</div>
-
-
-<div class="form-note">
-すべて任意項目です。
-</div>
-
-
-<input
-id="interactionId"
-type="hidden"
->
-
-
-<div class="field">
-
-<label>
-日付
-</label>
-
-<input
-id="interactionDate"
-type="date"
->
-
-</div>
-
-
-<div class="field">
-
-<label>
-交流した場所・種別
-</label>
-
-<input
-id="interactionType"
-list="interactionTypeOptions"
-placeholder="例：研修、Instagram"
->
-
-<datalist id="interactionTypeOptions">
-
-<option value="研修"></option>
-<option value="勉強会"></option>
-<option value="懇親会"></option>
-<option value="Instagram"></option>
-<option value="LINE"></option>
-<option value="電話"></option>
-<option value="Zoom"></option>
-<option value="その他"></option>
-
-</datalist>
-
-</div>
-
-
-<div class="field">
-
-<label>
-メモ
-</label>
-
-<textarea
-id="interactionMemo"
-style="min-height:180px"
-placeholder="話したこと・出来事・やりとりなど"
-></textarea>
-
-</div>
-
-
-<div class="form-actions">
-
-<button
-class="secondary"
-onclick="closeInteractionForm()"
->
-キャンセル
-</button>
-
-<button
-class="primary"
-onclick="saveInteractionForm()"
->
-保存
-</button>
-
-</div>
-
-
-</div>
-
-</div>
-
-
-<!-- =====================================
-    リンク・SNSフォーム
-    ===================================== -->
-
-<div
-id="linkModal"
-class="modal-bg"
->
-
-<div class="modal">
-
-<div class="modal-head">
-
-<div
-id="linkModalTitle"
-class="modal-title"
->
-リンク・SNSを追加
-</div>
-
-<button
-class="close"
-onclick="closeLinkForm()"
->
-×
-</button>
-
-</div>
-
-
-<input
-id="linkId"
-type="hidden"
->
-
-
-<div class="field">
-
-<label>
-種類
-</label>
-
-<select
-id="linkType"
-onchange="updateLinkInputGuide()"
->
-
-<option value="Instagram">Instagram</option>
-<option value="ホームページ">ホームページ</option>
-<option value="Facebook">Facebook</option>
-<option value="X">X</option>
-<option value="Threads">Threads</option>
-<option value="TikTok">TikTok</option>
-<option value="YouTube">YouTube</option>
-<option value="LINE">LINE</option>
-<option value="ブログ">ブログ</option>
-<option value="その他">その他</option>
-
-</select>
-
-</div>
-
-
-<div class="field">
-
-<label>
-表示名
-</label>
-
-<input
-id="linkDisplayName"
-placeholder="空欄なら種類名を表示"
->
-
-</div>
-
-
-<div class="field">
-
-<label id="linkValueLabel">
-アカウント名またはURL
-</label>
-
-<input
-id="linkValue"
-placeholder="例：ユーザー名 / @ユーザー名 / Instagram URL"
->
-
-<div
-id="linkValueNote"
-class="small-note"
->
-Instagramはアカウント名だけでも登録できます。
-</div>
-
-</div>
-
-
-<div class="form-actions">
-
-<button
-class="secondary"
-onclick="closeLinkForm()"
->
-キャンセル
-</button>
-
-<button
-class="primary"
-onclick="saveLinkForm()"
->
-保存
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- =====================================
-    アプリ内確認ダイアログ
-    ===================================== -->
-
-<div
-id="confirmModal"
-class="confirm-bg"
->
-
-<div class="confirm-card">
-
-<div
-id="confirmTitle"
-class="confirm-title"
->
-確認
-</div>
-
-<div
-id="confirmMessage"
-class="confirm-message"
-></div>
-
-<div class="confirm-actions">
-
-<button
-id="confirmCancel"
-class="secondary"
->
-キャンセル
-</button>
-
-<button
-id="confirmOk"
-class="confirm-danger"
->
-削除する
-</button>
-
-</div>
-
-</div>
+  <div class="confirm-card">
+
+    <div
+      id="confirmTitle"
+      class="confirm-title"
+    >
+      確認
+    </div>
+
+    <div
+      id="confirmMessage"
+      class="confirm-message"
+    ></div>
+
+    <div class="confirm-actions">
+
+      <button
+        id="confirmCancel"
+        class="secondary"
+      >
+        キャンセル
+      </button>
+
+      <button
+        id="confirmOk"
+        class="confirm-danger"
+      >
+        削除する
+      </button>
+
+    </div>
+
+  </div>
 
 </div>
 
@@ -1270,7 +1196,7 @@ class="confirm-danger"
 
 <script src="./config.js?v=20261006-03"></script>
 
-<script src="./app.js?v=20261006-13"></script>
+<script src="./app.js?v=20261007-02"></script>
 
 <script src="./app-enhancements.js?v=20261007-01"></script>
 
