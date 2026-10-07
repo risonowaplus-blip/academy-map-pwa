@@ -3483,11 +3483,38 @@ function openTeacherForm(
 
   renderTeacherFormInteractions();
 
+  var teacherModal =
   document.getElementById(
     'teacherModal'
-  ).classList.add(
-    'show'
   );
+
+
+teacherModal.classList.add(
+  'show'
+);
+
+
+/* フォームを開くたびに最上部へ戻す */
+requestAnimationFrame(
+  function() {
+
+    var modalBody =
+      teacherModal.querySelector(
+        '.modal'
+      );
+
+
+    if (
+      modalBody
+    ) {
+
+      modalBody.scrollTop =
+        0;
+
+    }
+
+  }
+);
 
 }
 
