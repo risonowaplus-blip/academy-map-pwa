@@ -1,4 +1,4 @@
-"var teachers = [];
+var teachers = [];
 var addressMaster = {};
 var selectedPrefecture = '';
 var selectedTeacherId = '';
@@ -904,7 +904,7 @@ function renderJapanMap() {
   ) {
 
     el.innerHTML =
-      '<div class=""empty"">日本地図を読み込めませんでした。</div>';
+      '<div class="empty">日本地図を読み込めませんでした。</div>';
 
     return;
   }
@@ -1180,11 +1180,11 @@ function renderStats() {
     'stats'
   ).innerHTML =
 
-    '<div class=""stat"">全国 ' +
+    '<div class="stat">全国 ' +
     teachers.length +
     '名</div>' +
 
-    '<div class=""stat"">所在地不明 ' +
+    '<div class="stat">所在地不明 ' +
     unknown +
     '名</div>';
 
@@ -1433,9 +1433,9 @@ function renderPrefList() {
     }
 
     html +=
-      '<div class=""pref-region-group""' +
+      '<div class="pref-region-group"' +
 
-      ' style=""' +
+      ' style="' +
 
       '--region-base:' +
       getRegionBaseColor(
@@ -1447,11 +1447,11 @@ function renderPrefList() {
       getRegionTeacherColor(
         regionName
       ) +
-      ';"">';
+      ';">';
 
     html +=
 
-      '<div class=""pref-region-title"">' +
+      '<div class="pref-region-title">' +
 
       escapeHtml(
         regionName
@@ -1459,7 +1459,7 @@ function renderPrefList() {
 
       '</div>' +
 
-      '<div class=""pref-region-chips"">';
+      '<div class="pref-region-chips">';
 
     for (
       var prefIndex = 0;
@@ -1496,17 +1496,17 @@ function renderPrefList() {
 
       html +=
 
-        '<button class=""' +
+        '<button class="' +
 
         cls +
 
-        '"" onclick=""selectPrefecture(\'' +
+        '" onclick="selectPrefecture(\'' +
 
         escapeJs(
           row.prefecture
         ) +
 
-        '\')"">' +
+        '\')">' +
 
         escapeHtml(
           row.prefecture
@@ -1539,13 +1539,13 @@ function renderPrefList() {
 
     html +=
 
-      '<div class=""pref-region-group unknown-region"">' +
+      '<div class="pref-region-group unknown-region">' +
 
-      '<div class=""pref-region-title"">所在地不明</div>' +
+      '<div class="pref-region-title">所在地不明</div>' +
 
-      '<div class=""pref-region-chips"">' +
+      '<div class="pref-region-chips">' +
 
-      '<button class=""chip' +
+      '<button class="chip' +
 
       (
         selectedPrefecture ===
@@ -1554,7 +1554,7 @@ function renderPrefList() {
           : ''
       ) +
 
-      '"" onclick=""selectUnknown()"">' +
+      '" onclick="selectUnknown()">' +
 
       '所在地不明 ' +
 
@@ -1697,15 +1697,15 @@ function teacherCard(teacher) {
 
   return (
 
-    '<div class=""teacher"" onclick=""openTeacherDetail(\'' +
+    '<div class="teacher" onclick="openTeacherDetail(\'' +
 
     escapeJs(
       teacher.teacherId
     ) +
 
-    '\')"">' +
+    '\')">' +
 
-    '<div class=""teacher-name"">' +
+    '<div class="teacher-name">' +
 
     escapeHtml(
       teacher.name ||
@@ -1716,7 +1716,7 @@ function teacherCard(teacher) {
 
     (
       teacher.nickname
-        ? '<div class=""meta"">' +
+        ? '<div class="meta">' +
           escapeHtml(
             teacher.nickname
           ) +
@@ -1726,7 +1726,7 @@ function teacherCard(teacher) {
 
     (
       teacher.salonName
-        ? '<div class=""meta"">' +
+        ? '<div class="meta">' +
           escapeHtml(
             teacher.salonName
           ) +
@@ -1736,12 +1736,12 @@ function teacherCard(teacher) {
 
     (
       location
-        ? '<div class=""meta"">' +
+        ? '<div class="meta">' +
           escapeHtml(
             location
           ) +
           '</div>'
-        : '<div class=""meta"">所在地不明</div>'
+        : '<div class="meta">所在地不明</div>'
     ) +
 
     '</div>'
@@ -1862,7 +1862,7 @@ function renderMapTeacherPreview() {
 
   var html =
 
-    '<div class=""section-title"">' +
+    '<div class="section-title">' +
 
     escapeHtml(
       title
@@ -1880,7 +1880,7 @@ function renderMapTeacherPreview() {
 
     html +=
 
-      '<div class=""empty"">該当する' +
+      '<div class="empty">該当する' +
 
       escapeHtml(
         personLabel()
@@ -1891,7 +1891,7 @@ function renderMapTeacherPreview() {
   } else {
 
     html +=
-      '<div class=""teacher-list"">';
+      '<div class="teacher-list">';
 
     for (
       var j = 0;
@@ -1958,7 +1958,7 @@ function renderFullTeacherList() {
     html ||
 
     (
-      '<div class=""empty"">該当する' +
+      '<div class="empty">該当する' +
 
       escapeHtml(
         personLabel()
@@ -1985,7 +1985,7 @@ function renderSearchResults() {
     document.getElementById(
       'searchResults'
     ).innerHTML =
-      '<div class=""empty"">検索語を入力してください。</div>';
+      '<div class="empty">検索語を入力してください。</div>';
 
     return;
   }
@@ -2021,7 +2021,7 @@ function renderSearchResults() {
     html ||
 
     (
-      '<div class=""empty"">該当する' +
+      '<div class="empty">該当する' +
 
       escapeHtml(
         personLabel()
@@ -2235,15 +2235,15 @@ function detailRow(
 
   return (
 
-    '<div class=""detail-row"">' +
+    '<div class="detail-row">' +
 
-    '<div class=""label"">' +
+    '<div class="label">' +
 
     escapeHtml(label) +
 
     '</div>' +
 
-    '<div class=""value"">' +
+    '<div class="value">' +
 
     escapeHtml(
       String(value)
@@ -2264,13 +2264,13 @@ function renderTeacherDetail(
 
   var html =
 
-    '<div class=""card"">' +
+    '<div class="card">' +
 
-    '<div class=""detail-head"">' +
+    '<div class="detail-head">' +
 
     '<div>' +
 
-    '<div class=""detail-name"">' +
+    '<div class="detail-name">' +
 
     escapeHtml(
       teacher.name ||
@@ -2281,7 +2281,7 @@ function renderTeacherDetail(
 
     (
       teacher.kana
-        ? '<div class=""meta"">' +
+        ? '<div class="meta">' +
           escapeHtml(
             teacher.kana
           ) +
@@ -2291,23 +2291,23 @@ function renderTeacherDetail(
 
     '</div>' +
 
-    '<div class=""detail-head-actions"">' +
+    '<div class="detail-head-actions">' +
 
-    '<button class=""secondary"" onclick=""openTeacherForm(\'' +
-
-    escapeJs(
-      teacher.teacherId
-    ) +
-
-    '\')"">編集</button>' +
-
-    '<button class=""detail-delete-button"" onclick=""deleteTeacherAction(\'' +
+    '<button class="secondary" onclick="openTeacherForm(\'' +
 
     escapeJs(
       teacher.teacherId
     ) +
 
-    '\')"">🗑 削除</button>' +
+    '\')">編集</button>' +
+
+    '<button class="detail-delete-button" onclick="deleteTeacherAction(\'' +
+
+    escapeJs(
+      teacher.teacherId
+    ) +
+
+    '\')">🗑 削除</button>' +
 
     '</div>' +
 
@@ -2373,11 +2373,11 @@ function renderTeacherDetail(
 
     html +=
 
-      '<div class=""detail-row"">' +
+      '<div class="detail-row">' +
 
-      '<div class=""label"">リンク・SNS</div>' +
+      '<div class="label">リンク・SNS</div>' +
 
-      '<div class=""link-list"">';
+      '<div class="link-list">';
 
     for (
       var linkIndex = 0;
@@ -2408,15 +2408,15 @@ function renderTeacherDetail(
 
     html +=
 
-      '<div class=""actions"">' +
+      '<div class="actions">' +
 
-      '<button class=""secondary"" onclick=""openGoogleMap(\'' +
+      '<button class="secondary" onclick="openGoogleMap(\'' +
 
       escapeJs(
         teacher.fullAddress
       ) +
 
-      '\')"">Google Maps</button>' +
+      '\')">Google Maps</button>' +
 
       '</div>';
 
@@ -2432,17 +2432,17 @@ function renderTeacherDetail(
 
   html +=
 
-    '<div class=""card"">' +
+    '<div class="card">' +
 
-    '<div class=""detail-head"">' +
+    '<div class="detail-head">' +
 
-    '<div class=""section-title"">交流履歴 ' +
+    '<div class="section-title">交流履歴 ' +
 
     interactions.length +
 
     '件</div>' +
 
-    '<button class=""primary"" onclick=""openInteractionForm()"">＋ 追加</button>' +
+    '<button class="primary" onclick="openInteractionForm()">＋ 追加</button>' +
 
     '</div>';
 
@@ -2451,7 +2451,7 @@ function renderTeacherDetail(
   ) {
 
     html +=
-      '<div class=""empty"">交流記録はまだありません。</div>';
+      '<div class="empty">交流記録はまだありません。</div>';
 
   } else {
 
@@ -2482,11 +2482,11 @@ function renderTeacherDetail(
 
   html +=
 
-    '<div class=""card"">' +
+    '<div class="card">' +
 
-    '<div class=""detail-head"">' +
+    '<div class="detail-head">' +
 
-    '<div class=""section-title"">' +
+    '<div class="section-title">' +
 
     '子ども情報 ' +
 
@@ -2494,13 +2494,13 @@ function renderTeacherDetail(
 
     '人</div>' +
 
-    '<button class=""primary"" onclick=""openTeacherFormForNewChild(\'' +
+    '<button class="primary" onclick="openTeacherFormForNewChild(\'' +
 
     escapeJs(
       teacher.teacherId
     ) +
 
-    '\')"">＋ 追加</button>' +
+    '\')">＋ 追加</button>' +
 
     '</div>';
 
@@ -2509,7 +2509,7 @@ function renderTeacherDetail(
   ) {
 
     html +=
-      '<div class=""empty"">登録なし</div>';
+      '<div class="empty">登録なし</div>';
 
   } else {
 
@@ -2526,9 +2526,9 @@ function renderTeacherDetail(
 
       html +=
 
-        '<div class=""child"">' +
+        '<div class="child">' +
 
-        '<div class=""child-name-text"">' +
+        '<div class="child-name-text">' +
 
         escapeHtml(
           child.name ||
@@ -2546,7 +2546,7 @@ function renderTeacherDetail(
 
         html +=
 
-          '<div class=""meta"">' +
+          '<div class="meta">' +
 
           escapeHtml(
             child.nickname
@@ -2562,7 +2562,7 @@ function renderTeacherDetail(
 
         html +=
 
-          '<div class=""meta"">性別：' +
+          '<div class="meta">性別：' +
 
           escapeHtml(
             child.gender
@@ -2578,7 +2578,7 @@ function renderTeacherDetail(
 
         html +=
 
-          '<div class=""meta"">学年：' +
+          '<div class="meta">学年：' +
 
           escapeHtml(
             child.gradeDisplay
@@ -2594,7 +2594,7 @@ function renderTeacherDetail(
 
         html +=
 
-          '<div class=""meta"">年齢：' +
+          '<div class="meta">年齢：' +
 
           escapeHtml(
             child.ageDisplay
@@ -2612,7 +2612,7 @@ function renderTeacherDetail(
 
         html +=
 
-          '<div class=""meta"">誕生日：' +
+          '<div class="meta">誕生日：' +
 
           escapeHtml(
             birthdayText(
@@ -2630,7 +2630,7 @@ function renderTeacherDetail(
 
         html +=
 
-          '<div class=""meta"">' +
+          '<div class="meta">' +
 
           escapeHtml(
             child.memo
@@ -2676,13 +2676,13 @@ function renderInteractionCard(
 
   var html =
 
-    '<div class=""child"">' +
+    '<div class="child">' +
 
-    '<div class=""detail-head"">' +
+    '<div class="detail-head">' +
 
     '<div>' +
 
-    '<div class=""interaction-date"">' +
+    '<div class="interaction-date">' +
 
     escapeHtml(
       dateText
@@ -2690,7 +2690,7 @@ function renderInteractionCard(
 
     '</div>' +
 
-    '<span class=""interaction-type-label"">' +
+    '<span class="interaction-type-label">' +
 
     escapeHtml(
       typeText
@@ -2700,23 +2700,23 @@ function renderInteractionCard(
 
     '</div>' +
 
-    '<div class=""detail-head-actions"">' +
+    '<div class="detail-head-actions">' +
 
-    '<button class=""secondary"" onclick=""openInteractionForm(\'' +
-
-    escapeJs(
-      interaction.interactionId
-    ) +
-
-    '\')"">編集</button>' +
-
-    '<button class=""detail-delete-button"" onclick=""deleteInteractionAction(\'' +
+    '<button class="secondary" onclick="openInteractionForm(\'' +
 
     escapeJs(
       interaction.interactionId
     ) +
 
-    '\')"">🗑 削除</button>' +
+    '\')">編集</button>' +
+
+    '<button class="detail-delete-button" onclick="deleteInteractionAction(\'' +
+
+    escapeJs(
+      interaction.interactionId
+    ) +
+
+    '\')">🗑 削除</button>' +
 
     '</div>' +
 
@@ -2728,7 +2728,7 @@ function renderInteractionCard(
 
     html +=
 
-      '<div style=""margin-top:10px;white-space:pre-wrap;line-height:1.7"">' +
+      '<div style="margin-top:10px;white-space:pre-wrap;line-height:1.7">' +
 
       escapeHtml(
         interaction.memo
@@ -3427,8 +3427,7 @@ async function saveTeacherForm() {
       ),
 
     ageManual:
-      valueOf("
-              "
+      valueOf(
         'ageManual'
       ),
 
@@ -3571,9 +3570,9 @@ function renderTeacherFormInteractions() {
 
   var html =
 
-    '<div class=""detail-head"">' +
+    '<div class="detail-head">' +
 
-    '<div class=""section-title"">' +
+    '<div class="section-title">' +
 
     '交流履歴 ' +
 
@@ -3583,7 +3582,7 @@ function renderTeacherFormInteractions() {
 
     '</div>' +
 
-    '<button type=""button"" class=""secondary"" onclick=""openTeacherFormInteraction()"">' +
+    '<button type="button" class="secondary" onclick="openTeacherFormInteraction()">' +
 
     '＋ 交流記録' +
 
@@ -3598,7 +3597,7 @@ function renderTeacherFormInteractions() {
 
     html +=
 
-      '<div class=""empty"">' +
+      '<div class="empty">' +
 
       '交流記録はまだありません。' +
 
@@ -3617,13 +3616,13 @@ function renderTeacherFormInteractions() {
 
     html +=
 
-      '<div class=""child"">' +
+      '<div class="child">' +
 
-      '<div class=""detail-head"">' +
+      '<div class="detail-head">' +
 
       '<div>' +
 
-      '<div class=""interaction-date"">' +
+      '<div class="interaction-date">' +
 
       escapeHtml(
         interaction.date ||
@@ -3632,7 +3631,7 @@ function renderTeacherFormInteractions() {
 
       '</div>' +
 
-      '<span class=""interaction-type-label"">' +
+      '<span class="interaction-type-label">' +
 
       escapeHtml(
         interaction.interactionType ||
@@ -3643,19 +3642,19 @@ function renderTeacherFormInteractions() {
 
       '</div>' +
 
-      '<div class=""detail-head-actions"">' +
+      '<div class="detail-head-actions">' +
 
-      '<button type=""button"" class=""secondary"" onclick=""openTeacherFormInteraction(' +
-
-      i +
-
-      ')"">編集</button>' +
-
-      '<button type=""button"" class=""detail-delete-button"" onclick=""removeTeacherFormInteraction(' +
+      '<button type="button" class="secondary" onclick="openTeacherFormInteraction(' +
 
       i +
 
-      ')"">🗑 削除</button>' +
+      ')">編集</button>' +
+
+      '<button type="button" class="detail-delete-button" onclick="removeTeacherFormInteraction(' +
+
+      i +
+
+      ')">🗑 削除</button>' +
 
       '</div>' +
 
@@ -3667,7 +3666,7 @@ function renderTeacherFormInteractions() {
 
       html +=
 
-        '<div style=""margin-top:8px;white-space:pre-wrap;line-height:1.7"">' +
+        '<div style="margin-top:8px;white-space:pre-wrap;line-height:1.7">' +
 
         escapeHtml(
           interaction.memo
@@ -3836,9 +3835,9 @@ function renderLinksEditor() {
 
   var html =
 
-    '<div class=""detail-head"">' +
+    '<div class="detail-head">' +
 
-    '<div class=""section-title"">' +
+    '<div class="section-title">' +
 
     'リンク・SNS ' +
 
@@ -3846,7 +3845,7 @@ function renderLinksEditor() {
 
     '件</div>' +
 
-    '<button type=""button"" class=""secondary"" onclick=""openTeacherFormLink()"">' +
+    '<button type="button" class="secondary" onclick="openTeacherFormLink()">' +
 
     '＋ リンクを追加' +
 
@@ -3860,7 +3859,7 @@ function renderLinksEditor() {
 
     html +=
 
-      '<div class=""empty"">' +
+      '<div class="empty">' +
 
       'リンク・SNSはまだありません。' +
 
@@ -3887,13 +3886,13 @@ function renderLinksEditor() {
 
     html +=
 
-      '<div class=""link-edit"">' +
+      '<div class="link-edit">' +
 
-      '<div class=""detail-head"">' +
+      '<div class="detail-head">' +
 
-      '<div class=""link-row-main"">' +
+      '<div class="link-row-main">' +
 
-      '<div class=""link-label"">' +
+      '<div class="link-label">' +
 
       escapeHtml(
         label
@@ -3901,7 +3900,7 @@ function renderLinksEditor() {
 
       '</div>' +
 
-      '<div class=""link-value"">' +
+      '<div class="link-value">' +
 
       escapeHtml(
         displayLinkValue(
@@ -3913,19 +3912,19 @@ function renderLinksEditor() {
 
       '</div>' +
 
-      '<div class=""detail-head-actions"">' +
+      '<div class="detail-head-actions">' +
 
-      '<button type=""button"" class=""secondary"" onclick=""openTeacherFormLink(' +
-
-      i +
-
-      ')"">編集</button>' +
-
-      '<button type=""button"" class=""detail-delete-button"" onclick=""removeTeacherFormLink(' +
+      '<button type="button" class="secondary" onclick="openTeacherFormLink(' +
 
       i +
 
-      ')"">🗑 削除</button>' +
+      ')">編集</button>' +
+
+      '<button type="button" class="detail-delete-button" onclick="removeTeacherFormLink(' +
+
+      i +
+
+      ')">🗑 削除</button>' +
 
       '</div>' +
 
@@ -4307,11 +4306,11 @@ function renderDetailLink(
 
   return (
 
-    '<div class=""link-row"">' +
+    '<div class="link-row">' +
 
-    '<div class=""link-row-main"">' +
+    '<div class="link-row-main">' +
 
-    '<div class=""link-label"">' +
+    '<div class="link-label">' +
 
     escapeHtml(
       label
@@ -4319,7 +4318,7 @@ function renderDetailLink(
 
     '</div>' +
 
-    '<div class=""link-value"">' +
+    '<div class="link-value">' +
 
     escapeHtml(
       displayLinkValue(
@@ -4331,7 +4330,7 @@ function renderDetailLink(
 
     '</div>' +
 
-    '<button class=""secondary link-open"" onclick=""openLink(\'' +
+    '<button class="secondary link-open" onclick="openLink(\'' +
 
     escapeJs(
       link.type ||
@@ -4345,7 +4344,7 @@ function renderDetailLink(
       ''
     ) +
 
-    '\')"">開く</button>' +
+    '\')">開く</button>' +
 
     '</div>'
 
@@ -4904,11 +4903,11 @@ function renderChildrenEditor(
     'childrenEditArea'
   ).innerHTML =
 
-    '<div class=""detail-head"">' +
+    '<div class="detail-head">' +
 
-    '<div class=""section-title"">子ども情報</div>' +
+    '<div class="section-title">子ども情報</div>' +
 
-    '<button type=""button"" class=""secondary"" onclick=""addChildRow()"">' +
+    '<button type="button" class="secondary" onclick="addChildRow()">' +
 
     '＋ 子どもを追加' +
 
@@ -4916,7 +4915,7 @@ function renderChildrenEditor(
 
     '</div>' +
 
-    '<div id=""childRows""></div>';
+    '<div id="childRows"></div>';
 
   for (
     var i = 0;
@@ -4956,7 +4955,7 @@ function addChildRow(
   );
 
   var gradeSelect =
-    '<select class=""child-grade"">';
+    '<select class="child-grade">';
 
   for (
     var i = 0;
@@ -4969,13 +4968,13 @@ function addChildRow(
 
     gradeSelect +=
 
-      '<option value=""' +
+      '<option value="' +
 
       escapeAttr(
         grade
       ) +
 
-      '""' +
+      '"' +
 
       (
         child.grade ===
@@ -5000,64 +4999,64 @@ function addChildRow(
 
   div.innerHTML =
 
-    '<div class=""grid2"">' +
+    '<div class="grid2">' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>名前</label>' +
 
-    '<input class=""child-name"" value=""' +
+    '<input class="child-name" value="' +
 
     escapeAttr(
       child.name ||
       ''
     ) +
 
-    '"">' +
+    '">' +
 
     '</div>' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>ふりがな</label>' +
 
-    '<input class=""child-kana"" value=""' +
+    '<input class="child-kana" value="' +
 
     escapeAttr(
       child.kana ||
       ''
     ) +
 
-    '"">' +
+    '">' +
 
     '</div>' +
 
     '</div>' +
 
-    '<div class=""grid2"">' +
+    '<div class="grid2">' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>呼び名</label>' +
 
-    '<input class=""child-nickname"" value=""' +
+    '<input class="child-nickname" value="' +
 
     escapeAttr(
       child.nickname ||
       ''
     ) +
 
-    '"">' +
+    '">' +
 
     '</div>' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>性別</label>' +
 
-    '<select class=""child-gender"">' +
+    '<select class="child-gender">' +
 
-    '<option value=""""' +
+    '<option value=""' +
 
     (
       !child.gender
@@ -5067,7 +5066,7 @@ function addChildRow(
 
     '>未設定</option>' +
 
-    '<option value=""女""' +
+    '<option value="女"' +
 
     (
       child.gender ===
@@ -5078,7 +5077,7 @@ function addChildRow(
 
     '>女</option>' +
 
-    '<option value=""男""' +
+    '<option value="男"' +
 
     (
       child.gender ===
@@ -5095,9 +5094,9 @@ function addChildRow(
 
     '</div>' +
 
-    '<div class=""grid2"">' +
+    '<div class="grid2">' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>学年</label>' +
 
@@ -5105,77 +5104,77 @@ function addChildRow(
 
     '</div>' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>年齢</label>' +
 
-    '<input type=""number"" class=""child-age"" value=""' +
+    '<input type="number" class="child-age" value="' +
 
     escapeAttr(
       child.ageManual ||
       ''
     ) +
 
-    '"">' +
+    '">' +
 
     '</div>' +
 
     '</div>' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>生まれ年</label>' +
 
-    '<input type=""number"" class=""child-year"" value=""' +
+    '<input type="number" class="child-year" value="' +
 
     escapeAttr(
       child.birthYear ||
       ''
     ) +
 
-    '"">' +
+    '">' +
 
     '</div>' +
 
-    '<div class=""grid2"">' +
+    '<div class="grid2">' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>誕生月</label>' +
 
-    '<input type=""number"" min=""1"" max=""12"" class=""child-month"" value=""' +
+    '<input type="number" min="1" max="12" class="child-month" value="' +
 
     escapeAttr(
       child.birthMonth ||
       ''
     ) +
 
-    '"">' +
+    '">' +
 
     '</div>' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>誕生日</label>' +
 
-    '<input type=""number"" min=""1"" max=""31"" class=""child-day"" value=""' +
+    '<input type="number" min="1" max="31" class="child-day" value="' +
 
     escapeAttr(
       child.birthDay ||
       ''
     ) +
 
-    '"">' +
+    '">' +
 
     '</div>' +
 
     '</div>' +
 
-    '<div class=""field"">' +
+    '<div class="field">' +
 
     '<label>メモ</label>' +
 
-    '<textarea class=""child-memo"">' +
+    '<textarea class="child-memo">' +
 
     escapeHtml(
       child.memo ||
@@ -5186,7 +5185,7 @@ function addChildRow(
 
     '</div>' +
 
-    '<button type=""button"" class=""detail-delete-button"" onclick=""removeChildRow(this)"">' +
+    '<button type="button" class="detail-delete-button" onclick="removeChildRow(this)">' +
 
     '🗑 この子ども情報を削除' +
 
@@ -6726,7 +6725,7 @@ function escapeHtml(str) {
     )
 
     .replace(
-      /""/g,
+      /"/g,
       '&quot;'
     )
 
@@ -6763,7 +6762,7 @@ function escapeJs(str) {
 
     .replace(
       /'/g,
-      ""\\'""
+      "\\'"
     )
 
     .replace(
@@ -6776,4 +6775,4 @@ function escapeJs(str) {
       '\\n'
     );
 
-}"
+}
