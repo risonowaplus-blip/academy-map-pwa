@@ -2590,3 +2590,793 @@ document.addEventListener(
 
   }
 );
+
+/* =========================================================
+   2026-10-07 追加修正
+   ・交流した場所・種別：検索＋候補＋新規追加
+   ・地図下の一覧も3行表示
+   ========================================================= */
+
+
+/* =========================================================
+   交流した場所・種別 候補
+   ========================================================= */
+
+var MIREL_INTERACTION_TYPE_DEFAULTS = [
+  '研修',
+  '勉強会',
+  'セミナー',
+  '講習会',
+  'イベント',
+  '懇親会',
+  '個別相談',
+  'Zoom',
+  'LINE',
+  'Instagram',
+  '電話',
+  'その他'
+];
+
+
+function mirelInteractionTypeCandidates() {
+
+  var result =
+    MIREL_INTERACTION_TYPE_DEFAULTS.slice();
+
+
+  /*
+   * すでに登録済みの交流種別も
+   * 自動的に候補へ加える
+   */
+  teachers.forEach(
+    function(teacher) {
+
+      var interactions =
+        teacher.interactions ||
+        [];
+
+
+      interactions.forEach(
+        function(interaction) {
+
+          var value =
+            String(
+              interaction.interactionType ||
+              ''
+            ).trim();
+
+
+          if (
+            value &&
+            result.indexOf(value) === -1
+          ) {
+
+            result.push(
+              value
+            );
+
+          }
+
+        }
+      );
+
+    }
+  );
+
+
+  /*
+   * 先生フォーム内でまだ保存していない
+   * 交流記録も候補へ加える
+   */
+  pendingInteractions.forEach(
+    function(interaction) {
+
+      var value =
+        String(
+          interaction.interactionType ||
+          ''
+        ).trim();
+
+
+      if (
+        value &&
+        result.indexOf(value) === -1
+      ) {
+
+        result.push(
+          value
+        );
+
+      }
+
+    }
+  );
+
+
+  return result;
+
+}
+
+
+/* =========================================================
+   交流種別 独自プルダウン
+   ========================================================= */
+
+function mirelInstallInteractionTypeSelect() {
+
+  var input =
+    document.getElementById(
+      'interactionType'
+    );
+
+
+  if (
+    !input ||
+    input.dataset.mirelInteractionReady === '1'
+  ) {
+
+    return;
+
+  }
+
+
+  input.dataset.mirelInteractionReady =
+    '1';
+
+
+  /*
+   * 古いdatalistは使わない
+   */
+  input.removeAttribute(
+    'list'
+  );
+
+  input.autocomplete =
+    'off';
+
+  input.placeholder =
+    '候補から選択・検索・直接入力';
+
+
+  var field =
+    input.closest(
+      '.field'
+    );
+
+
+  if (!field) {
+    return;
+  }
+
+
+  field.classList.add(
+    'mirel-interaction-select'
+  );
+
+
+  /*
+   * 右側のプルダウン矢印
+   */
+  var arrow =
+    document.createElement(
+      'button'
+    );
+
+  arrow.type =
+    'button';
+
+  arrow.className =
+    'mirel-interaction-arrow';
+
+  arrow.setAttribute(
+    'aria-label',
+    '候補を開く'
+  );
+
+
+  /*
+   * 候補パネル
+   */
+  var panel =
+    document.createElement(
+      'div'
+    );
+
+  panel.className =
+    'mirel-interaction-panel';
+
+
+  /*
+   * パネル内検索窓
+   */
+  var search =
+    document.createElement(
+      'input'
+    );
+
+  search.type =
+    'search';
+
+  search.className =
+    'mirel-interaction-search';
+
+  search.placeholder =
+    '候補を検索';
+
+
+  var list =
+    document.createElement(
+      'div'
+    );
+
+  list.className =
+    'mirel-interaction-options';
+
+
+  panel.appendChild(
+    search
+  );
+
+  panel.appendChild(
+    list
+  );
+
+
+  field.appendChild(
+    arrow
+  );
+
+  field.appendChild(
+    panel
+  );
+
+
+  function renderOptions() {
+
+    var query =
+      String(
+        search.value ||
+        ''
+      ).trim();
+
+
+    var candidates =
+      mirelInteractionTypeCandidates();
+
+
+    var matched =
+      candidates.filter(
+        function(candidate) {
+
+          return (
+            !query ||
+            candidate
+              .toLowerCase()
+              .indexOf(
+                query.toLowerCase()
+              ) !== -1
+          );
+
+        }
+      );
+
+
+    list.innerHTML =
+      '';
+
+
+    matched.forEach(
+      function(candidate) {
+
+        var button =
+          document.createElement(
+            'button'
+          );
+
+        button.type =
+          'button';
+
+        button.className =
+          'mirel-interaction-option';
+
+        button.textContent =
+          candidate;
+
+
+        button.onclick =
+          function(event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+
+            input.value =
+              candidate;
+
+
+            panel.classList.remove(
+              'show'
+            );
+
+          };
+
+
+        list.appendChild(
+          button
+        );
+
+      }
+    );
+
+
+    /*
+     * 入力した言葉が既存候補になければ
+     * 新規追加候補を表示
+     */
+    if (
+      query &&
+      candidates.indexOf(query) === -1
+    ) {
+
+      var add =
+        document.createElement(
+          'button'
+        );
+
+      add.type =
+        'button';
+
+      add.className =
+        'mirel-interaction-add';
+
+      add.innerHTML =
+
+        '<span class="mirel-add-mark">＋</span>' +
+
+        '<span>「' +
+
+        escapeHtml(
+          query
+        ) +
+
+        '」を新規追加</span>';
+
+
+      add.onclick =
+        function(event) {
+
+          event.preventDefault();
+          event.stopPropagation();
+
+
+          input.value =
+            query;
+
+
+          panel.classList.remove(
+            'show'
+          );
+
+        };
+
+
+      list.appendChild(
+        add
+      );
+
+    }
+
+
+    if (
+      !matched.length &&
+      !query
+    ) {
+
+      var empty =
+        document.createElement(
+          'div'
+        );
+
+      empty.className =
+        'mirel-interaction-empty';
+
+      empty.textContent =
+        '候補はありません。';
+
+
+      list.appendChild(
+        empty
+      );
+
+    }
+
+  }
+
+
+  function openPanel() {
+
+    search.value =
+      '';
+
+    renderOptions();
+
+
+    panel.classList.add(
+      'show'
+    );
+
+  }
+
+
+  arrow.onclick =
+    function(event) {
+
+      event.preventDefault();
+      event.stopPropagation();
+
+
+      if (
+        panel.classList.contains(
+          'show'
+        )
+      ) {
+
+        panel.classList.remove(
+          'show'
+        );
+
+      } else {
+
+        openPanel();
+
+      }
+
+    };
+
+
+  input.addEventListener(
+    'focus',
+    function() {
+
+      openPanel();
+
+    }
+  );
+
+
+  input.addEventListener(
+    'input',
+    function() {
+
+      search.value =
+        input.value;
+
+      renderOptions();
+
+      panel.classList.add(
+        'show'
+      );
+
+    }
+  );
+
+
+  search.addEventListener(
+    'input',
+    function() {
+
+      renderOptions();
+
+    }
+  );
+
+
+  panel.addEventListener(
+    'click',
+    function(event) {
+
+      event.stopPropagation();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   交流フォームを開くたび候補UIを有効化
+   ========================================================= */
+
+var mirelOriginalOpenInteractionForm =
+  openInteractionForm;
+
+
+openInteractionForm =
+  function(interactionId) {
+
+    mirelOriginalOpenInteractionForm(
+      interactionId
+    );
+
+
+    mirelInstallInteractionTypeSelect();
+
+  };
+
+
+var mirelOriginalOpenTeacherFormInteraction =
+  openTeacherFormInteraction;
+
+
+openTeacherFormInteraction =
+  function(index) {
+
+    mirelOriginalOpenTeacherFormInteraction(
+      index
+    );
+
+
+    mirelInstallInteractionTypeSelect();
+
+  };
+
+
+/* =========================================================
+   地図下の先生一覧も
+   一覧画面と同じ3行表示へ統一
+   ========================================================= */
+
+renderMapTeacherPreview =
+  function() {
+
+    var query =
+      (
+        document.getElementById(
+          'mapSearch'
+        ).value ||
+        ''
+      ).trim();
+
+
+    var list = [];
+
+
+    for (
+      var i = 0;
+      i < teachers.length;
+      i++
+    ) {
+
+      var teacher =
+        teachers[i];
+
+
+      if (
+        selectedPrefecture ===
+          '__UNKNOWN__' &&
+        teacher.prefecture
+      ) {
+
+        continue;
+
+      }
+
+
+      if (
+        selectedPrefecture &&
+        selectedPrefecture !==
+          '__UNKNOWN__' &&
+        teacher.prefecture !==
+          selectedPrefecture
+      ) {
+
+        continue;
+
+      }
+
+
+      if (
+        !teacherMatches(
+          teacher,
+          query
+        )
+      ) {
+
+        continue;
+
+      }
+
+
+      list.push(
+        teacher
+      );
+
+    }
+
+
+    /*
+     * 地域順に並べる
+     */
+    list.sort(
+      function(a, b) {
+
+        var prefDiff =
+
+          mirelPrefectureIndex(
+            a.prefecture
+          ) -
+
+          mirelPrefectureIndex(
+            b.prefecture
+          );
+
+
+        if (
+          prefDiff !== 0
+        ) {
+
+          return prefDiff;
+
+        }
+
+
+        return String(
+          a.kana ||
+          a.name ||
+          ''
+        ).localeCompare(
+
+          String(
+            b.kana ||
+            b.name ||
+            ''
+          ),
+
+          'ja'
+
+        );
+
+      }
+    );
+
+
+    var title =
+      personLabel() +
+      '一覧';
+
+
+    if (
+      selectedPrefecture ===
+      '__UNKNOWN__'
+    ) {
+
+      title =
+        '所在地不明';
+
+    } else if (
+      selectedPrefecture
+    ) {
+
+      title =
+        selectedPrefecture;
+
+    }
+
+
+    var html =
+
+      '<div class="section-title">' +
+
+      escapeHtml(
+        title
+      ) +
+
+      '　' +
+
+      list.length +
+
+      '名</div>';
+
+
+    if (
+      list.length === 0
+    ) {
+
+      html +=
+
+        '<div class="empty">該当する' +
+
+        escapeHtml(
+          personLabel()
+        ) +
+
+        'はいません。</div>';
+
+
+    } else {
+
+      html +=
+        '<div class="teacher-list mirel-map-teacher-list">';
+
+
+      for (
+        var j = 0;
+        j < list.length;
+        j++
+      ) {
+
+        html +=
+          mirelTeacherListCard(
+            list[j]
+          );
+
+      }
+
+
+      html +=
+        '</div>';
+
+    }
+
+
+    document.getElementById(
+      'mapSide'
+    ).innerHTML =
+      html;
+
+  };
+
+
+/* =========================================================
+   初回にも交流種別UIを準備
+   ========================================================= */
+
+if (
+  document.readyState ===
+  'loading'
+) {
+
+  document.addEventListener(
+    'DOMContentLoaded',
+    mirelInstallInteractionTypeSelect
+  );
+
+} else {
+
+  mirelInstallInteractionTypeSelect();
+
+}
+
+
+/* =========================================================
+   外側タップで交流候補を閉じる
+   ========================================================= */
+
+document.addEventListener(
+  'click',
+  function(event) {
+
+    if (
+      !event.target.closest(
+        '.mirel-interaction-select'
+      )
+    ) {
+
+      var panel =
+        document.querySelector(
+          '.mirel-interaction-panel'
+        );
+
+
+      if (panel) {
+
+        panel.classList.remove(
+          'show'
+        );
+
+      }
+
+    }
+
+  }
+);
