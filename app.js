@@ -3218,7 +3218,7 @@ function openTeacherForm(
 
     setValue(
       'gender',
-      '女'
+      ''
     );
 
   }
