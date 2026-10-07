@@ -1090,7 +1090,6 @@ button {
 
 }
 
-
 /* ========================================
    地方別 都道府県一覧
    ======================================== */
@@ -1192,7 +1191,6 @@ button {
     #ffffff;
 }
 
-
 /* ========================================
    Detail右上操作
    ======================================== */
@@ -1200,22 +1198,23 @@ button {
 .detail-head-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
 }
 
 
 .detail-delete-button {
-  padding: 7px 10px;
+  padding: 5px 9px;
 
-  border: 1px solid #e9c7c7;
+  border: 0;
 
-  border-radius: 9px;
+  border-radius: 8px;
 
-  background: #fffafa;
+  background: transparent;
 
-  color: #ad6262;
+  color: #a16f6f;
 
   font-size: 12px;
+  line-height: 1.25;
 
   cursor: pointer;
 }
@@ -1228,7 +1227,7 @@ button {
 
 
 /* ========================================
-   スマホ日本地図
+   日本地図 canvas 位置
    ======================================== */
 
 @media (max-width: 560px) {
@@ -1250,12 +1249,15 @@ button {
     max-width: none;
 
     flex: 0 0 auto;
+
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
 }
 
-
-/* PCの日本地図を少し左へ */
 
 @media (min-width: 561px) {
 
@@ -1287,10 +1289,12 @@ button {
    ======================================== */
 
 .interaction-date {
-  font-weight: 400;
-  font-size: 14px;
-  color: #5f5755;
   margin-bottom: 6px;
+
+  color: #5f5755;
+
+  font-size: 14px;
+  font-weight: 400;
 }
 
 
@@ -1306,15 +1310,15 @@ button {
   color: #805f5b;
 
   font-size: 12px;
-
   line-height: 1.3;
 }
 
 
 .child-name-text {
-  font-weight: 400;
-  font-size: 15px;
   color: #332d2b;
+
+  font-size: 15px;
+  font-weight: 400;
 }
 
 
@@ -1503,87 +1507,89 @@ button {
   line-height: 1.6;
 }
 
+
 /* ========================================
    スマホ フォーム表示の微調整
    ======================================== */
 
 @media (max-width: 560px) {
 
-  /* フォーム全体の文字を少し小さく */
   .modal {
     font-size: 14px;
   }
 
 
-  /* 見出し */
   .modal .section-title {
-    font-size: 17px;
     margin-bottom: 8px;
+
+    font-size: 17px;
   }
 
 
-  /* 項目ラベル */
   .modal .field label {
     font-size: 12px;
   }
 
 
-  /* 入力欄 */
   .modal .field input,
   .modal .field select,
   .modal .field textarea {
-    font-size: 14px;
     padding: 10px 11px;
+
+    font-size: 14px;
   }
 
 
-  /* 共通ボタン */
   .modal .primary,
   .modal .secondary,
   .modal .danger {
     padding: 9px 12px;
-    font-size: 13px;
+
     border-radius: 11px;
+
+    font-size: 13px;
   }
 
 
-  /* リンク・SNS / 子ども / 交流履歴 の見出し行 */
   .modal .children-area > .detail-head {
     align-items: center;
+
     gap: 10px;
   }
 
 
-  /* 「＋リンクを追加」など右上ボタンをコンパクトに */
   .modal .children-area > .detail-head > button {
     flex: 0 0 auto;
-    white-space: nowrap;
+
     padding: 9px 11px;
+
+    white-space: nowrap;
+
     font-size: 13px;
   }
 
 
-  /* リンク1件ごとのカード */
   .modal .link-edit {
     margin-top: 10px;
+
     padding: 11px 0 4px;
   }
 
 
-  /* リンク内容と編集・削除ボタンを明確に分離 */
   .modal .link-edit .detail-head {
     align-items: flex-start;
+
     gap: 12px;
   }
 
 
   .modal .link-edit .link-row-main {
     flex: 1;
+
     min-width: 0;
   }
 
 
-  /* 編集・削除ボタンエリア */
   .modal .link-edit .detail-head-actions {
     flex: 0 0 auto;
 
@@ -1596,49 +1602,50 @@ button {
   }
 
 
-  /* 編集ボタン */
   .modal .link-edit .detail-head-actions .secondary {
     padding: 8px 11px;
+
     font-size: 13px;
   }
 
 
-  /* 削除ボタン */
   .modal .link-edit .detail-delete-button {
     padding: 8px 10px;
+
     font-size: 12px;
   }
 
 
-  /* リンク種別 */
   .modal .link-label {
     font-size: 14px;
   }
 
 
-  /* @ユーザー名など */
   .modal .link-value {
     margin-top: 3px;
-    font-size: 13px;
+
     color: var(--muted);
+
+    font-size: 13px;
+
     word-break: break-all;
   }
 
 
-  /* メモ */
   .modal textarea {
     line-height: 1.55;
   }
 
 
-  /* 子ども・交流履歴のボタンも少し小さく */
   .modal .child .secondary,
   .modal .child .detail-delete-button {
-    font-size: 12px;
     padding: 7px 9px;
+
+    font-size: 12px;
   }
 
 }
+
 
 /* ========================================
    登録済み リンク・SNSをカード化
@@ -1659,11 +1666,9 @@ button {
     1.5px solid
     #f0c5cd;
 
-  border-radius:
-    16px;
+  border-radius: 16px;
 
-  background:
-    #fff7f8;
+  background: #fff7f8;
 
   box-shadow:
     0 2px 8px
@@ -1671,7 +1676,6 @@ button {
 }
 
 
-/* 左側にアクセントライン */
 .modal .link-edit::after {
   content: "";
 
@@ -1686,93 +1690,64 @@ button {
   border-radius:
     0 4px 4px 0;
 
-  background:
-    var(--accent);
+  background: var(--accent);
 }
 
 
-/* 登録済みバッジ */
 .modal .link-edit::before {
-  content:
-    "登録済み";
+  content: "登録済み";
 
   position: absolute;
 
   top: -10px;
   left: 14px;
 
-  padding:
-    3px 9px;
+  padding: 3px 9px;
 
-  border-radius:
-    999px;
+  border-radius: 999px;
 
-  background:
-    var(--accent);
+  background: var(--accent);
 
-  color:
-    #ffffff;
+  color: #ffffff;
 
-  font-size:
-    11px;
+  font-size: 11px;
+  font-weight: 700;
 
-  font-weight:
-    700;
-
-  line-height:
-    1.4;
+  line-height: 1.4;
 }
 
 
-/* SNS種類 */
 .modal .link-edit .link-label {
-  margin-left:
-    4px;
+  margin-left: 4px;
 
-  color:
-    #3f3534;
+  color: #3f3534;
 
-  font-size:
-    15px;
-
-  font-weight:
-    700;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 
-/* アカウント名・URL */
 .modal .link-edit .link-value {
-  margin-top:
-    5px;
+  margin-top: 5px;
+  margin-left: 4px;
 
-  margin-left:
-    4px;
+  color: #8b6d70;
 
-  color:
-    #8b6d70;
+  font-size: 13px;
 
-  font-size:
-    13px;
+  line-height: 1.5;
 
-  line-height:
-    1.5;
-
-  word-break:
-    break-all;
+  word-break: break-all;
 }
 
 
-/* 編集・削除ボタンとの間隔 */
 .modal .link-edit .detail-head-actions {
-  margin-left:
-    12px;
+  margin-left: 12px;
 
-  gap:
-    7px;
+  gap: 7px;
 }
 
 
-/* スマホ */
 @media (max-width: 560px) {
 
   .modal .link-edit {
@@ -1784,15 +1759,14 @@ button {
 
 
   .modal .link-edit::before {
-    left:
-      12px;
+    left: 12px;
   }
 
 }
 
+
 /* =========================================================
    Mirel Map Enhancements
-   2026-10-07
    ========================================================= */
 
 
@@ -1816,6 +1790,8 @@ button {
   right: 7px;
   bottom: 6px;
 
+  z-index: 4;
+
   width: 30px;
   height: 30px;
 
@@ -1827,9 +1803,32 @@ button {
 
   color: #988d8b;
 
-  font-size: 12px;
+  font-size: 0;
 
-  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.mirel-select-arrow::after,
+.mirel-setting-arrow::after {
+  content: "";
+
+  display: block;
+
+  width: 7px;
+  height: 7px;
+
+  border-right: 1.5px solid #777;
+  border-bottom: 1.5px solid #777;
+
+  transform: rotate(45deg);
+
+  margin:
+    -3px
+    auto
+    0;
 }
 
 
@@ -1973,6 +1972,8 @@ button {
 .mirel-region {
   margin-bottom: 20px;
 
+  padding-top: 4px;
+
   scroll-margin-top: 90px;
 }
 
@@ -1984,24 +1985,43 @@ button {
   justify-content: space-between;
 
   margin:
-    2px
-    2px
+    0
+    0
     8px;
 
-  color: #4d4644;
+  padding:
+    8px
+    11px;
+
+  border-left:
+    4px solid #d88c9a;
+
+  border-radius: 8px;
+
+  background: #f8ecef;
+
+  color: #584b4d;
 
   font-size: 15px;
-
   font-weight: 800;
 }
 
 
 .mirel-region-count {
-  color: var(--muted);
+  color: #9a7d82;
 
   font-size: 11px;
-
   font-weight: 500;
+}
+
+
+.mirel-region + .mirel-region {
+  margin-top: 6px;
+
+  padding-top: 17px;
+
+  border-top:
+    1px solid #eee4e5;
 }
 
 
@@ -2125,7 +2145,6 @@ button {
   color: #443c3a;
 
   font-size: 13px;
-
   font-weight: 800;
 }
 
@@ -2147,29 +2166,41 @@ button {
    詳細 小ボタン
    ------------------------- */
 
-.mirel-mini-button {
+.mirel-mini-button,
+#detailContent .mirel-action-mini,
+#detailContent .detail-head > .primary,
+#detailContent .mirel-teacher-top-action {
   flex: 0 0 auto;
 
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  width: auto !important;
+  height: auto !important;
+
   padding:
-    6px
-    9px;
+    5px
+    9px !important;
 
   border:
     1px solid #e7d6d3;
 
-  border-radius: 9px;
+  border-radius: 8px !important;
 
   background: #fff;
 
   color: #685e5c;
 
-  font-size: 11px;
+  font-size: 12px !important;
+  font-weight: 600 !important;
 
-  font-weight: 700;
+  line-height: 1.25 !important;
 }
 
 
-.mirel-mini-button:active {
+.mirel-mini-button:active,
+#detailContent .mirel-action-mini:active,
+#detailContent .mirel-teacher-top-action:active {
   background: #f5efed;
 }
 
@@ -2187,11 +2218,6 @@ button {
    設定 ▽
    ------------------------- */
 
-.setting-combo {
-  position: relative;
-}
-
-
 .setting-combo > input {
   padding-right: 35px;
 }
@@ -2200,148 +2226,23 @@ button {
 .mirel-setting-arrow {
   position: absolute;
 
-  right: 12px;
-  bottom: 12px;
+  right: 7px;
+  bottom: 6px;
 
   z-index: 3;
 
-  color: #998e8c;
-
-  font-size: 12px;
-
-  pointer-events: none;
-}
-
-
-/* -------------------------
-   スマホ
-   ------------------------- */
-
-@media (max-width: 560px) {
-
-  #pageList .teacher-list {
-    gap: 6px;
-  }
-
-
-  .mirel-region {
-    margin-bottom: 17px;
-  }
-
-
-  .mirel-social-card {
-    padding: 9px 10px;
-  }
-
-}
-
-/* =========================================================
-   プルダウン矢印をselectと同じ見た目に統一
-   ========================================================= */
-
-.mirel-select-arrow,
-.mirel-setting-arrow {
-  font-size: 0;
-}
-
-
-/* 下向きシェブロン */
-.mirel-select-arrow::after,
-.mirel-setting-arrow::after {
-  content: "";
-
-  display: block;
-
-  width: 7px;
-  height: 7px;
-
-  border-right: 1.5px solid #777;
-  border-bottom: 1.5px solid #777;
-
-  transform: rotate(45deg);
-
-  margin:
-    -3px
-    auto
-    0;
-}
-
-
-/* 生年月日の矢印 */
-.mirel-select-arrow {
   display: flex;
-
-  align-items: center;
-  justify-content: center;
-}
-
-
-/* 設定画面の矢印位置 */
-.mirel-setting-arrow {
-  display: flex;
-
   align-items: center;
   justify-content: center;
 
   width: 30px;
   height: 30px;
 
-  right: 7px;
-  bottom: 6px;
-}
+  color: #998e8c;
 
-/* =========================================================
-   2026-10-07 追加修正
-   ========================================================= */
+  font-size: 0;
 
-
-/* -------------------------
-   先生一覧 地域見出し
-   ------------------------- */
-
-.mirel-region {
-  padding-top: 4px;
-}
-
-
-.mirel-region-title {
-  margin:
-    0
-    0
-    8px;
-
-  padding:
-    8px
-    11px;
-
-  border-left:
-    4px solid #d88c9a;
-
-  border-radius:
-    8px;
-
-  background:
-    #f8ecef;
-
-  color:
-    #584b4d;
-}
-
-
-.mirel-region-count {
-  color:
-    #9a7d82;
-}
-
-
-/* 地域と地域の間にも少し区切り */
-.mirel-region + .mirel-region {
-  margin-top: 6px;
-
-  padding-top: 17px;
-
-  border-top:
-    1px solid #eee4e5;
+  pointer-events: none;
 }
 
 
@@ -2359,7 +2260,6 @@ button {
 }
 
 
-/* selectと同系統の矢印 */
 .mirel-interaction-arrow {
   position: absolute;
 
@@ -2485,8 +2385,7 @@ button {
 
 
 .mirel-interaction-option:active {
-  background:
-    #fff4f6;
+  background: #fff4f6;
 }
 
 
@@ -2501,8 +2400,7 @@ button {
 
   font-weight: 700;
 
-  background:
-    #fff8f9;
+  background: #fff8f9;
 }
 
 
@@ -2523,18 +2421,14 @@ button {
 }
 
 
-/* -------------------------
-   地図下先生一覧もコンパクト
-   ------------------------- */
-
 .mirel-map-teacher-list {
   gap: 6px;
 }
 
-/* =========================================================
+
+/* ========================================
    iPhone / PWA スクロール修正
-   2026-10-07
-   ========================================================= */
+   ======================================== */
 
 @media (max-width: 560px) {
 
@@ -2543,7 +2437,9 @@ button {
     width: 100%;
     height: 100%;
     min-height: 0;
+
     overflow: hidden;
+
     overscroll-behavior: none;
   }
 
@@ -2580,6 +2476,7 @@ button {
 
   .main {
     flex: 1 1 auto;
+
     min-height: 0;
 
     overflow-x: hidden;
@@ -2603,89 +2500,39 @@ button {
     right: 0;
     bottom: 0;
 
+    z-index: 200;
+
     width: 100%;
 
     transform: none;
-
-    z-index: 200;
   }
 
-}
-
-/* =========================================================
-   iPhone 地図タップ反応改善
-   ========================================================= */
-
-@media (max-width: 560px) {
 
   .japan-map {
     touch-action: manipulation;
   }
 
-  .japan-map canvas {
-    touch-action: manipulation;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
+
+  #pageList .teacher-list {
+    gap: 6px;
+  }
+
+
+  .mirel-region {
+    margin-bottom: 17px;
+  }
+
+
+  .mirel-social-card {
+    padding: 9px 10px;
   }
 
 }
 
-@media (max-width: 560px) {
 
-  .japan-map canvas {
-    touch-action: manipulation;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-}
-
-/* =========================================================
-   詳細画面 コンパクトUI
-   ========================================================= */
-
-#detailContent .mirel-action-mini,
-#detailContent .detail-head > .primary {
-  min-width: 0;
-  min-height: 0;
-
-  padding: 5px 9px;
-
-  border-radius: 8px;
-
-  font-size: 12px;
-  line-height: 1.25;
-  font-weight: 600;
-}
-
-
-#detailContent .detail-head-actions {
-  gap: 5px;
-}
-
-
-/* 削除 */
-#detailContent .detail-delete-button {
-  padding: 5px 9px;
-
-  border: 0;
-
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: #a16f6f;
-
-  font-size: 12px;
-  line-height: 1.25;
-}
-
-
-/* =========================
+/* ========================================
    交流履歴 月タブ
-   ========================= */
+   ======================================== */
 
 .mirel-history-tabs {
   display: flex;
@@ -2720,27 +2567,25 @@ button {
   color: #756b69;
 
   font-size: 11px;
+
   white-space: nowrap;
 }
 
 
 .mirel-history-tab.active {
-  border-color:
-    #d8b7b7;
+  border-color: #d8b7b7;
 
-  background:
-    #f8eeee;
+  background: #f8eeee;
 
-  color:
-    #795b5b;
+  color: #795b5b;
 
   font-weight: 700;
 }
 
 
-/* =========================
+/* ========================================
    折りたたみ
-   ========================= */
+   ======================================== */
 
 .mirel-history-toggle,
 .mirel-children-toggle {
@@ -2754,10 +2599,10 @@ button {
 
   background: transparent;
 
-  color:
-    var(--muted);
+  color: var(--muted);
 
   font-size: 12px;
 
   text-align: center;
 }
+
