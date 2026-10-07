@@ -4177,3 +4177,772 @@ saveTeacherForm =
     }
 
   };
+
+/* =========================================================
+   2026-10-07
+   iPhone 日本地図タップ判定 強化
+   ・小さい県を押しやすくする
+   ・ピンチ拡大後も座標ズレしにくくする
+   ・canvasの疑似mouse判定に依存しない
+   ========================================================= */
+
+(function () {
+
+  var mirelOriginalRenderJapanMapForTouch =
+    renderJapanMap;
+
+
+  renderJapanMap =
+    function () {
+
+      mirelOriginalRenderJapanMapForTouch
+        .apply(
+          this,
+          arguments
+        );
+
+
+      if (
+        window.innerWidth > 560
+      ) {
+        return;
+      }
+
+
+      requestAnimationFrame(
+        function () {
+
+          mirelInstallMapHitAssist();
+
+        }
+      );
+
+    };
+
+
+  function mirelHitColor(code) {
+
+    /*
+     * 県ごとに重複しない色を割り当てる。
+     * 表示用ではなく判定専用。
+     */
+    var r =
+      code;
+
+    var g =
+      37;
+
+    var b =
+      91;
+
+
+    return (
+      '#' +
+      r.toString(16)
+        .padStart(2, '0') +
+      g.toString(16)
+        .padStart(2, '0') +
+      b.toString(16)
+        .padStart(2, '0')
+    );
+
+  }
+
+
+  function mirelBuildMapHitCanvas(
+    visibleCanvas
+  ) {
+
+    var old =
+      document.getElementById(
+        'mirelMapHitHost'
+      );
+
+
+    if (old) {
+      old.remove();
+    }
+
+
+    var host =
+      document.createElement(
+        'div'
+      );
+
+
+    host.id =
+      'mirelMapHitHost';
+
+
+    host.style.position =
+      'fixed';
+
+    host.style.left =
+      '-10000px';
+
+    host.style.top =
+      '-10000px';
+
+    host.style.pointerEvents =
+      'none';
+
+    host.style.zIndex =
+      '-1';
+
+
+    document.body.appendChild(
+      host
+    );
+
+
+    var areas =
+      [];
+
+
+    for (
+      var i = 0;
+      i < prefectures.length;
+      i++
+    ) {
+
+      var code =
+        i + 1;
+
+      var color =
+        mirelHitColor(
+          code
+        );
+
+
+      areas.push({
+
+        code:
+          code,
+
+        color:
+          color,
+
+        hoverColor:
+          color
+
+      });
+
+    }
+
+
+    var hitWidth =
+      Math.max(
+        600,
+        Number(
+          visibleCanvas.width
+        ) ||
+        600
+      );
+
+
+    try {
+
+      new jpmap.japanMap(
+
+        host,
+
+        {
+
+          areas:
+            areas,
+
+          width:
+            hitWidth,
+
+          showsPrefectureName:
+            false,
+
+          movesIslands:
+            true,
+
+          backgroundColor:
+            '#FFFFFF',
+
+          lineColor:
+            '#FFFFFF',
+
+          lineWidth:
+            1,
+
+          borderLineColor:
+            '#FFFFFF',
+
+          borderLineWidth:
+            1.4,
+
+          onSelect:
+            function () {}
+
+        }
+
+      );
+
+    } catch (e) {
+
+      return null;
+
+    }
+
+
+    return host.querySelector(
+      'canvas'
+    );
+
+  }
+
+
+  function mirelReadHitPrefecture(
+    hitCanvas,
+    visibleCanvas,
+    clientX,
+    clientY
+  ) {
+
+    if (
+      !hitCanvas ||
+      !visibleCanvas
+    ) {
+      return '';
+    }
+
+
+    var rect =
+      visibleCanvas
+        .getBoundingClientRect();
+
+
+    if (
+      !rect.width ||
+      !rect.height
+    ) {
+      return '';
+    }
+
+
+    var normalizedX =
+      (
+        clientX -
+        rect.left
+      ) /
+      rect.width;
+
+
+    var normalizedY =
+      (
+        clientY -
+        rect.top
+      ) /
+      rect.height;
+
+
+    if (
+      normalizedX < 0 ||
+      normalizedX > 1 ||
+      normalizedY < 0 ||
+      normalizedY > 1
+    ) {
+      return '';
+    }
+
+
+    var centerX =
+      normalizedX *
+      hitCanvas.width;
+
+
+    var centerY =
+      normalizedY *
+      hitCanvas.height;
+
+
+    var context =
+      hitCanvas.getContext(
+        '2d',
+        {
+          willReadFrequently:
+            true
+        }
+      );
+
+
+    if (!context) {
+      return '';
+    }
+
+
+    var colorToPref =
+      {};
+
+
+    for (
+      var i = 0;
+      i < prefectures.length;
+      i++
+    ) {
+
+      var code =
+        i + 1;
+
+
+      colorToPref[
+        code +
+        ',37,91'
+      ] =
+        prefectures[i];
+
+    }
+
+
+    function readPref(
+      x,
+      y
+    ) {
+
+      x =
+        Math.round(x);
+
+      y =
+        Math.round(y);
+
+
+      if (
+        x < 0 ||
+        y < 0 ||
+        x >= hitCanvas.width ||
+        y >= hitCanvas.height
+      ) {
+        return '';
+      }
+
+
+      var pixel;
+
+      try {
+
+        pixel =
+          context.getImageData(
+            x,
+            y,
+            1,
+            1
+          ).data;
+
+      } catch (e) {
+
+        return '';
+
+      }
+
+
+      /*
+       * 塗りつぶし中央なら完全一致。
+       */
+      var exact =
+        colorToPref[
+          pixel[0] +
+          ',' +
+          pixel[1] +
+          ',' +
+          pixel[2]
+        ];
+
+
+      if (exact) {
+        return exact;
+      }
+
+
+      /*
+       * アンチエイリアスされた境界対策。
+       * G/Bが近い場合はRから県コードを推定。
+       */
+      if (
+        Math.abs(
+          pixel[1] - 37
+        ) <= 5 &&
+        Math.abs(
+          pixel[2] - 91
+        ) <= 5
+      ) {
+
+        var estimatedCode =
+          Math.round(
+            pixel[0]
+          );
+
+
+        if (
+          estimatedCode >= 1 &&
+          estimatedCode <=
+            prefectures.length
+        ) {
+
+          return prefectures[
+            estimatedCode - 1
+          ];
+
+        }
+
+      }
+
+
+      return '';
+
+    }
+
+
+    /*
+     * まず指の中心を判定
+     */
+    var pref =
+      readPref(
+        centerX,
+        centerY
+      );
+
+
+    if (pref) {
+      return pref;
+    }
+
+
+    /*
+     * 小さい県・境界部分用。
+     * 見た目で約22px以内の最も近い県を探す。
+     */
+    var scaleX =
+      hitCanvas.width /
+      rect.width;
+
+
+    var scaleY =
+      hitCanvas.height /
+      rect.height;
+
+
+    var maxRadiusCss =
+      22;
+
+
+    for (
+      var radiusCss = 3;
+      radiusCss <= maxRadiusCss;
+      radiusCss += 3
+    ) {
+
+      var rx =
+        radiusCss *
+        scaleX;
+
+
+      var ry =
+        radiusCss *
+        scaleY;
+
+
+      var points = [
+
+        [0, -ry],
+        [rx, 0],
+        [0, ry],
+        [-rx, 0],
+
+        [rx * 0.7, -ry * 0.7],
+        [rx * 0.7, ry * 0.7],
+        [-rx * 0.7, ry * 0.7],
+        [-rx * 0.7, -ry * 0.7]
+
+      ];
+
+
+      for (
+        var p = 0;
+        p < points.length;
+        p++
+      ) {
+
+        pref =
+          readPref(
+
+            centerX +
+              points[p][0],
+
+            centerY +
+              points[p][1]
+
+          );
+
+
+        if (pref) {
+          return pref;
+        }
+
+      }
+
+    }
+
+
+    return '';
+
+  }
+
+
+  function mirelInstallMapHitAssist() {
+
+    var map =
+      document.getElementById(
+        'japanMap'
+      );
+
+
+    if (!map) {
+      return;
+    }
+
+
+    var canvas =
+      map.querySelector(
+        'canvas'
+      );
+
+
+    if (!canvas) {
+      return;
+    }
+
+
+    if (
+      canvas.dataset
+        .mirelHitAssistReady ===
+      '1'
+    ) {
+      return;
+    }
+
+
+    canvas.dataset
+      .mirelHitAssistReady =
+      '1';
+
+
+    var hitCanvas =
+      mirelBuildMapHitCanvas(
+        canvas
+      );
+
+
+    if (!hitCanvas) {
+      return;
+    }
+
+
+    var startX =
+      0;
+
+    var startY =
+      0;
+
+    var moved =
+      false;
+
+    var multiTouch =
+      false;
+
+
+    canvas.addEventListener(
+
+      'touchstart',
+
+      function (event) {
+
+        if (
+          event.touches.length !==
+          1
+        ) {
+
+          multiTouch =
+            true;
+
+          moved =
+            true;
+
+          return;
+        }
+
+
+        multiTouch =
+          false;
+
+
+        var touch =
+          event.touches[0];
+
+
+        startX =
+          touch.clientX;
+
+        startY =
+          touch.clientY;
+
+        moved =
+          false;
+
+      },
+
+      {
+        passive:
+          true,
+
+        capture:
+          true
+      }
+
+    );
+
+
+    canvas.addEventListener(
+
+      'touchmove',
+
+      function (event) {
+
+        if (
+          event.touches.length !==
+          1
+        ) {
+
+          multiTouch =
+            true;
+
+          moved =
+            true;
+
+          return;
+        }
+
+
+        var touch =
+          event.touches[0];
+
+
+        var diffX =
+          Math.abs(
+            touch.clientX -
+            startX
+          );
+
+
+        var diffY =
+          Math.abs(
+            touch.clientY -
+            startY
+          );
+
+
+        /*
+         * 普通のスクロール操作は
+         * タップ扱いしない。
+         */
+        if (
+          diffX > 18 ||
+          diffY > 18
+        ) {
+
+          moved =
+            true;
+
+        }
+
+      },
+
+      {
+        passive:
+          true,
+
+        capture:
+          true
+      }
+
+    );
+
+
+    canvas.addEventListener(
+
+      'touchend',
+
+      function (event) {
+
+        /*
+         * ピンチズームやスクロールは
+         * そのままブラウザへ渡す。
+         */
+        if (
+          multiTouch ||
+          moved
+        ) {
+          return;
+        }
+
+
+        if (
+          !event.changedTouches ||
+          !event.changedTouches.length
+        ) {
+          return;
+        }
+
+
+        var touch =
+          event.changedTouches[0];
+
+
+        var pref =
+          mirelReadHitPrefecture(
+
+            hitCanvas,
+            canvas,
+
+            touch.clientX,
+            touch.clientY
+
+          );
+
+
+        if (!pref) {
+          return;
+        }
+
+
+        /*
+         * app.js側の古い疑似mousedown処理を
+         * このタップだけ止める。
+         */
+        event.preventDefault();
+
+        event.stopImmediatePropagation();
+
+
+        selectPrefecture(
+          pref
+        );
+
+      },
+
+      {
+        passive:
+          false,
+
+        capture:
+          true
+      }
+
+    );
+
+  }
+
+})();
