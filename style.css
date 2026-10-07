@@ -2641,3 +2641,123 @@ button {
   }
 
 }
+
+/* =========================================================
+   詳細画面 コンパクトUI
+   ========================================================= */
+
+#detailContent .mirel-action-mini,
+#detailContent .detail-head > .primary {
+  min-width: 0;
+  min-height: 0;
+
+  padding: 5px 9px;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+
+#detailContent .detail-head-actions {
+  gap: 5px;
+}
+
+
+/* 削除 */
+#detailContent .detail-delete-button {
+  padding: 5px 9px;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #a16f6f;
+
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+
+/* =========================
+   交流履歴 月タブ
+   ========================= */
+
+.mirel-history-tabs {
+  display: flex;
+
+  gap: 6px;
+
+  margin:
+    10px 0
+    12px;
+
+  padding-bottom: 2px;
+
+  overflow-x: auto;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+
+.mirel-history-tab {
+  flex: 0 0 auto;
+
+  padding: 5px 9px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 999px;
+
+  background: #fff;
+
+  color: #756b69;
+
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+
+.mirel-history-tab.active {
+  border-color:
+    #d8b7b7;
+
+  background:
+    #f8eeee;
+
+  color:
+    #795b5b;
+
+  font-weight: 700;
+}
+
+
+/* =========================
+   折りたたみ
+   ========================= */
+
+.mirel-history-toggle,
+.mirel-children-toggle {
+  width: 100%;
+
+  margin-top: 9px;
+
+  padding: 8px;
+
+  border: 0;
+
+  background: transparent;
+
+  color:
+    var(--muted);
+
+  font-size: 12px;
+
+  text-align: center;
+}
