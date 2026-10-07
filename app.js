@@ -316,7 +316,6 @@ async function restoreOrLogin() {
 
   var savedToken = '';
   var savedExpiresAt = 0;
-  var wasAuthorized = false;
 
   try {
 
@@ -332,11 +331,6 @@ async function restoreOrLogin() {
         ) || 0
       );
 
-    wasAuthorized =
-      localStorage.getItem(
-        STORAGE_AUTHORIZED
-      ) === '1';
-
   } catch (e) {}
 
   if (
@@ -344,33 +338,27 @@ async function restoreOrLogin() {
     savedExpiresAt > Date.now()
   ) {
 
-    accessToken = savedToken;
-    accessTokenExpiresAt = savedExpiresAt;
+    accessToken =
+      savedToken;
+
+    accessTokenExpiresAt =
+      savedExpiresAt;
 
     await startApp();
 
     return;
-  }
-
-  if (wasAuthorized) {
-
-    try {
-
-      await requestGoogleToken('');
-
-      await startApp();
-
-      return;
-
-    } catch (e) {
-
-      showLoginScreen();
-
-      return;
-
-    }
 
   }
+
+  /*
+   * 有効なトークンがない場合は、
+   * 起動時にGoogle認証を自動で開かない。
+   *
+   * 必ずログイン画面を表示し、
+   * ユーザーが「Googleでログイン」を押した時だけ
+   * 認証を開始する。
+   */
+  clearAccessToken();
 
   showLoginScreen();
 
