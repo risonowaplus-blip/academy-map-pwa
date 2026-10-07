@@ -2611,3 +2611,22 @@ button {
   }
 
 }
+
+/* =========================================================
+   iPhone 地図タップ反応改善
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  .japan-map {
+    touch-action: manipulation;
+  }
+
+  .japan-map canvas {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+}
