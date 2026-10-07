@@ -5861,3 +5861,1319 @@ renderTeacherDetail =
     );
 
   };
+
+/* =========================================================
+   2026-10-07
+   詳細画面 UI 改善
+   ・操作ボタン小型化
+   ・削除表記統一
+   ・子ども新規追加は空フォームのみ
+   ・削除確認に日付／名前表示
+   ・交流履歴 日付降順
+   ・交流履歴 月別タブ
+   ・交流履歴 2件目以降折りたたみ
+   ・子ども情報 2人目以降折りたたみ
+   ========================================================= */
+
+
+/* =========================================================
+   交流履歴カード
+   ========================================================= */
+
+renderInteractionCard =
+  function(interaction) {
+
+    var dateText =
+      interaction.date ||
+      '日付未登録';
+
+    var typeText =
+      interaction.interactionType ||
+      '種別未登録';
+
+    var html =
+
+      '<div class="child mirel-interaction-row">' +
+
+        '<div class="detail-head">' +
+
+          '<div>' +
+
+            '<div class="interaction-date">' +
+
+              escapeHtml(
+                dateText
+              ) +
+
+            '</div>' +
+
+            '<span class="interaction-type-label">' +
+
+              escapeHtml(
+                typeText
+              ) +
+
+            '</span>' +
+
+          '</div>' +
+
+          '<div class="detail-head-actions">' +
+
+            '<button type="button" class="secondary mirel-action-mini" onclick="openInteractionForm(\'' +
+
+              escapeJs(
+                interaction.interactionId
+              ) +
+
+            '\')">編集</button>' +
+
+            '<button type="button" class="detail-delete-button mirel-action-mini" onclick="deleteInteractionAction(\'' +
+
+              escapeJs(
+                interaction.interactionId
+              ) +
+
+            '\')">削除</button>' +
+
+          '</div>' +
+
+        '</div>';
+
+    if (
+      interaction.memo
+    ) {
+
+      html +=
+
+        '<div style="margin-top:10px;white-space:pre-wrap;line-height:1.7">' +
+
+          escapeHtml(
+            interaction.memo
+          ) +
+
+        '</div>';
+
+    }
+
+    html +=
+      '</div>';
+
+    return html;
+
+  };
+
+
+/* =========================================================
+   交流履歴 削除確認
+   ========================================================= */
+
+deleteInteractionAction =
+  async function(
+    interactionId
+  ) {
+
+    var interaction =
+      findInteraction(
+        interactionId
+      );
+
+    var dateText =
+      interaction &&
+      interaction.date
+        ? interaction.date
+        : '日付未登録';
+
+
+    if (
+      !(await appConfirm(
+
+        '交流記録を削除しますか？',
+
+        dateText +
+        'の交流記録を削除します。\n' +
+        'この操作は元に戻せません。'
+
+      ))
+    ) {
+
+      return;
+
+    }
+
+
+    setLoading(
+      true
+    );
+
+
+    try {
+
+      await runScript(
+        'deleteInteraction',
+        [
+          interactionId
+        ]
+      );
+
+
+      await refreshTeacherData(
+        selectedTeacherId
+      );
+
+
+    } catch (e) {
+
+      handleError(
+        e
+      );
+
+
+    } finally {
+
+      setLoading(
+        false
+      );
+
+    }
+
+  };
+
+
+/* =========================================================
+   子ども編集
+   新規の場合は空フォームだけ表示
+   ========================================================= */
+
+mirelOpenChildEditor =
+  function(
+    childId
+  ) {
+
+    var child =
+      childId
+        ? mirelFindDetailChild(
+            childId
+          )
+        : null;
+
+
+    if (
+      childId &&
+      !child
+    ) {
+      return;
+    }
+
+
+    var modal =
+      mirelEnsureChildEditModal();
+
+
+    var title =
+      modal.querySelector(
+        '.modal-title'
+      );
+
+
+    if (title) {
+
+      title.textContent =
+        child
+          ? '子ども情報を編集'
+          : '子ども情報を追加';
+
+    }
+
+
+    document.getElementById(
+      'mirelChildId'
+    ).value =
+      child
+        ? child.childId || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildName'
+    ).value =
+      child
+        ? child.name || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildKana'
+    ).value =
+      child
+        ? child.kana || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildNickname'
+    ).value =
+      child
+        ? child.nickname || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildGender'
+    ).value =
+      child
+        ? child.gender || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildGrade'
+    ).value =
+      child
+        ? child.grade || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildAge'
+    ).value =
+      child
+        ? child.ageManual || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildBirthYear'
+    ).value =
+      child
+        ? child.birthYear || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildBirthMonth'
+    ).value =
+      child
+        ? child.birthMonth || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildBirthDay'
+    ).value =
+      child
+        ? child.birthDay || ''
+        : '';
+
+
+    document.getElementById(
+      'mirelChildMemo'
+    ).value =
+      child
+        ? child.memo || ''
+        : '';
+
+
+    modal.classList.add(
+      'show'
+    );
+
+  };
+
+
+/* =========================================================
+   子ども 新規追加
+   先生全体フォームは開かない
+   ========================================================= */
+
+openTeacherFormForNewChild =
+  function(
+    teacherId
+  ) {
+
+    selectedTeacherId =
+      teacherId;
+
+
+    mirelOpenChildEditor(
+      ''
+    );
+
+  };
+
+
+/* =========================================================
+   子ども 削除確認
+   ========================================================= */
+
+mirelDeleteChildFromDetail =
+  async function(
+    childId
+  ) {
+
+    var child =
+      mirelFindDetailChild(
+        childId
+      );
+
+
+    var childName =
+      child
+        ? (
+            child.name ||
+            child.nickname ||
+            '名前未登録'
+          )
+        : '名前未登録';
+
+
+    if (
+      !(await appConfirm(
+
+        '子ども情報を削除しますか？',
+
+        childName +
+        'の子ども情報を削除します。\n' +
+        'この操作は元に戻せません。'
+
+      ))
+    ) {
+
+      return;
+
+    }
+
+
+    setLoading(
+      true
+    );
+
+
+    try {
+
+      await runScript(
+        'deleteChild',
+        [
+          childId
+        ]
+      );
+
+
+      await mirelRefreshDetailTeacher();
+
+
+    } catch (e) {
+
+      handleError(
+        e
+      );
+
+
+    } finally {
+
+      setLoading(
+        false
+      );
+
+    }
+
+  };
+
+
+/* =========================================================
+   子どもカード 編集／削除
+   ========================================================= */
+
+mirelInstallChildDetailActions =
+  function(
+    teacher
+  ) {
+
+    var detail =
+      document.getElementById(
+        'detailContent'
+      );
+
+
+    if (!detail) {
+      return;
+    }
+
+
+    var cards =
+      detail.querySelectorAll(
+        '.card'
+      );
+
+
+    var childCard =
+      null;
+
+
+    for (
+      var i = 0;
+      i < cards.length;
+      i++
+    ) {
+
+      var title =
+        cards[i].querySelector(
+          '.section-title'
+        );
+
+
+      if (
+        title &&
+        title.textContent
+          .trim()
+          .indexOf(
+            '子ども情報'
+          ) === 0
+      ) {
+
+        childCard =
+          cards[i];
+
+        break;
+
+      }
+
+    }
+
+
+    if (!childCard) {
+      return;
+    }
+
+
+    var rows =
+      childCard.querySelectorAll(
+        ':scope > .child'
+      );
+
+
+    var children =
+      teacher.children ||
+      [];
+
+
+    for (
+      var index = 0;
+      index < rows.length;
+      index++
+    ) {
+
+      var row =
+        rows[index];
+
+      var child =
+        children[index];
+
+
+      if (
+        !child ||
+        row.dataset
+          .mirelActionsReady ===
+          '1'
+      ) {
+
+        continue;
+
+      }
+
+
+      row.dataset
+        .mirelActionsReady =
+        '1';
+
+
+      var name =
+        row.querySelector(
+          '.child-name-text'
+        );
+
+
+      if (!name) {
+        continue;
+      }
+
+
+      var head =
+        document.createElement(
+          'div'
+        );
+
+
+      head.className =
+        'detail-head';
+
+
+      row.insertBefore(
+        head,
+        name
+      );
+
+
+      head.appendChild(
+        name
+      );
+
+
+      var actions =
+        document.createElement(
+          'div'
+        );
+
+
+      actions.className =
+        'detail-head-actions';
+
+
+      actions.innerHTML =
+
+        '<button type="button" class="secondary mirel-action-mini" onclick="mirelOpenChildEditor(\'' +
+
+          escapeJs(
+            child.childId
+          ) +
+
+        '\')">編集</button>' +
+
+        '<button type="button" class="detail-delete-button mirel-action-mini" onclick="mirelDeleteChildFromDetail(\'' +
+
+          escapeJs(
+            child.childId
+          ) +
+
+        '\')">削除</button>';
+
+
+      head.appendChild(
+        actions
+      );
+
+    }
+
+  };
+
+
+/* =========================================================
+   交流履歴 月取得
+   ========================================================= */
+
+function mirelHistoryMonthKey(
+  interaction
+) {
+
+  var date =
+    String(
+      interaction.date ||
+      ''
+    );
+
+
+  if (
+    /^\d{4}-\d{2}/.test(
+      date
+    )
+  ) {
+
+    return date.slice(
+      0,
+      7
+    );
+
+  }
+
+
+  return '__NONE__';
+
+}
+
+
+function mirelHistoryMonthLabel(
+  key
+) {
+
+  if (
+    key === '__NONE__'
+  ) {
+
+    return '日付未設定';
+
+  }
+
+
+  var parts =
+    key.split(
+      '-'
+    );
+
+
+  return (
+    parts[0] +
+    '年' +
+    Number(
+      parts[1]
+    ) +
+    '月'
+  );
+
+}
+
+
+/* =========================================================
+   交流履歴 表示状態
+   ========================================================= */
+
+var mirelHistoryExpanded =
+  false;
+
+var mirelHistoryMode =
+  'latest';
+
+
+function mirelApplyHistoryView() {
+
+  var card =
+    document.querySelector(
+      '#detailContent .mirel-history-card'
+    );
+
+
+  if (!card) {
+    return;
+  }
+
+
+  var rows =
+    card.querySelectorAll(
+      ':scope > .mirel-interaction-row'
+    );
+
+
+  rows.forEach(
+    function(
+      row,
+      index
+    ) {
+
+      var show =
+        false;
+
+
+      if (
+        mirelHistoryMode ===
+        'latest'
+      ) {
+
+        show =
+          mirelHistoryExpanded ||
+          index === 0;
+
+      } else {
+
+        show =
+          row.dataset
+            .mirelMonth ===
+          mirelHistoryMode;
+
+      }
+
+
+      row.style.display =
+        show
+          ? ''
+          : 'none';
+
+    }
+  );
+
+
+  var toggle =
+    card.querySelector(
+      '.mirel-history-toggle'
+    );
+
+
+  if (toggle) {
+
+    if (
+      mirelHistoryMode ===
+        'latest' &&
+      rows.length > 1
+    ) {
+
+      toggle.style.display =
+        'block';
+
+      toggle.textContent =
+        mirelHistoryExpanded
+          ? '過去履歴を閉じる ↑'
+          : '過去履歴を表示 ↓';
+
+    } else {
+
+      toggle.style.display =
+        'none';
+
+    }
+
+  }
+
+
+  card
+    .querySelectorAll(
+      '.mirel-history-tab'
+    )
+    .forEach(
+      function(button) {
+
+        button.classList.toggle(
+
+          'active',
+
+          button.dataset
+            .mirelMonth ===
+            mirelHistoryMode
+
+        );
+
+      }
+    );
+
+}
+
+
+function mirelSetHistoryMonth(
+  month
+) {
+
+  mirelHistoryMode =
+    month;
+
+
+  mirelApplyHistoryView();
+
+}
+
+
+function mirelToggleHistory() {
+
+  mirelHistoryExpanded =
+    !mirelHistoryExpanded;
+
+
+  mirelApplyHistoryView();
+
+}
+
+
+/* =========================================================
+   交流履歴
+   ・日付降順
+   ・月別タブ
+   ・2件目以降折りたたみ
+   ========================================================= */
+
+function mirelEnhanceInteractionHistory(
+  teacher
+) {
+
+  var cards =
+    document.querySelectorAll(
+      '#detailContent .card'
+    );
+
+
+  var card =
+    null;
+
+
+  for (
+    var i = 0;
+    i < cards.length;
+    i++
+  ) {
+
+    var title =
+      cards[i].querySelector(
+        '.section-title'
+      );
+
+
+    if (
+      title &&
+      title.textContent
+        .trim()
+        .indexOf(
+          '交流履歴'
+        ) === 0
+    ) {
+
+      card =
+        cards[i];
+
+      break;
+
+    }
+
+  }
+
+
+  if (!card) {
+    return;
+  }
+
+
+  card.classList.add(
+    'mirel-history-card'
+  );
+
+
+  var header =
+    card.querySelector(
+      ':scope > .detail-head'
+    );
+
+
+  var oldRows =
+    card.querySelectorAll(
+      ':scope > .child'
+    );
+
+
+  oldRows.forEach(
+    function(row) {
+      row.remove();
+    }
+  );
+
+
+  var oldTabs =
+    card.querySelector(
+      '.mirel-history-tabs'
+    );
+
+
+  if (oldTabs) {
+    oldTabs.remove();
+  }
+
+
+  var oldToggle =
+    card.querySelector(
+      '.mirel-history-toggle'
+    );
+
+
+  if (oldToggle) {
+    oldToggle.remove();
+  }
+
+
+  var interactions =
+    (
+      teacher.interactions ||
+      []
+    ).slice();
+
+
+  interactions.sort(
+    function(a, b) {
+
+      return String(
+        b.date ||
+        ''
+      ).localeCompare(
+
+        String(
+          a.date ||
+          ''
+        )
+
+      );
+
+    }
+  );
+
+
+  var months =
+    [];
+
+
+  interactions.forEach(
+    function(interaction) {
+
+      var month =
+        mirelHistoryMonthKey(
+          interaction
+        );
+
+
+      if (
+        months.indexOf(
+          month
+        ) === -1
+      ) {
+
+        months.push(
+          month
+        );
+
+      }
+
+    }
+  );
+
+
+  if (
+    interactions.length
+  ) {
+
+    var tabs =
+      document.createElement(
+        'div'
+      );
+
+
+    tabs.className =
+      'mirel-history-tabs';
+
+
+    tabs.innerHTML =
+
+      '<button type="button" class="mirel-history-tab active" data-mirel-month="latest" onclick="mirelSetHistoryMonth(\'latest\')">' +
+
+        '最新' +
+
+      '</button>';
+
+
+    months.forEach(
+      function(month) {
+
+        tabs.innerHTML +=
+
+          '<button type="button" class="mirel-history-tab" data-mirel-month="' +
+
+            escapeAttr(
+              month
+            ) +
+
+          '" onclick="mirelSetHistoryMonth(\'' +
+
+            escapeJs(
+              month
+            ) +
+
+          '\')">' +
+
+            escapeHtml(
+              mirelHistoryMonthLabel(
+                month
+              )
+            ) +
+
+          '</button>';
+
+      }
+    );
+
+
+    header.insertAdjacentElement(
+      'afterend',
+      tabs
+    );
+
+  }
+
+
+  interactions.forEach(
+    function(interaction) {
+
+      var holder =
+        document.createElement(
+          'div'
+        );
+
+
+      holder.innerHTML =
+        renderInteractionCard(
+          interaction
+        );
+
+
+      var row =
+        holder.firstElementChild;
+
+
+      if (!row) {
+        return;
+      }
+
+
+      row.dataset.mirelMonth =
+        mirelHistoryMonthKey(
+          interaction
+        );
+
+
+      card.appendChild(
+        row
+      );
+
+    }
+  );
+
+
+  if (
+    interactions.length > 1
+  ) {
+
+    var toggle =
+      document.createElement(
+        'button'
+      );
+
+
+    toggle.type =
+      'button';
+
+    toggle.className =
+      'mirel-history-toggle';
+
+    toggle.onclick =
+      mirelToggleHistory;
+
+
+    card.appendChild(
+      toggle
+    );
+
+  }
+
+
+  mirelHistoryExpanded =
+    false;
+
+  mirelHistoryMode =
+    'latest';
+
+
+  mirelApplyHistoryView();
+
+}
+
+
+/* =========================================================
+   子ども情報
+   2人目以降を折りたたむ
+   ========================================================= */
+
+var mirelChildrenExpanded =
+  false;
+
+
+function mirelApplyChildrenView() {
+
+  var card =
+    document.querySelector(
+      '#detailContent .mirel-child-card'
+    );
+
+
+  if (!card) {
+    return;
+  }
+
+
+  var rows =
+    card.querySelectorAll(
+      ':scope > .child'
+    );
+
+
+  rows.forEach(
+    function(
+      row,
+      index
+    ) {
+
+      row.style.display =
+        (
+          index === 0 ||
+          mirelChildrenExpanded
+        )
+          ? ''
+          : 'none';
+
+    }
+  );
+
+
+  var toggle =
+    card.querySelector(
+      '.mirel-children-toggle'
+    );
+
+
+  if (toggle) {
+
+    toggle.textContent =
+      mirelChildrenExpanded
+        ? '2人目以降を閉じる ↑'
+        : '2人目以降を見る ↓';
+
+  }
+
+}
+
+
+function mirelToggleChildren() {
+
+  mirelChildrenExpanded =
+    !mirelChildrenExpanded;
+
+
+  mirelApplyChildrenView();
+
+}
+
+
+function mirelEnhanceChildrenList() {
+
+  var cards =
+    document.querySelectorAll(
+      '#detailContent .card'
+    );
+
+
+  var card =
+    null;
+
+
+  for (
+    var i = 0;
+    i < cards.length;
+    i++
+  ) {
+
+    var title =
+      cards[i].querySelector(
+        '.section-title'
+      );
+
+
+    if (
+      title &&
+      title.textContent
+        .trim()
+        .indexOf(
+          '子ども情報'
+        ) === 0
+    ) {
+
+      card =
+        cards[i];
+
+      break;
+
+    }
+
+  }
+
+
+  if (!card) {
+    return;
+  }
+
+
+  card.classList.add(
+    'mirel-child-card'
+  );
+
+
+  var old =
+    card.querySelector(
+      '.mirel-children-toggle'
+    );
+
+
+  if (old) {
+    old.remove();
+  }
+
+
+  var rows =
+    card.querySelectorAll(
+      ':scope > .child'
+    );
+
+
+  mirelChildrenExpanded =
+    false;
+
+
+  if (
+    rows.length > 1
+  ) {
+
+    var toggle =
+      document.createElement(
+        'button'
+      );
+
+
+    toggle.type =
+      'button';
+
+    toggle.className =
+      'mirel-children-toggle';
+
+    toggle.onclick =
+      mirelToggleChildren;
+
+
+    card.appendChild(
+      toggle
+    );
+
+  }
+
+
+  mirelApplyChildrenView();
+
+}
+
+
+/* =========================================================
+   詳細描画後にまとめて適用
+   ========================================================= */
+
+var mirelDetailBeforeCompactUi =
+  renderTeacherDetail;
+
+
+renderTeacherDetail =
+  function(
+    teacher
+  ) {
+
+    mirelDetailBeforeCompactUi(
+      teacher
+    );
+
+
+    mirelInstallChildDetailActions(
+      teacher
+    );
+
+
+    mirelEnhanceInteractionHistory(
+      teacher
+    );
+
+
+    mirelEnhanceChildrenList();
+
+  };
