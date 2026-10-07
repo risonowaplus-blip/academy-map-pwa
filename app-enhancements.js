@@ -4947,3 +4947,917 @@ saveTeacherForm =
   }
 
 })();
+
+/* =========================================================
+   2026-10-07
+   先生詳細
+   ・交流履歴 編集／削除
+   ・子ども情報 編集／削除
+   ========================================================= */
+
+
+/* =========================================================
+   交流履歴カード
+   詳細画面で編集／削除できるようにする
+   ========================================================= */
+
+renderInteractionCard =
+  function(interaction) {
+
+    var dateText =
+      interaction.date ||
+      '日付未登録';
+
+    var typeText =
+      interaction.interactionType ||
+      '種別未登録';
+
+
+    var html =
+
+      '<div class="child">' +
+
+        '<div class="detail-head">' +
+
+          '<div>' +
+
+            '<div class="interaction-date">' +
+
+              escapeHtml(
+                dateText
+              ) +
+
+            '</div>' +
+
+            '<span class="interaction-type-label">' +
+
+              escapeHtml(
+                typeText
+              ) +
+
+            '</span>' +
+
+          '</div>' +
+
+
+          '<div class="detail-head-actions">' +
+
+            '<button type="button" class="secondary" onclick="openInteractionForm(\'' +
+
+              escapeJs(
+                interaction.interactionId
+              ) +
+
+            '\')">編集</button>' +
+
+
+            '<button type="button" class="detail-delete-button" onclick="deleteInteractionAction(\'' +
+
+              escapeJs(
+                interaction.interactionId
+              ) +
+
+            '\')">🗑 削除</button>' +
+
+          '</div>' +
+
+        '</div>';
+
+
+    if (
+      interaction.memo
+    ) {
+
+      html +=
+
+        '<div style="margin-top:10px;white-space:pre-wrap;line-height:1.7">' +
+
+          escapeHtml(
+            interaction.memo
+          ) +
+
+        '</div>';
+
+    }
+
+
+    html +=
+      '</div>';
+
+
+    return html;
+
+  };
+
+
+/* =========================================================
+   子ども情報を探す
+   ========================================================= */
+
+function mirelFindDetailChild(
+  childId
+) {
+
+  var teacher =
+    findTeacher(
+      selectedTeacherId
+    );
+
+
+  if (!teacher) {
+    return null;
+  }
+
+
+  var children =
+    teacher.children ||
+    [];
+
+
+  for (
+    var i = 0;
+    i < children.length;
+    i++
+  ) {
+
+    if (
+      String(
+        children[i].childId ||
+        ''
+      ) ===
+      String(
+        childId ||
+        ''
+      )
+    ) {
+
+      return children[i];
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+/* =========================================================
+   子ども編集モーダル作成
+   ========================================================= */
+
+function mirelEnsureChildEditModal() {
+
+  var existing =
+    document.getElementById(
+      'mirelChildEditModal'
+    );
+
+
+  if (existing) {
+    return existing;
+  }
+
+
+  var modal =
+    document.createElement(
+      'div'
+    );
+
+
+  modal.id =
+    'mirelChildEditModal';
+
+  modal.className =
+    'modal-bg';
+
+
+  modal.innerHTML =
+
+    '<div class="modal">' +
+
+
+      '<div class="modal-head">' +
+
+        '<div class="modal-title">' +
+          '子ども情報を編集' +
+        '</div>' +
+
+        '<button type="button" class="close" onclick="mirelCloseChildEditor()">' +
+          '×' +
+        '</button>' +
+
+      '</div>' +
+
+
+      '<input type="hidden" id="mirelChildId">' +
+
+
+      '<div class="grid2">' +
+
+        '<div class="field">' +
+
+          '<label>名前</label>' +
+
+          '<input id="mirelChildName">' +
+
+        '</div>' +
+
+
+        '<div class="field">' +
+
+          '<label>ふりがな</label>' +
+
+          '<input id="mirelChildKana">' +
+
+        '</div>' +
+
+      '</div>' +
+
+
+      '<div class="grid2">' +
+
+        '<div class="field">' +
+
+          '<label>呼び名</label>' +
+
+          '<input id="mirelChildNickname">' +
+
+        '</div>' +
+
+
+        '<div class="field">' +
+
+          '<label>性別</label>' +
+
+          '<select id="mirelChildGender">' +
+
+            '<option value="">未設定</option>' +
+            '<option value="女">女</option>' +
+            '<option value="男">男</option>' +
+
+          '</select>' +
+
+        '</div>' +
+
+      '</div>' +
+
+
+      '<div class="grid2">' +
+
+        '<div class="field">' +
+
+          '<label>学年</label>' +
+
+          '<select id="mirelChildGrade"></select>' +
+
+        '</div>' +
+
+
+        '<div class="field">' +
+
+          '<label>年齢</label>' +
+
+          '<input type="number" min="0" id="mirelChildAge">' +
+
+        '</div>' +
+
+      '</div>' +
+
+
+      '<div class="field">' +
+
+        '<label>生まれ年</label>' +
+
+        '<input type="number" id="mirelChildBirthYear">' +
+
+      '</div>' +
+
+
+      '<div class="grid2">' +
+
+        '<div class="field">' +
+
+          '<label>誕生月</label>' +
+
+          '<input type="number" min="1" max="12" id="mirelChildBirthMonth">' +
+
+        '</div>' +
+
+
+        '<div class="field">' +
+
+          '<label>誕生日</label>' +
+
+          '<input type="number" min="1" max="31" id="mirelChildBirthDay">' +
+
+        '</div>' +
+
+      '</div>' +
+
+
+      '<div class="field">' +
+
+        '<label>メモ</label>' +
+
+        '<textarea id="mirelChildMemo"></textarea>' +
+
+      '</div>' +
+
+
+      '<div class="form-actions">' +
+
+        '<button type="button" class="secondary" onclick="mirelCloseChildEditor()">' +
+          'キャンセル' +
+        '</button>' +
+
+        '<button type="button" class="primary" onclick="mirelSaveChildEditor()">' +
+          '保存' +
+        '</button>' +
+
+      '</div>' +
+
+
+    '</div>';
+
+
+  document.body.appendChild(
+    modal
+  );
+
+
+  var grade =
+    document.getElementById(
+      'mirelChildGrade'
+    );
+
+
+  gradeOptions.forEach(
+    function(value) {
+
+      var option =
+        document.createElement(
+          'option'
+        );
+
+
+      option.value =
+        value;
+
+      option.textContent =
+        value ||
+        '未設定';
+
+
+      grade.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  return modal;
+
+}
+
+
+/* =========================================================
+   子ども編集フォームを開く
+   ========================================================= */
+
+function mirelOpenChildEditor(
+  childId
+) {
+
+  var child =
+    mirelFindDetailChild(
+      childId
+    );
+
+
+  if (!child) {
+    return;
+  }
+
+
+  var modal =
+    mirelEnsureChildEditModal();
+
+
+  document.getElementById(
+    'mirelChildId'
+  ).value =
+    child.childId ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildName'
+  ).value =
+    child.name ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildKana'
+  ).value =
+    child.kana ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildNickname'
+  ).value =
+    child.nickname ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildGender'
+  ).value =
+    child.gender ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildGrade'
+  ).value =
+    child.grade ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildAge'
+  ).value =
+    child.ageManual ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildBirthYear'
+  ).value =
+    child.birthYear ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildBirthMonth'
+  ).value =
+    child.birthMonth ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildBirthDay'
+  ).value =
+    child.birthDay ||
+    '';
+
+
+  document.getElementById(
+    'mirelChildMemo'
+  ).value =
+    child.memo ||
+    '';
+
+
+  modal.classList.add(
+    'show'
+  );
+
+}
+
+
+/* =========================================================
+   子ども編集フォームを閉じる
+   ========================================================= */
+
+function mirelCloseChildEditor() {
+
+  var modal =
+    document.getElementById(
+      'mirelChildEditModal'
+    );
+
+
+  if (modal) {
+
+    modal.classList.remove(
+      'show'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   詳細画面を最新状態へ更新
+   ========================================================= */
+
+async function mirelRefreshDetailTeacher() {
+
+  var teacherId =
+    selectedTeacherId;
+
+
+  teachers =
+    (
+      await runScript(
+        'getTeachers'
+      )
+    ) ||
+    [];
+
+
+  renderAll();
+
+  renderJapanMap();
+
+
+  if (
+    teacherId &&
+    findTeacher(
+      teacherId
+    )
+  ) {
+
+    openTeacherDetail(
+      teacherId
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   子ども情報 保存
+   ========================================================= */
+
+async function mirelSaveChildEditor() {
+
+  if (
+    !selectedTeacherId
+  ) {
+    return;
+  }
+
+
+  var payload = {
+
+    childId:
+      document.getElementById(
+        'mirelChildId'
+      ).value,
+
+    teacherId:
+      selectedTeacherId,
+
+    name:
+      document.getElementById(
+        'mirelChildName'
+      ).value,
+
+    kana:
+      document.getElementById(
+        'mirelChildKana'
+      ).value,
+
+    nickname:
+      document.getElementById(
+        'mirelChildNickname'
+      ).value,
+
+    gender:
+      document.getElementById(
+        'mirelChildGender'
+      ).value,
+
+    grade:
+      document.getElementById(
+        'mirelChildGrade'
+      ).value,
+
+    birthYear:
+      document.getElementById(
+        'mirelChildBirthYear'
+      ).value,
+
+    birthMonth:
+      document.getElementById(
+        'mirelChildBirthMonth'
+      ).value,
+
+    birthDay:
+      document.getElementById(
+        'mirelChildBirthDay'
+      ).value,
+
+    ageManual:
+      document.getElementById(
+        'mirelChildAge'
+      ).value,
+
+    memo:
+      document.getElementById(
+        'mirelChildMemo'
+      ).value
+
+  };
+
+
+  setLoading(
+    true
+  );
+
+
+  try {
+
+    await runScript(
+      'saveChild',
+      [
+        payload
+      ]
+    );
+
+
+    mirelCloseChildEditor();
+
+
+    await mirelRefreshDetailTeacher();
+
+
+  } catch (e) {
+
+    handleError(
+      e
+    );
+
+
+  } finally {
+
+    setLoading(
+      false
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   子ども情報 削除
+   ========================================================= */
+
+async function mirelDeleteChildFromDetail(
+  childId
+) {
+
+  if (
+    !(await appConfirm(
+      '子ども情報を削除しますか？',
+      'この子ども情報を削除します。\nこの操作は元に戻せません。'
+    ))
+  ) {
+
+    return;
+
+  }
+
+
+  setLoading(
+    true
+  );
+
+
+  try {
+
+    await runScript(
+      'deleteChild',
+      [
+        childId
+      ]
+    );
+
+
+    await mirelRefreshDetailTeacher();
+
+
+  } catch (e) {
+
+    handleError(
+      e
+    );
+
+
+  } finally {
+
+    setLoading(
+      false
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   子どもカードへ編集／削除を追加
+   ========================================================= */
+
+function mirelInstallChildDetailActions(
+  teacher
+) {
+
+  var detail =
+    document.getElementById(
+      'detailContent'
+    );
+
+
+  if (!detail) {
+    return;
+  }
+
+
+  var cards =
+    detail.querySelectorAll(
+      '.card'
+    );
+
+
+  var childCard =
+    null;
+
+
+  for (
+    var i = 0;
+    i < cards.length;
+    i++
+  ) {
+
+    var title =
+      cards[i].querySelector(
+        '.section-title'
+      );
+
+
+    if (
+      title &&
+      title.textContent
+        .trim()
+        .indexOf(
+          '子ども情報'
+        ) === 0
+    ) {
+
+      childCard =
+        cards[i];
+
+      break;
+
+    }
+
+  }
+
+
+  if (!childCard) {
+    return;
+  }
+
+
+  var childRows =
+    childCard.querySelectorAll(
+      '.child'
+    );
+
+
+  var children =
+    teacher.children ||
+    [];
+
+
+  for (
+    var index = 0;
+    index < childRows.length;
+    index++
+  ) {
+
+    var row =
+      childRows[index];
+
+    var child =
+      children[index];
+
+
+    if (
+      !child ||
+      row.dataset.mirelActionsReady ===
+        '1'
+    ) {
+
+      continue;
+
+    }
+
+
+    row.dataset.mirelActionsReady =
+      '1';
+
+
+    var name =
+      row.querySelector(
+        '.child-name-text'
+      );
+
+
+    if (!name) {
+      continue;
+    }
+
+
+    var head =
+      document.createElement(
+        'div'
+      );
+
+
+    head.className =
+      'detail-head';
+
+
+    row.insertBefore(
+      head,
+      name
+    );
+
+
+    head.appendChild(
+      name
+    );
+
+
+    var actions =
+      document.createElement(
+        'div'
+      );
+
+
+    actions.className =
+      'detail-head-actions';
+
+
+    actions.innerHTML =
+
+      '<button type="button" class="secondary" onclick="mirelOpenChildEditor(\'' +
+
+        escapeJs(
+          child.childId
+        ) +
+
+      '\')">編集</button>' +
+
+
+      '<button type="button" class="detail-delete-button" onclick="mirelDeleteChildFromDetail(\'' +
+
+        escapeJs(
+          child.childId
+        ) +
+
+      '\')">🗑 削除</button>';
+
+
+    head.appendChild(
+      actions
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   renderTeacherDetail 後に
+   子ども操作ボタンを追加
+   ========================================================= */
+
+var mirelOriginalRenderTeacherDetailActions =
+  renderTeacherDetail;
+
+
+renderTeacherDetail =
+  function(teacher) {
+
+    mirelOriginalRenderTeacherDetailActions(
+      teacher
+    );
+
+
+    mirelInstallChildDetailActions(
+      teacher
+    );
+
+  };
