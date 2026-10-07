@@ -1753,6 +1753,19 @@ function teacherCard(teacher) {
 
 function renderMapTeacherPreview() {
 
+  var mapSide =
+    document.getElementById(
+      'mapSide'
+    );
+
+  if (
+    !mapSide
+  ) {
+
+    return;
+
+  }
+
   var query =
     (
       document.getElementById(
@@ -1760,6 +1773,20 @@ function renderMapTeacherPreview() {
       ).value ||
       ''
     ).trim();
+
+
+  if (
+    !selectedPrefecture &&
+    !query
+  ) {
+
+    mapSide.innerHTML =
+      '';
+
+    return;
+
+  }
+
 
   var list = [];
 
@@ -1824,6 +1851,13 @@ function renderMapTeacherPreview() {
     title =
       selectedPrefecture;
 
+  } else if (
+    query
+  ) {
+
+    title =
+      '検索結果';
+
   }
 
   var html =
@@ -1877,9 +1911,7 @@ function renderMapTeacherPreview() {
 
   }
 
-  document.getElementById(
-    'mapSide'
-  ).innerHTML =
+  mapSide.innerHTML =
     html;
 
 }
