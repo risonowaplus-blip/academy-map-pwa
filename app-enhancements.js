@@ -342,7 +342,7 @@ function mirelAttachSearchSelect(
     'mirel-select-arrow';
 
   arrow.textContent =
-    '▽';
+    '';
 
 
   var panel =
@@ -2417,7 +2417,7 @@ function mirelEnhanceSettings() {
           'mirel-setting-arrow';
 
         arrow.textContent =
-          '▽';
+          '';
 
 
         field.appendChild(
