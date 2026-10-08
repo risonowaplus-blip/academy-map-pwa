@@ -4723,6 +4723,9 @@ saveTeacherForm =
 
       mirelRefreshAffiliationFilters();
 
+      if (typeof cacheAppSnapshot === 'function') {
+        cacheAppSnapshot();
+      }
 
       closeTeacherForm();
 
