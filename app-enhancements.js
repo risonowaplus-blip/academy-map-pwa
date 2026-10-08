@@ -6709,6 +6709,14 @@ function mirelEnhanceInteractionHistory(
   teacher
 ) {
 
+  if (
+    document.querySelector(
+      '#detailContent .mirel-history-native'
+    )
+  ) {
+    return;
+  }
+
   var cards =
     document.querySelectorAll(
       '#detailContent .card'
