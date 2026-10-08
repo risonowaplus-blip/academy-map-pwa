@@ -28,7 +28,7 @@
   <meta
     id="appleAppTitle"
     name="apple-mobile-web-app-title"
-    content="Academy Map"
+    content="Mirel Map"
   >
 
   <link
@@ -48,7 +48,7 @@
   >
 
   <title>
-    Academy Map
+    Mirel Map
   </title>
 
 </head>
@@ -65,15 +65,15 @@
   <div class="auth-card">
 
     <div class="app-mark">
-      A
+      M
     </div>
 
     <h1 id="authAppName">
-      Academy Map
+      Mirel Map
     </h1>
 
     <p id="authDescription">
-      Googleアカウントでログインして先生情報を開きます。
+      Googleアカウントでログインして人物情報を開きます。
     </p>
 
     <button
@@ -113,11 +113,11 @@
     <div>
 
       <div id="brandName" class="brand">
-        Academy Map
+        Mirel Map
       </div>
 
       <div id="brandSub" class="sub">
-        全国の先生管理
+        全国の人物管理
       </div>
 
     </div>
@@ -200,7 +200,7 @@
                 <span class="legend-dot teacher-dot"></span>
 
                 <span id="mapLegendActive">
-                  先生あり
+                  人物あり
                 </span>
 
               </span>
@@ -235,7 +235,7 @@
                 class="active"
                 onclick="setPrefMode('active')"
               >
-                先生がいる県のみ
+                人物がいる県のみ
               </button>
 
               <button
@@ -275,14 +275,14 @@
           id="listPageTitle"
           class="section-title"
         >
-          先生一覧
+          人物一覧
         </div>
 
         <input
           id="listSearch"
           class="search"
           type="search"
-          placeholder="名前・呼び名・サロン名・地域で検索"
+          placeholder="名前・呼び名・店名・電話番号・地域・所属で検索"
           oninput="renderFullTeacherList()"
         >
 
@@ -311,7 +311,7 @@
           id="globalSearch"
           class="search"
           type="search"
-          placeholder="先生名・ふりがな・呼び名・サロン・Instagram・住所"
+          placeholder="名前・ふりがな・呼び名・店名・電話番号・SNS・住所・所属"
           oninput="renderSearchResults()"
         >
 
@@ -465,6 +465,68 @@
         </div>
 
 
+        <div
+          id="mirelExtraSettings"
+          class="mirel-extra-section"
+        >
+
+          <div class="section-title">
+            使用する項目
+          </div>
+
+          <div class="form-note">
+            OFFにしても登録済みデータは削除されません。再度ONにすると元のデータが表示されます。
+          </div>
+
+          <div
+            id="mirelFeatureGrid"
+            class="mirel-feature-grid"
+          ></div>
+
+
+          <div class="mirel-extra-section">
+
+            <div class="section-title">
+              所属ラベル
+            </div>
+
+            <div class="form-note">
+              所属はいくつでも作成できます。色も自由に変更できます。
+            </div>
+
+            <div id="mirelAffiliationMaster"></div>
+
+            <div class="mirel-aff-master-row">
+
+              <input
+                id="mirelNewAffColor"
+                type="color"
+                value="#f4b8c4"
+              >
+
+              <input
+                id="mirelNewAffName"
+                type="text"
+                placeholder="新しい所属名"
+              >
+
+              <button
+                class="primary"
+                type="button"
+                onclick="mirelAddAffiliation()"
+              >
+                追加
+              </button>
+
+              <span></span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
         <div class="form-actions">
 
           <button
@@ -524,7 +586,7 @@
       </span>
 
       <span id="navListText">
-        先生一覧
+        人物一覧
       </span>
 
     </button>
@@ -603,7 +665,7 @@
         id="modalTitle"
         class="modal-title"
       >
-        先生を追加
+        人物を追加
       </div>
 
       <button
@@ -687,7 +749,61 @@
 </div>
 
 
-<!-- 生まれ年・誕生月 -->
+<!-- 学年 -->
+<div
+  class="field"
+  id="mirelGradeField"
+>
+
+  <label>
+    学年
+  </label>
+
+  <select id="mirelGrade">
+    <option value="">未設定</option>
+    <option value="年少">年少</option>
+    <option value="年中">年中</option>
+    <option value="年長">年長</option>
+    <option value="小1">小1</option>
+    <option value="小2">小2</option>
+    <option value="小3">小3</option>
+    <option value="小4">小4</option>
+    <option value="小5">小5</option>
+    <option value="小6">小6</option>
+    <option value="中1">中1</option>
+    <option value="中2">中2</option>
+    <option value="中3">中3</option>
+    <option value="高1">高1</option>
+    <option value="高2">高2</option>
+    <option value="高3">高3</option>
+    <option value="短大1">短大1</option>
+    <option value="短大2">短大2</option>
+    <option value="大学1">大学1</option>
+    <option value="大学2">大学2</option>
+    <option value="大学3">大学3</option>
+    <option value="大学4">大学4</option>
+    <option value="大学6年制1">大学6年制1</option>
+    <option value="大学6年制2">大学6年制2</option>
+    <option value="大学6年制3">大学6年制3</option>
+    <option value="大学6年制4">大学6年制4</option>
+    <option value="大学6年制5">大学6年制5</option>
+    <option value="大学6年制6">大学6年制6</option>
+    <option value="専門1">専門1</option>
+    <option value="専門2">専門2</option>
+    <option value="専門3">専門3</option>
+    <option value="専門4">専門4</option>
+    <option value="修士1">修士1</option>
+    <option value="修士2">修士2</option>
+    <option value="博士1">博士1</option>
+    <option value="博士2">博士2</option>
+    <option value="博士3">博士3</option>
+    <option value="その他">その他</option>
+  </select>
+
+</div>
+
+
+<!-- 生まれ年・年齢 -->
 <div class="grid2">
 
   <div class="field">
@@ -707,6 +823,26 @@
   <div class="field">
 
     <label>
+      年齢
+    </label>
+
+    <input
+      id="ageManual"
+      type="number"
+      min="0"
+    >
+
+  </div>
+
+</div>
+
+
+<!-- 誕生月・誕生日 -->
+<div class="grid2">
+
+  <div class="field">
+
+    <label>
       誕生月
     </label>
 
@@ -719,11 +855,6 @@
 
   </div>
 
-</div>
-
-
-<!-- 誕生日・年齢 -->
-<div class="grid2">
 
   <div class="field">
 
@@ -740,22 +871,43 @@
 
   </div>
 
+</div>
 
-  <div class="field">
 
-    <label>
-      年齢
-    </label>
+<!-- 電話番号 -->
+<div class="field">
 
-    <input
-      id="ageManual"
-      type="number"
-    >
+  <label>
+    電話番号
+  </label>
 
-  </div>
+  <input
+    id="phone"
+    type="tel"
+    autocomplete="tel"
+    inputmode="tel"
+    placeholder="例：090-1234-5678"
+  >
 
 </div>
 
+
+<!-- 所属 -->
+<div
+  class="field"
+  id="mirelAffiliationField"
+>
+
+  <label>
+    所属
+  </label>
+
+  <div
+    id="mirelAffiliationPicker"
+    class="mirel-aff-picker"
+  ></div>
+
+</div>
 
 <!-- 店名 -->
 <div class="field">
@@ -1203,15 +1355,22 @@
 </div>
 
 
+<div
+  id="mirelToast"
+  class="mirel-toast"
+  aria-live="polite"
+></div>
+
+
 <script src="https://accounts.google.com/gsi/client"></script>
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261006-03"></script>
+<script src="./config.js?v=20261008-02"></script>
 
-<script src="./app.js?v=20261008-01"></script>
+<script src="./app.js?v=20261008-02"></script>
 
-<script src="./app-enhancements.js?v=20261008-01"></script>
+<script src="./app-enhancements.js?v=20261008-02"></script>
 
 </body>
 
