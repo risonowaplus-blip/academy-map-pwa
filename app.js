@@ -9961,6 +9961,12 @@ function mirelInstallSettingsUi() {
       '<button class="primary" type="button" onclick="saveSettingsForm()">設定を保存</button>' +
     '</div>' +
 
+    '<div class="mirel-extra-section mirel-perf-section">' +
+      '<div class="section-title">速度診断</div>' +
+      '<div class="form-note">直近の起動・保存を自動計測します。「計測結果をコピー」でそのまま送れます。</div>' +
+      '<div id="mirelPerformancePanel"></div>' +
+    '</div>' +
+
     '<div class="mirel-extra-section">' +
 
       '<div class="section-title">所属ラベル</div>' +
@@ -9971,12 +9977,6 @@ function mirelInstallSettingsUi() {
 
       '<div id="mirelAffiliationMaster"></div>' +
 
-    '</div>' +
-
-    '<div class="mirel-extra-section mirel-perf-section">' +
-      '<div class="section-title">速度診断</div>' +
-      '<div class="form-note">直近の起動・保存を自動計測します。「計測結果をコピー」でそのまま送れます。</div>' +
-      '<div id="mirelPerformancePanel"></div>' +
     '</div>';
 
 
