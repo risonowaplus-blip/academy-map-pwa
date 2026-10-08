@@ -193,6 +193,65 @@
     }
   </style>
 
+
+  <style>
+    body {
+      --mirel-detail-primary-size: 15px;
+      --mirel-detail-body-size: 14px;
+      --mirel-detail-small-size: 13px;
+    }
+
+    body[data-mirel-font-size="small"] {
+      --mirel-detail-primary-size: 14px;
+      --mirel-detail-body-size: 13px;
+      --mirel-detail-small-size: 12px;
+    }
+
+    body[data-mirel-font-size="standard"] {
+      --mirel-detail-primary-size: 15px;
+      --mirel-detail-body-size: 14px;
+      --mirel-detail-small-size: 13px;
+    }
+
+    body[data-mirel-font-size="large"] {
+      --mirel-detail-primary-size: 18px;
+      --mirel-detail-body-size: 16px;
+      --mirel-detail-small-size: 15px;
+    }
+
+    #detailContent .mirel-interaction-row,
+    #detailContent .mirel-child-card > .child {
+      font-size: var(--mirel-detail-body-size) !important;
+    }
+
+    #detailContent .mirel-interaction-row .interaction-date,
+    #detailContent .mirel-child-card .child-name-text {
+      font-size: var(--mirel-detail-primary-size) !important;
+    }
+
+    #detailContent .mirel-interaction-row .interaction-type-label,
+    #detailContent .mirel-child-card .child-meta,
+    #detailContent .mirel-child-card .small-note {
+      font-size: var(--mirel-detail-small-size) !important;
+    }
+
+    #detailContent .mirel-interaction-row > div:not(.detail-head),
+    #detailContent .mirel-history-toggle,
+    #detailContent .mirel-children-toggle,
+    #detailContent .mirel-history-tab {
+      font-size: var(--mirel-detail-body-size) !important;
+    }
+
+    .mirel-list-card .teacher-name {
+      font-size: var(--mirel-detail-primary-size) !important;
+    }
+
+    .mirel-list-card .mirel-list-address,
+    .mirel-list-card .mirel-list-line {
+      font-size: var(--mirel-detail-body-size) !important;
+    }
+  </style>
+
 </head>
 
 
@@ -603,6 +662,25 @@
             id="settingPlaceKanaLabelResults"
             class="setting-results"
           ></div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            文字サイズ
+          </label>
+
+          <select id="settingFontSize">
+            <option value="small">小さめ</option>
+            <option value="standard">標準</option>
+            <option value="large">大きめ</option>
+          </select>
+
+          <div class="small-note">
+            一覧・詳細画面の文字サイズを調整できます。標準は現在の子ども情報と同程度です。
+          </div>
 
         </div>
 
@@ -1577,9 +1655,9 @@
 
 <script src="./config.js?v=20261008-03"></script>
 
-<script src="./app.js?v=20261008-04"></script>
+<script src="./app.js?v=20261008-05"></script>
 
-<script src="./app-enhancements.js?v=20261008-04"></script>
+<script src="./app-enhancements.js?v=20261008-05"></script>
 
 </body>
 
