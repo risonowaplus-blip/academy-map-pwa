@@ -8,3 +8,4 @@ const CONFIG = {
   // Apps Script本体が必要とするスコープ
   SCOPES: 'https://www.googleapis.com/auth/spreadsheets'
 };
+
