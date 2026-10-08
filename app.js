@@ -9055,24 +9055,27 @@ function mirelRenderAffiliationMaster() {
           '<button ' +
           'type="button" ' +
           'class="secondary" ' +
-          'onclick="mirelUpdateAffiliation(\\'' +
-          escapeJs(
-            row.affiliationId
-          ) +
-          '\\')">' +
-          '保存' +
-          '</button>' +
-
           '<button ' +
-          'type="button" ' +
-          'class="secondary" ' +
-          'onclick="mirelDeleteAffiliation(\\'' +
-          escapeJs(
-            row.affiliationId
-          ) +
-          '\\')">' +
-          '削除' +
-          '</button>' +
+'type="button" ' +
+'class="secondary" ' +
+'onclick="mirelUpdateAffiliation(\'' +
+escapeJs(
+  row.affiliationId
+) +
+'\')">' +
+'保存' +
+'</button>' +
+
+'<button ' +
+'type="button" ' +
+'class="secondary" ' +
+'onclick="mirelDeleteAffiliation(\'' +
+escapeJs(
+  row.affiliationId
+) +
+'\')">' +
+'削除' +
+'</button>' +
 
         '</div>';
 
