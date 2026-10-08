@@ -9930,6 +9930,24 @@ function mirelInstallSettingsUi() {
 
   if (existingArea) {
 
+    /* index.html に既存の設定領域がある場合でも、
+       速度診断が未配置なら「設定を保存」の直後へ必ず追加する。 */
+    if (!document.getElementById('mirelPerformancePanel')) {
+      var featureActions = existingArea.querySelector('.mirel-feature-save-actions');
+      var perfSection = document.createElement('div');
+      perfSection.className = 'mirel-extra-section mirel-perf-section';
+      perfSection.innerHTML =
+        '<div class="section-title">速度診断</div>' +
+        '<div class="form-note">直近の起動・保存を自動計測します。「計測結果をコピー」でそのまま送れます。</div>' +
+        '<div id="mirelPerformancePanel"></div>';
+
+      if (featureActions && featureActions.parentNode) {
+        featureActions.parentNode.insertBefore(perfSection, featureActions.nextSibling);
+      } else {
+        existingArea.insertBefore(perfSection, existingArea.firstChild);
+      }
+    }
+
     mirelRenderFeatureSettings();
 
     mirelRenderAffiliationMaster();
