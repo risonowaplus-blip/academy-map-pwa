@@ -44,9 +44,30 @@ gradeOptions = [
   '中3',
   '高1',
   '高2',
-  '高3'
+  '高3',
+  '短大1',
+  '短大2',
+  '大学1',
+  '大学2',
+  '大学3',
+  '大学4',
+  '大学6年制1',
+  '大学6年制2',
+  '大学6年制3',
+  '大学6年制4',
+  '大学6年制5',
+  '大学6年制6',
+  '専門1',
+  '専門2',
+  '専門3',
+  '専門4',
+  '修士1',
+  '修士2',
+  '博士1',
+  '博士2',
+  '博士3',
+  'その他'
 ];
-
 
 /* =========================================================
    Mirel Map 標準名称
@@ -1344,6 +1365,16 @@ function mirelTeacherListCard(
 
       '</div>' +
 
+      (
+        mirelFeatureOn(
+          'affiliation'
+        )
+          ? mirelAffiliationTagsHtml(
+              teacher.teacherId
+            )
+          : ''
+      ) +
+
 
     '</div>'
 
@@ -1411,8 +1442,56 @@ function mirelPrefectureIndex(
 renderFullTeacherList =
   function() {
 
+    var affiliationFilter =
+      document.getElementById(
+        'mirelListAffiliationFilter'
+      );
+
+    var affiliationId =
+      affiliationFilter
+        ? affiliationFilter.value
+        : '';
+
+    var query =
+      (
+        document.getElementById(
+          'listSearch'
+        ) &&
+        document.getElementById(
+          'listSearch'
+        ).value
+      ) ||
+      '';
+
     var rows =
       teachers
+        .filter(
+          function(teacher) {
+
+            if (
+              affiliationId &&
+              !mirelTeacherHasAffiliation(
+                teacher.teacherId,
+                affiliationId
+              )
+            ) {
+              return false;
+            }
+
+            if (
+              query &&
+              !teacherMatches(
+                teacher,
+                query
+              )
+            ) {
+              return false;
+            }
+
+            return true;
+
+          }
+        )
         .slice()
         .sort(
           function(a, b) {
@@ -2099,6 +2178,26 @@ saveSettingsForm =
     };
 
 
+    var featurePayload =
+      {};
+
+
+    document
+      .querySelectorAll(
+        '.mirel-feature-setting'
+      )
+      .forEach(
+        function(input) {
+
+          featurePayload[
+            input.dataset.feature
+          ] =
+            input.checked;
+
+        }
+      );
+
+
     setLoading(
       true
     );
@@ -2118,9 +2217,26 @@ saveSettingsForm =
         );
 
 
-      /*
-       * 旧標準値だけ新名称へ変換
-       */
+      var featureResult =
+        await runScript(
+
+          'saveMirelFeatureSettings',
+
+          [
+            featurePayload
+          ]
+
+        );
+
+
+      mirelFeatureSettings =
+        (
+          featureResult &&
+          featureResult.featureSettings
+        ) ||
+        mirelFeatureSettings;
+
+
       if (
         appSettings.appName ===
         'Academy Map'
@@ -2147,6 +2263,10 @@ saveSettingsForm =
 
       applySettingsToUi();
 
+      mirelRenderFeatureSettings();
+
+      mirelApplyCurrentVisibility();
+
       renderAll();
 
       renderJapanMap();
@@ -2154,7 +2274,7 @@ saveSettingsForm =
       fillSettingsForm();
 
 
-      alert(
+      appToast(
         '設定を保存しました。'
       );
 
@@ -2175,7 +2295,6 @@ saveSettingsForm =
     }
 
   };
-
 
 /* =========================================================
    設定候補
@@ -4013,6 +4132,11 @@ saveTeacherForm =
           'gender'
         ),
 
+      phone:
+        valueOf(
+          'phone'
+        ),
+
       birthYear:
         valueOf(
           'birthYear'
@@ -4092,7 +4216,19 @@ saveTeacherForm =
         pendingInteractions.slice(),
 
       deletedInteractionIds:
-        deletedInteractionIds.slice()
+        deletedInteractionIds.slice(),
+
+      extras: {
+
+        grade:
+          valueOf(
+            'mirelGrade'
+          ),
+
+        affiliationIds:
+          mirelSelectedAffiliationIds()
+
+      }
 
     };
 
@@ -4129,6 +4265,35 @@ saveTeacherForm =
         result.teacherId
           ? result.teacherId
           : '';
+
+
+      if (
+        result &&
+        result.extra
+      ) {
+
+        mirelAffiliations =
+          result.extra.affiliations ||
+          mirelAffiliations;
+
+        mirelTeacherAffiliations =
+          result.extra.teacherAffiliations ||
+          mirelTeacherAffiliations;
+
+        mirelProfiles =
+          result.extra.profiles ||
+          mirelProfiles;
+
+        mirelFeatureSettings =
+          result.extra.featureSettings ||
+          mirelFeatureSettings;
+
+      }
+
+
+      mirelApplyProfileDerivedValues();
+
+      mirelRefreshAffiliationFilters();
 
 
       closeTeacherForm();
@@ -5047,7 +5212,8 @@ function mirelBindAgePreview(
   yearInput,
   monthInput,
   dayInput,
-  ageInput
+  ageInput,
+  gradeInput
 ) {
 
   if (
@@ -5081,8 +5247,44 @@ function mirelBindAgePreview(
     ageInput.dataset
       .mirelAutoWriting = '1';
 
-    ageInput.value =
-      age;
+
+    if (
+      age !== ''
+    ) {
+
+      ageInput.value =
+        age;
+
+      ageInput.placeholder =
+        '生年月日入力時は自動計算。手入力も可';
+
+    } else {
+
+      ageInput.value =
+        '';
+
+      var gradeValue =
+        gradeInput
+          ? gradeInput.value
+          : '';
+
+      var approx =
+        gradeValue
+          ? mirelGradeAgeDisplay(
+              mirelGradeDisplay(
+                gradeValue,
+                mirelCurrentFiscalYear()
+              )
+            )
+          : '';
+
+      ageInput.placeholder =
+        approx
+          ? '目安：' + approx + '（手入力可）'
+          : '生年月日・学年から目安表示。手入力も可';
+
+    }
+
 
     ageInput.dataset
       .mirelAutoWriting = '0';
@@ -5187,8 +5389,29 @@ function mirelBindAgePreview(
   }
 
 
+  if (
+    gradeInput &&
+    gradeInput.dataset.mirelAgeGradeReady !== '1'
+  ) {
+
+    gradeInput.dataset.mirelAgeGradeReady =
+      '1';
+
+    gradeInput.addEventListener(
+      'change',
+      updatePreview
+    );
+
+    gradeInput.addEventListener(
+      'input',
+      updatePreview
+    );
+
+  }
+
+
   ageInput.placeholder =
-    '生年月日入力時は自動計算。手入力も可';
+    '生年月日・学年から目安表示。手入力も可';
 
 
   ageInput.dataset
@@ -5242,6 +5465,10 @@ openTeacherForm =
 
           document.getElementById(
             'ageManual'
+          ),
+
+          document.getElementById(
+            'mirelGrade'
           )
 
         );
@@ -5677,6 +5904,10 @@ function mirelEnsureChildEditModal() {
 
     document.getElementById(
       'mirelChildAge'
+    ),
+
+    document.getElementById(
+      'mirelChildGrade'
     )
 
   );
@@ -7067,4 +7298,3 @@ openTeacherDetail =
     );
 
   };
-
