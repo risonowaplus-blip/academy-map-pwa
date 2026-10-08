@@ -7428,6 +7428,28 @@ function mirelInstallExtraStyles() {
       background: transparent;
     }
 
+    .mirel-aff-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      grid-column: 1 / -1;
+      margin: 2px 0 4px;
+    }
+
+    .mirel-aff-preset {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      padding: 0;
+      border: 1px solid #dfd4d1;
+      border-radius: 50%;
+      box-shadow: none;
+    }
+
+    .mirel-aff-preset:active {
+      transform: scale(0.94);
+    }
+
     .mirel-aff-picker {
       display: flex;
       flex-wrap: wrap;
@@ -7662,6 +7684,198 @@ function mirelTeacherHasAffiliation(
 }
 
 
+
+var MIREL_AFFILIATION_PASTEL_COLORS = [
+  '#f7d8df',
+  '#f6d9f2',
+  '#f7e4c9',
+  '#f3efc8',
+  '#dcebd7',
+  '#d7e9ea',
+  '#dbe3f4',
+  '#e4dcf3',
+  '#e8e1da'
+];
+
+
+function mirelAffiliationDisplayColor(
+  color
+) {
+
+  var value =
+    String(
+      color ||
+      '#f7d8df'
+    ).trim();
+
+
+  if (
+    !/^#[0-9a-fA-F]{6}$/.test(
+      value
+    )
+  ) {
+    return '#f7d8df';
+  }
+
+
+  var r =
+    parseInt(
+      value.slice(1, 3),
+      16
+    );
+
+  var g =
+    parseInt(
+      value.slice(3, 5),
+      16
+    );
+
+  var b =
+    parseInt(
+      value.slice(5, 7),
+      16
+    );
+
+
+  var max =
+    Math.max(
+      r,
+      g,
+      b
+    );
+
+  var min =
+    Math.min(
+      r,
+      g,
+      b
+    );
+
+  var lightness =
+    (
+      max +
+      min
+    ) /
+    510;
+
+
+  /*
+   * 旧仕様では保存色を20%の透明度で表示していたため、
+   * #ff00ff など設定画面では濃い色でも、実際のラベルは薄色だった。
+   * 旧データの濃色だけ、見えていたラベル色相当へ変換する。
+   * すでに淡色ならそのまま使う。
+   */
+  if (
+    lightness >= 0.78
+  ) {
+    return value.toLowerCase();
+  }
+
+
+  function pastelChannel(
+    channel
+  ) {
+
+    return Math.round(
+      255 * 0.8 +
+      channel * 0.2
+    );
+
+  }
+
+
+  return (
+    '#' +
+    [
+      pastelChannel(r),
+      pastelChannel(g),
+      pastelChannel(b)
+    ]
+      .map(
+        function(channel) {
+
+          return channel
+            .toString(16)
+            .padStart(
+              2,
+              '0'
+            );
+
+        }
+      )
+      .join('')
+  );
+
+}
+
+
+function mirelSetAffiliationColor(
+  inputId,
+  color
+) {
+
+  var input =
+    document.getElementById(
+      inputId
+    );
+
+
+  if (!input) {
+    return;
+  }
+
+
+  input.value =
+    mirelAffiliationDisplayColor(
+      color
+    );
+
+}
+
+
+function mirelAffiliationPaletteHtml(
+  inputId
+) {
+
+  return (
+    '<div class="mirel-aff-palette" aria-label="淡い色の候補">' +
+    MIREL_AFFILIATION_PASTEL_COLORS
+      .map(
+        function(color) {
+
+          return (
+            '<button type="button" ' +
+            'class="mirel-aff-preset" ' +
+            'style="background:' +
+            escapeAttr(
+              color
+            ) +
+            ';" ' +
+            'aria-label="' +
+            escapeAttr(
+              color
+            ) +
+            '" ' +
+            'onclick="mirelSetAffiliationColor(\'' +
+            escapeJs(
+              inputId
+            ) +
+            '\',\'' +
+            escapeJs(
+              color
+            ) +
+            '\')"></button>'
+          );
+
+        }
+      )
+      .join('') +
+    '</div>'
+  );
+
+}
+
+
 function mirelAffiliationTagsHtml(
   teacherId
 ) {
@@ -7693,10 +7907,11 @@ function mirelAffiliationTagsHtml(
       tags +=
         '<span class="mirel-aff-tag" style="background:' +
         escapeAttr(
-          row.color ||
-          '#f4b8c4'
+          mirelAffiliationDisplayColor(
+            row.color
+          )
         ) +
-        '33;">' +
+        ';">' +
         escapeHtml(
           row.name
         ) +
@@ -8191,10 +8406,11 @@ function mirelRenderAffiliationPicker(
         '<span style="' +
         'background:' +
         escapeHtml(
-          row.color ||
-          '#f4b8c4'
+          mirelAffiliationDisplayColor(
+            row.color
+          )
         ) +
-        '33;' +
+        ';' +
         'color:#444;' +
         '">' +
 
@@ -8620,10 +8836,11 @@ function mirelInjectDetailExtras(
             '<span class="mirel-aff-tag" ' +
             'style="background:' +
             escapeHtml(
-              row.color ||
-              '#f4b8c4'
+              mirelAffiliationDisplayColor(
+                row.color
+              )
             ) +
-            '33;">' +
+            ';">' +
 
             escapeHtml(
               row.name
@@ -9132,13 +9349,17 @@ function mirelInstallSettingsUi() {
 
       '<div class="mirel-aff-master-row">' +
 
-        '<input id="mirelNewAffColor" type="color" value="#f4b8c4">' +
+        '<input id="mirelNewAffColor" type="color" value="#f7d8df">' +
 
         '<input id="mirelNewAffName" type="text" placeholder="新しい所属名">' +
 
         '<button class="primary" type="button" onclick="mirelAddAffiliation()">追加</button>' +
 
         '<span></span>' +
+
+        mirelAffiliationPaletteHtml(
+          'mirelNewAffColor'
+        ) +
 
       '</div>' +
 
@@ -9373,8 +9594,9 @@ function mirelRenderAffiliationMaster() {
           '" ' +
           'value="' +
           escapeHtml(
-            row.color ||
-            '#f4b8c4'
+            mirelAffiliationDisplayColor(
+              row.color
+            )
           ) +
           '">' +
 
@@ -9411,6 +9633,11 @@ function mirelRenderAffiliationMaster() {
           '削除' +
           '</button>' +
 
+          mirelAffiliationPaletteHtml(
+            'mirelAffColor_' +
+            row.affiliationId
+          ) +
+
         '</div>';
 
     }
@@ -9440,7 +9667,7 @@ async function mirelAddAffiliation() {
   var color =
     colorInput
       ? colorInput.value
-      : '#f4b8c4';
+      : '#f7d8df';
 
 
   if (!name) {
@@ -9497,7 +9724,7 @@ async function mirelUpdateAffiliation(
     color:
       colorInput
         ? colorInput.value
-        : '#f4b8c4'
+        : '#f7d8df'
 
   });
 
