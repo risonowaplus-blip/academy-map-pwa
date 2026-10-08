@@ -7421,11 +7421,22 @@ function mirelInstallExtraStyles() {
     }
 
     .mirel-aff-master-row input[type="color"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mirel-aff-color-preview {
       width: 42px;
       height: 40px;
-      border: 0;
-      padding: 2px;
-      background: transparent;
+      min-width: 42px;
+      padding: 0;
+      border: 1px solid #b9aeab;
+      border-radius: 0;
+      box-shadow: none;
+      background: #f7d8df;
     }
 
     .mirel-aff-palette {
@@ -7825,10 +7836,25 @@ function mirelSetAffiliationColor(
   }
 
 
-  input.value =
+  var displayColor =
     mirelAffiliationDisplayColor(
       color
     );
+
+  input.value =
+    displayColor;
+
+
+  var preview =
+    document.getElementById(
+      inputId + '_preview'
+    );
+
+
+  if (preview) {
+    preview.style.background =
+      displayColor;
+  }
 
 }
 
@@ -9349,7 +9375,9 @@ function mirelInstallSettingsUi() {
 
       '<div class="mirel-aff-master-row">' +
 
-        '<input id="mirelNewAffColor" type="color" value="#f7d8df">' +
+        '<input id="mirelNewAffColor" type="hidden" value="#f7d8df">' +
+
+        '<button type="button" class="mirel-aff-color-preview" id="mirelNewAffColor_preview" style="background:#f7d8df" aria-label="新しい所属の色"></button>' +
 
         '<input id="mirelNewAffName" type="text" placeholder="新しい所属名">' +
 
@@ -9588,7 +9616,7 @@ function mirelRenderAffiliationMaster() {
         '<div class="mirel-aff-master-row">' +
 
           '<input ' +
-          'type="color" ' +
+          'type="hidden" ' +
           'id="mirelAffColor_' +
           row.affiliationId +
           '" ' +
@@ -9599,6 +9627,20 @@ function mirelRenderAffiliationMaster() {
             )
           ) +
           '">' +
+
+          '<button type="button" ' +
+          'class="mirel-aff-color-preview" ' +
+          'id="mirelAffColor_' +
+          row.affiliationId +
+          '_preview" ' +
+          'style="background:' +
+          escapeAttr(
+            mirelAffiliationDisplayColor(
+              row.color
+            )
+          ) +
+          ';" ' +
+          'aria-label="現在の所属色"></button>' +
 
           '<input ' +
           'type="text" ' +
@@ -9690,6 +9732,11 @@ async function mirelAddAffiliation() {
   setValue(
     'mirelNewAffName',
     ''
+  );
+
+  mirelSetAffiliationColor(
+    'mirelNewAffColor',
+    '#f7d8df'
   );
 
 }
