@@ -4544,7 +4544,109 @@ function mirelSameComparable(a, b) {
 
 /* =========================================================
    保存を1回のAPI通信へまとめる
+   2026-10-08-22: 体感高速化
+   ・フォームは保存タップ直後に閉じる
+   ・既存人物はローカルへ即時反映
+   ・全画面「読み込んでいます」は出さない
+   ・右下トーストで「保存中…」→「保存しました」
+   ・通信失敗時はロールバックしてフォームを再表示
    ========================================================= */
+
+function mirelShowPersistentToast(message) {
+
+  var toast =
+    document.getElementById(
+      'mirelToast'
+    );
+
+  if (!toast) {
+
+    toast =
+      document.createElement(
+        'div'
+      );
+
+    toast.id =
+      'mirelToast';
+
+    toast.className =
+      'mirel-toast';
+
+    document.body.appendChild(
+      toast
+    );
+
+  }
+
+  if (
+    typeof appToast === 'function'
+  ) {
+    clearTimeout(
+      appToast._timer
+    );
+  }
+
+  toast.textContent =
+    String(
+      message || ''
+    );
+
+  toast.classList.add(
+    'show'
+  );
+
+}
+
+
+function mirelHidePersistentToast() {
+
+  var toast =
+    document.getElementById(
+      'mirelToast'
+    );
+
+  if (toast) {
+    toast.classList.remove(
+      'show'
+    );
+  }
+
+}
+
+
+function mirelHideTeacherFormWithoutReset() {
+
+  var modal =
+    document.getElementById(
+      'teacherModal'
+    );
+
+  if (modal) {
+    modal.classList.remove(
+      'show'
+    );
+  }
+
+  hideCombos();
+
+}
+
+
+function mirelRestoreTeacherFormAfterSaveError() {
+
+  var modal =
+    document.getElementById(
+      'teacherModal'
+    );
+
+  if (modal) {
+    modal.classList.add(
+      'show'
+    );
+  }
+
+}
+
 
 saveTeacherForm =
   async function() {
@@ -4665,6 +4767,31 @@ saveTeacherForm =
           )
         : null;
 
+    var currentTeacherSnapshot =
+      currentTeacher
+        ? JSON.parse(
+            JSON.stringify(
+              currentTeacher
+            )
+          )
+        : null;
+
+    var currentProfileSnapshot =
+      currentTeacher && mirelProfiles[currentTeacher.teacherId]
+        ? JSON.parse(
+            JSON.stringify(
+              mirelProfiles[currentTeacher.teacherId]
+            )
+          )
+        : null;
+
+    var currentAffiliationSnapshot =
+      currentTeacher
+        ? (
+            mirelTeacherAffiliations[currentTeacher.teacherId] || []
+          ).slice()
+        : [];
+
     var collectedChildren =
       mirelCollectChildren();
 
@@ -4681,8 +4808,7 @@ saveTeacherForm =
           collectedChildren
         ),
         mirelComparableChildren(
-          currentTeacher.children ||
-          []
+          currentTeacher.children || []
         )
       );
 
@@ -4694,8 +4820,7 @@ saveTeacherForm =
           currentLinks
         ),
         mirelComparableLinks(
-          currentTeacher.links ||
-          []
+          currentTeacher.links || []
         )
       );
 
@@ -4707,8 +4832,7 @@ saveTeacherForm =
           currentInteractions
         ),
         mirelComparableInteractions(
-          currentTeacher.interactions ||
-          []
+          currentTeacher.interactions || []
         )
       );
 
@@ -4780,8 +4904,76 @@ saveTeacherForm =
     };
 
 
-    setLoading(
-      true
+    /*
+     * ここから先は全画面ローディングを出さない。
+     * 既存人物は先にローカルへ反映して、フォームを即閉じる。
+     */
+    if (currentTeacher) {
+
+      Object.keys(
+        teacherPayload
+      ).forEach(
+        function(key) {
+          if (key !== 'teacherId') {
+            currentTeacher[key] =
+              teacherPayload[key];
+          }
+        }
+      );
+
+      if (childrenChanged) {
+        currentTeacher.children =
+          collectedChildren.slice();
+      }
+
+      if (linksChanged) {
+        currentTeacher.links =
+          currentLinks.slice();
+      }
+
+      if (interactionsChanged) {
+        currentTeacher.interactions =
+          currentInteractions.slice();
+      }
+
+      mirelTeacherAffiliations[currentTeacher.teacherId] =
+        bundle.extras.affiliationIds.slice();
+
+      mirelProfiles[currentTeacher.teacherId] =
+        Object.assign(
+          {},
+          mirelProfiles[currentTeacher.teacherId] || {},
+          {
+            grade:
+              bundle.extras.grade || ''
+          }
+        );
+
+      mirelApplyProfileDerivedValues();
+      mirelRefreshAffiliationFilters();
+
+      if (typeof cacheAppSnapshot === 'function') {
+        cacheAppSnapshot();
+      }
+
+      mirelHideTeacherFormWithoutReset();
+
+      renderAll();
+      renderJapanMap();
+
+      openTeacherDetail(
+        currentTeacher.teacherId
+      );
+
+    } else {
+
+      /* 新規はID確定前なのでフォームだけ即閉じる */
+      mirelHideTeacherFormWithoutReset();
+
+    }
+
+    mirelShowPersistentToast(
+      '保存中…'
     );
 
 
@@ -4823,12 +5015,10 @@ saveTeacherForm =
 
           if (
             String(
-              teachers[teacherIndex].teacherId ||
-              ''
+              teachers[teacherIndex].teacherId || ''
             ) ===
             String(
-              result.teacher.teacherId ||
-              ''
+              result.teacher.teacherId || ''
             )
           ) {
 
@@ -4865,7 +5055,13 @@ saveTeacherForm =
         result &&
         result.teacherId
           ? result.teacherId
-          : '';
+          : (
+              result &&
+              result.teacher &&
+              result.teacher.teacherId
+                ? result.teacher.teacherId
+                : teacherPayload.teacherId || ''
+            );
 
 
       if (
@@ -4886,18 +5082,16 @@ saveTeacherForm =
 
 
       mirelApplyProfileDerivedValues();
-
       mirelRefreshAffiliationFilters();
 
       if (typeof cacheAppSnapshot === 'function') {
         cacheAppSnapshot();
       }
 
+      /* 成功した時点でフォーム用一時データをクリア */
       closeTeacherForm();
 
-
       renderAll();
-
       renderJapanMap();
 
 
@@ -4910,15 +5104,10 @@ saveTeacherForm =
             savedTeacherId
           );
 
-
-        if (
-          teacher
-        ) {
-
+        if (teacher) {
           openTeacherDetail(
             savedTeacherId
           );
-
         }
 
       }
@@ -4957,19 +5146,71 @@ saveTeacherForm =
         );
       }
 
+      mirelHidePersistentToast();
+
+      if (typeof appToast === 'function') {
+        appToast(
+          '保存しました'
+        );
+      }
+
 
     } catch (e) {
+
+      /* 楽観反映した既存データを元へ戻す */
+      if (
+        currentTeacherSnapshot &&
+        teacherPayload.teacherId
+      ) {
+
+        for (
+          var rollbackIndex = 0;
+          rollbackIndex < teachers.length;
+          rollbackIndex++
+        ) {
+
+          if (
+            String(
+              teachers[rollbackIndex].teacherId || ''
+            ) ===
+            String(
+              teacherPayload.teacherId || ''
+            )
+          ) {
+            teachers[rollbackIndex] =
+              currentTeacherSnapshot;
+            break;
+          }
+
+        }
+
+        if (currentProfileSnapshot) {
+          mirelProfiles[teacherPayload.teacherId] =
+            currentProfileSnapshot;
+        } else {
+          delete mirelProfiles[teacherPayload.teacherId];
+        }
+
+        mirelTeacherAffiliations[teacherPayload.teacherId] =
+          currentAffiliationSnapshot.slice();
+
+        mirelApplyProfileDerivedValues();
+        mirelRefreshAffiliationFilters();
+
+        renderAll();
+        renderJapanMap();
+
+      }
+
+      mirelHidePersistentToast();
+
+      /* 入力内容はDOMにも一時配列にも残っているので、そのまま再表示 */
+      mirelRestoreTeacherFormAfterSaveError();
 
       handleError(
         e
       );
 
-
-    } finally {
-
-      setLoading(
-        false
-      );
 
     }
 
