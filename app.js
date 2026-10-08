@@ -35,6 +35,208 @@ var STORAGE_AUTHORIZED = 'academyGoogleAuthorized';
 var STORAGE_APP_SNAPSHOT = 'mirelAppSnapshotV2';
 var APP_SNAPSHOT_VERSION = 2;
 
+/* ========================================
+   速度診断
+   ======================================== */
+
+var MIREL_PERF_STORAGE = 'mirelPerformanceHistoryV1';
+var mirelLastApiTimings = {};
+
+function mirelPerfNow() {
+  if (
+    window.performance &&
+    typeof window.performance.now === 'function'
+  ) {
+    return window.performance.now();
+  }
+  return Date.now();
+}
+
+function mirelPerfMs(value) {
+  var n = Number(value || 0);
+  if (!isFinite(n)) {
+    return 0;
+  }
+  return Math.round(n);
+}
+
+function mirelSavePerformance(type, values) {
+  var entry = Object.assign(
+    {
+      type: type,
+      at: new Date().toISOString()
+    },
+    values || {}
+  );
+
+  try {
+    var history = JSON.parse(
+      localStorage.getItem(MIREL_PERF_STORAGE) || '[]'
+    );
+    if (!Array.isArray(history)) {
+      history = [];
+    }
+    history.push(entry);
+    if (history.length > 20) {
+      history = history.slice(history.length - 20);
+    }
+    localStorage.setItem(
+      MIREL_PERF_STORAGE,
+      JSON.stringify(history)
+    );
+  } catch (e) {}
+
+  try {
+    console.log('[Mirel速度診断]', entry);
+  } catch (e) {}
+
+  mirelRenderPerformancePanel();
+  return entry;
+}
+
+function mirelPerformanceHistory() {
+  try {
+    var history = JSON.parse(
+      localStorage.getItem(MIREL_PERF_STORAGE) || '[]'
+    );
+    return Array.isArray(history) ? history : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function mirelLastPerformance(type) {
+  var history = mirelPerformanceHistory();
+  for (var i = history.length - 1; i >= 0; i--) {
+    if (history[i] && history[i].type === type) {
+      return history[i];
+    }
+  }
+  return null;
+}
+
+function mirelFormatPerfMs(ms) {
+  var n = mirelPerfMs(ms);
+  if (n >= 1000) {
+    return (n / 1000).toFixed(n >= 10000 ? 1 : 2) + '秒';
+  }
+  return n + 'ms';
+}
+
+function mirelPerformanceServerLines(server) {
+  if (!server || typeof server !== 'object') {
+    return '';
+  }
+  var order = [
+    ['ensureStructureMs', '構造確認'],
+    ['teachersMs', '人物一覧'],
+    ['settingsMs', '設定'],
+    ['extraMs', '所属等'],
+    ['teacherSaveMs', '人物保存'],
+    ['childrenMs', '子ども'],
+    ['linksMs', 'SNS'],
+    ['interactionsMs', '交流履歴'],
+    ['extrasMs', '学年・所属'],
+    ['detailMs', '保存後詳細'],
+    ['resultExtraMs', '保存後所属等']
+  ];
+  var parts = [];
+  order.forEach(function(item) {
+    if (server[item[0]] !== undefined) {
+      parts.push(
+        item[1] + ' ' + mirelFormatPerfMs(server[item[0]])
+      );
+    }
+  });
+  return parts.join(' / ');
+}
+
+function mirelPerfEntryHtml(title, entry) {
+  if (!entry) {
+    return (
+      '<div class="mirel-perf-row">' +
+      '<strong>' + title + '</strong>' +
+      '<span>まだ計測データがありません</span>' +
+      '</div>'
+    );
+  }
+
+  var main = [];
+  if (entry.totalMs !== undefined) {
+    main.push('合計 ' + mirelFormatPerfMs(entry.totalMs));
+  }
+  if (entry.cacheVisibleMs !== undefined && entry.cacheVisibleMs !== null) {
+    main.push('キャッシュ表示 ' + mirelFormatPerfMs(entry.cacheVisibleMs));
+  }
+  if (entry.apiMs !== undefined) {
+    main.push('API ' + mirelFormatPerfMs(entry.apiMs));
+  }
+  if (entry.uiMs !== undefined) {
+    main.push('画面更新 ' + mirelFormatPerfMs(entry.uiMs));
+  }
+
+  var serverLine = mirelPerformanceServerLines(entry.server);
+
+  return (
+    '<div class="mirel-perf-row">' +
+      '<strong>' + title + '</strong>' +
+      '<span>' + main.join(' / ') + '</span>' +
+      (serverLine
+        ? '<small>サーバー内：' + serverLine + '</small>'
+        : '') +
+    '</div>'
+  );
+}
+
+function mirelRenderPerformancePanel() {
+  var el = document.getElementById('mirelPerformancePanel');
+  if (!el) {
+    return;
+  }
+  var startup = mirelLastPerformance('startup');
+  var save = mirelLastPerformance('save');
+  el.innerHTML =
+    mirelPerfEntryHtml('直近の起動', startup) +
+    mirelPerfEntryHtml('直近の保存', save) +
+    '<button type="button" class="secondary mirel-perf-copy" onclick="mirelCopyPerformanceReport()">計測結果をコピー</button>';
+}
+
+function mirelBuildPerformanceReport() {
+  var startup = mirelLastPerformance('startup');
+  var save = mirelLastPerformance('save');
+  function line(title, entry) {
+    if (!entry) return title + '：未計測';
+    var parts = [];
+    if (entry.totalMs !== undefined) parts.push('合計=' + mirelPerfMs(entry.totalMs) + 'ms');
+    if (entry.cacheVisibleMs !== undefined && entry.cacheVisibleMs !== null) parts.push('キャッシュ表示=' + mirelPerfMs(entry.cacheVisibleMs) + 'ms');
+    if (entry.apiMs !== undefined) parts.push('API=' + mirelPerfMs(entry.apiMs) + 'ms');
+    if (entry.uiMs !== undefined) parts.push('画面更新=' + mirelPerfMs(entry.uiMs) + 'ms');
+    if (entry.server && entry.server.totalMs !== undefined) parts.push('GAS内部=' + mirelPerfMs(entry.server.totalMs) + 'ms');
+    var server = mirelPerformanceServerLines(entry.server);
+    if (server) parts.push('内訳[' + server + ']');
+    return title + '：' + parts.join(' / ');
+  }
+  return [
+    'Mirel Map 速度診断',
+    line('起動', startup),
+    line('保存', save)
+  ].join('\n');
+}
+
+async function mirelCopyPerformanceReport() {
+  var text = mirelBuildPerformanceReport();
+  try {
+    await navigator.clipboard.writeText(text);
+    if (typeof mirelShowToast === 'function') {
+      mirelShowToast('速度診断結果をコピーしました。');
+    }
+  } catch (e) {
+    if (typeof mirelShowToast === 'function') {
+      mirelShowToast(text);
+    }
+  }
+}
+
 
 var prefectures = [
   '北海道',
@@ -515,6 +717,9 @@ async function runScript(
   retried
 ) {
 
+  var mirelApiStartedAt =
+    mirelPerfNow();
+
   if (!accessToken) {
 
     throw new Error(
@@ -577,8 +782,14 @@ async function runScript(
 
   }
 
+  var mirelFetchFinishedAt =
+    mirelPerfNow();
+
   var data =
     await response.json();
+
+  var mirelApiFinishedAt =
+    mirelPerfNow();
 
   if (
     !response.ok ||
@@ -616,9 +827,29 @@ async function runScript(
 
   }
 
-  return data.response
-    ? data.response.result
-    : null;
+  var mirelResult =
+    data.response
+      ? data.response.result
+      : null;
+
+  mirelLastApiTimings[functionName] = {
+    totalMs:
+      mirelApiFinishedAt -
+      mirelApiStartedAt,
+    fetchMs:
+      mirelFetchFinishedAt -
+      mirelApiStartedAt,
+    parseMs:
+      mirelApiFinishedAt -
+      mirelFetchFinishedAt,
+    server:
+      mirelResult &&
+      mirelResult.__perf
+        ? mirelResult.__perf
+        : null
+  };
+
+  return mirelResult;
 
 }
 
@@ -628,6 +859,12 @@ async function runScript(
    ======================================== */
 
 async function startApp() {
+
+  var mirelStartupStartedAt =
+    mirelPerfNow();
+
+  var mirelCacheVisibleMs =
+    null;
 
   var restoredFromCache =
     restoreCachedAppSnapshot();
@@ -649,6 +886,10 @@ async function startApp() {
     renderAll();
     renderJapanMap();
     setLoading(false);
+
+    mirelCacheVisibleMs =
+      mirelPerfNow() -
+      mirelStartupStartedAt;
 
   } else {
 
@@ -719,6 +960,33 @@ async function startApp() {
     mirelMaybeShowInitialSetup();
     renderAll();
     renderJapanMap();
+
+    var mirelStartupFinishedAt =
+      mirelPerfNow();
+
+    var mirelInitialApi =
+      mirelLastApiTimings.getInitialData ||
+      {};
+
+    mirelSavePerformance(
+      'startup',
+      {
+        totalMs:
+          mirelStartupFinishedAt -
+          mirelStartupStartedAt,
+        cacheUsed:
+          !!restoredFromCache,
+        cacheVisibleMs:
+          mirelCacheVisibleMs,
+        apiMs:
+          mirelInitialApi.totalMs ||
+          0,
+        server:
+          data && data.__perf
+            ? data.__perf
+            : mirelInitialApi.server || null
+      }
+    );
 
   } catch (e) {
 
@@ -9653,6 +9921,8 @@ function mirelInstallSettingsUi() {
 
     mirelRenderAffiliationMaster();
 
+    mirelRenderPerformancePanel();
+
     return;
 
   }
@@ -9701,6 +9971,12 @@ function mirelInstallSettingsUi() {
 
       '<div id="mirelAffiliationMaster"></div>' +
 
+    '</div>' +
+
+    '<div class="mirel-extra-section mirel-perf-section">' +
+      '<div class="section-title">速度診断</div>' +
+      '<div class="form-note">直近の起動・保存を自動計測します。「計測結果をコピー」でそのまま送れます。</div>' +
+      '<div id="mirelPerformancePanel"></div>' +
     '</div>';
 
 
@@ -9726,6 +10002,8 @@ function mirelInstallSettingsUi() {
   mirelRenderFeatureSettings();
 
   mirelRenderAffiliationMaster();
+
+  mirelRenderPerformancePanel();
 
 }
 
@@ -11268,3 +11546,20 @@ async function mirelFinishSetup() {
   }
 
 }
+
+/* 速度診断 表示 */
+(function mirelInstallPerfStyles(){
+  if (document.getElementById('mirelPerfStyles')) return;
+  var style = document.createElement('style');
+  style.id = 'mirelPerfStyles';
+  style.textContent =
+    '.mirel-perf-section{margin-top:18px;}' +
+    '#mirelPerformancePanel{display:grid;gap:8px;}' +
+    '.mirel-perf-row{display:grid;gap:3px;padding:10px 12px;border:1px solid #ece7e3;border-radius:10px;background:#faf9f8;font-size:13px;}' +
+    '.mirel-perf-row strong{font-size:13px;}' +
+    '.mirel-perf-row span{line-height:1.5;}' +
+    '.mirel-perf-row small{font-size:11px;line-height:1.5;color:#756e69;}' +
+    '.mirel-perf-copy{justify-self:start;margin-top:2px;}';
+  document.head.appendChild(style);
+})();
+
