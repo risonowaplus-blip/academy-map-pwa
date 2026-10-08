@@ -7408,15 +7408,76 @@ function mirelInstallExtraStyles() {
       accent-color: #df607f;
     }
 
-    .mirel-aff-master-row {
-      display: grid;
-      grid-template-columns: 42px 1fr auto auto;
-      gap: 8px;
-      align-items: center;
-      margin-top: 9px;
+    .mirel-aff-create-box {
+      margin-top: 12px;
+      padding: 14px;
+      border: 1px solid #eee2df;
+      border-radius: 16px;
+      background: #fffafa;
     }
 
-    .mirel-aff-master-row input[type="text"] {
+    .mirel-aff-create-title {
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .mirel-aff-create-main {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mirel-aff-master-list {
+      margin-top: 18px;
+    }
+
+    .mirel-aff-existing-title {
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .mirel-aff-master-row {
+      margin-top: 9px;
+      padding: 12px;
+      border: 1px solid #eee2df;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .mirel-aff-view-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mirel-aff-view-swatch {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #ded2cf;
+    }
+
+    .mirel-aff-view-name {
+      min-width: 0;
+      font-size: 15px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mirel-aff-edit-row {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mirel-aff-edit-row input[type="text"] {
       min-width: 0;
     }
 
@@ -9371,24 +9432,33 @@ function mirelInstallSettingsUi() {
       '所属はいくつでも作成できます。色も自由に変更できます。' +
       '</div>' +
 
-      '<div id="mirelAffiliationMaster"></div>' +
+      '<div class="mirel-aff-create-box">' +
 
-      '<div class="mirel-aff-master-row">' +
+        '<div class="mirel-aff-create-title">新しい所属ラベルを追加</div>' +
 
-        '<input id="mirelNewAffColor" type="hidden" value="#f7d8df">' +
+        '<div class="mirel-aff-create-main">' +
 
-        '<button type="button" class="mirel-aff-color-preview" id="mirelNewAffColor_preview" style="background:#f7d8df" aria-label="新しい所属の色"></button>' +
+          '<input id="mirelNewAffColor" type="hidden" value="#f7d8df">' +
 
-        '<input id="mirelNewAffName" type="text" placeholder="新しい所属名">' +
+          '<button type="button" class="mirel-aff-color-preview" id="mirelNewAffColor_preview" style="background:#f7d8df" aria-label="新しい所属の色"></button>' +
 
-        '<button class="primary" type="button" onclick="mirelAddAffiliation()">追加</button>' +
+          '<input id="mirelNewAffName" type="text" placeholder="所属名を入力">' +
 
-        '<span></span>' +
+          '<button class="primary" type="button" onclick="mirelAddAffiliation()">追加</button>' +
+
+        '</div>' +
 
         mirelAffiliationPaletteHtml(
           'mirelNewAffColor'
         ) +
 
+        '<div class="small-note">色と所属名を選んで「追加」を押すと保存されます。</div>' +
+
+      '</div>' +
+
+      '<div class="mirel-aff-master-list">' +
+        '<div class="mirel-aff-existing-title">登録済みの所属ラベル</div>' +
+        '<div id="mirelAffiliationMaster"></div>' +
       '</div>' +
 
     '</div>';
@@ -9611,74 +9681,110 @@ function mirelRenderAffiliationMaster() {
   mirelAffiliations.forEach(
     function(row) {
 
+      var color =
+        mirelAffiliationDisplayColor(
+          row.color
+        );
+
+
       html +=
 
-        '<div class="mirel-aff-master-row">' +
+        '<div class="mirel-aff-master-row" id="mirelAffRow_' +
+        escapeAttr(
+          row.affiliationId
+        ) +
+        '">' +
 
-          '<input ' +
-          'type="hidden" ' +
-          'id="mirelAffColor_' +
-          row.affiliationId +
-          '" ' +
-          'value="' +
-          escapeHtml(
-            mirelAffiliationDisplayColor(
-              row.color
-            )
-          ) +
-          '">' +
-
-          '<button type="button" ' +
-          'class="mirel-aff-color-preview" ' +
-          'id="mirelAffColor_' +
-          row.affiliationId +
-          '_preview" ' +
-          'style="background:' +
+          '<div class="mirel-aff-view-row" id="mirelAffView_' +
           escapeAttr(
-            mirelAffiliationDisplayColor(
-              row.color
-            )
-          ) +
-          ';" ' +
-          'aria-label="現在の所属色"></button>' +
-
-          '<input ' +
-          'type="text" ' +
-          'id="mirelAffName_' +
-          row.affiliationId +
-          '" ' +
-          'value="' +
-          escapeHtml(
-            row.name
+            row.affiliationId
           ) +
           '">' +
 
-          '<button ' +
-          'type="button" ' +
-          'class="secondary" ' +
-          'onclick="mirelUpdateAffiliation(\'' +
-          escapeJs(
-            row.affiliationId
-          ) +
-          '\')">' +
-          '保存' +
-          '</button>' +
+            '<span class="mirel-aff-view-swatch" style="background:' +
+            escapeAttr(
+              color
+            ) +
+            ';"></span>' +
 
-          '<button ' +
-          'type="button" ' +
-          'class="secondary" ' +
-          'onclick="mirelDeleteAffiliation(\'' +
-          escapeJs(
-            row.affiliationId
-          ) +
-          '\')">' +
-          '削除' +
-          '</button>' +
+            '<div class="mirel-aff-view-name">' +
+            escapeHtml(
+              row.name
+            ) +
+            '</div>' +
 
-          mirelAffiliationPaletteHtml(
-            'mirelAffColor_' +
+            '<button type="button" class="secondary" onclick="mirelStartAffiliationEdit(\'' +
+            escapeJs(
+              row.affiliationId
+            ) +
+            '\')">編集</button>' +
+
+            '<button type="button" class="secondary" onclick="mirelDeleteAffiliation(\'' +
+            escapeJs(
+              row.affiliationId
+            ) +
+            '\')">削除</button>' +
+
+          '</div>' +
+
+          '<div class="mirel-aff-edit-panel" id="mirelAffEdit_' +
+          escapeAttr(
             row.affiliationId
           ) +
+          '" style="display:none">' +
+
+            '<div class="mirel-aff-edit-row">' +
+
+              '<input type="hidden" id="mirelAffColor_' +
+              escapeAttr(
+                row.affiliationId
+              ) +
+              '" value="' +
+              escapeAttr(
+                color
+              ) +
+              '">' +
+
+              '<button type="button" class="mirel-aff-color-preview" id="mirelAffColor_' +
+              escapeAttr(
+                row.affiliationId
+              ) +
+              '_preview" style="background:' +
+              escapeAttr(
+                color
+              ) +
+              ';" aria-label="所属色"></button>' +
+
+              '<input type="text" id="mirelAffName_' +
+              escapeAttr(
+                row.affiliationId
+              ) +
+              '" value="' +
+              escapeAttr(
+                row.name
+              ) +
+              '">' +
+
+              '<button type="button" class="primary" onclick="mirelUpdateAffiliation(\'' +
+              escapeJs(
+                row.affiliationId
+              ) +
+              '\')">保存</button>' +
+
+              '<button type="button" class="secondary" onclick="mirelCancelAffiliationEdit(\'' +
+              escapeJs(
+                row.affiliationId
+              ) +
+              '\')">キャンセル</button>' +
+
+            '</div>' +
+
+            mirelAffiliationPaletteHtml(
+              'mirelAffColor_' +
+              row.affiliationId
+            ) +
+
+          '</div>' +
 
         '</div>';
 
@@ -9688,6 +9794,70 @@ function mirelRenderAffiliationMaster() {
 
   box.innerHTML =
     html;
+
+}
+
+
+function mirelStartAffiliationEdit(
+  id
+) {
+
+  document
+    .querySelectorAll(
+      '.mirel-aff-edit-panel'
+    )
+    .forEach(
+      function(panel) {
+        panel.style.display =
+          'none';
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      '.mirel-aff-view-row'
+    )
+    .forEach(
+      function(row) {
+        row.style.display =
+          'grid';
+      }
+    );
+
+
+  var view =
+    document.getElementById(
+      'mirelAffView_' +
+      id
+    );
+
+  var edit =
+    document.getElementById(
+      'mirelAffEdit_' +
+      id
+    );
+
+
+  if (view) {
+    view.style.display =
+      'none';
+  }
+
+
+  if (edit) {
+    edit.style.display =
+      'block';
+  }
+
+}
+
+
+function mirelCancelAffiliationEdit(
+  id
+) {
+
+  mirelRenderAffiliationMaster();
 
 }
 
@@ -9751,6 +9921,17 @@ async function mirelUpdateAffiliation(
       'mirelAffName_' +
       id
     );
+
+
+  if (!name) {
+
+    appToast(
+      '所属名を入力してください。'
+    );
+
+    return;
+
+  }
 
 
   var colorInput =
