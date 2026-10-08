@@ -1679,12 +1679,6 @@ function mirelInstallRegionJump() {
     );
 
 
-  if (listSearch) {
-    listSearch.style.display =
-      'none';
-  }
-
-
   if (
     document.getElementById(
       'mirelRegionJump'
@@ -1804,10 +1798,34 @@ function mirelInstallRegionJump() {
   );
 
 
-  title.insertAdjacentElement(
-    'afterend',
-    wrapper
-  );
+  var filterRow =
+    document.getElementById(
+      'mirelListFilterRow'
+    );
+
+
+  if (filterRow) {
+
+    filterRow.insertBefore(
+      wrapper,
+      filterRow.firstChild
+    );
+
+  } else if (listSearch) {
+
+    listSearch.insertAdjacentElement(
+      'afterend',
+      wrapper
+    );
+
+  } else {
+
+    title.insertAdjacentElement(
+      'afterend',
+      wrapper
+    );
+
+  }
 
 }
 
