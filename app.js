@@ -7893,9 +7893,19 @@ function mirelInstallExtraStyles() {
 
     .mirel-aff-view-row {
       display: grid;
-      grid-template-columns: 34px minmax(0, 1fr) auto auto auto;
+      grid-template-columns: 34px minmax(0, 1fr);
+      column-gap: 10px;
+      row-gap: 8px;
+      align-items: center;
+    }
+
+    .mirel-aff-view-actions {
+      grid-column: 2;
+      display: flex;
+      flex-wrap: wrap;
       gap: 6px;
       align-items: center;
+      justify-content: flex-end;
     }
 
     .mirel-aff-order-actions {
@@ -7942,13 +7952,12 @@ function mirelInstallExtraStyles() {
       min-width: 0;
       font-size: 15px;
       font-weight: 600;
+      white-space: normal;
       overflow: visible;
       text-overflow: clip;
-      white-space: normal;
       overflow-wrap: anywhere;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      word-break: break-word;
+      line-height: 1.45;
     }
 
     .mirel-aff-edit-panel {
@@ -10282,34 +10291,36 @@ function mirelRenderAffiliationMaster() {
               ) +
               '</div>' +
 
-              '<div class="mirel-aff-order-actions" aria-label="表示順">' +
-                '<button type="button" class="secondary mirel-aff-order-button" title="前へ" ' +
-                (index === 0 ? 'disabled ' : '') +
-                'onclick="mirelMoveAffiliation(\'' +
+              '<div class="mirel-aff-view-actions">' +
+                '<div class="mirel-aff-order-actions" aria-label="表示順">' +
+                  '<button type="button" class="secondary mirel-aff-order-button" title="前へ" ' +
+                  (index === 0 ? 'disabled ' : '') +
+                  'onclick="mirelMoveAffiliation(\'' +
+                  escapeJs(
+                    row.affiliationId
+                  ) +
+                  '\', -1)">↑</button>' +
+                  '<button type="button" class="secondary mirel-aff-order-button" title="後へ" ' +
+                  (index === mirelAffiliations.length - 1 ? 'disabled ' : '') +
+                  'onclick="mirelMoveAffiliation(\'' +
+                  escapeJs(
+                    row.affiliationId
+                  ) +
+                  '\', 1)">↓</button>' +
+                '</div>' +
+
+                '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelStartAffiliationEdit(\'' +
                 escapeJs(
                   row.affiliationId
                 ) +
-                '\', -1)">↑</button>' +
-                '<button type="button" class="secondary mirel-aff-order-button" title="後へ" ' +
-                (index === mirelAffiliations.length - 1 ? 'disabled ' : '') +
-                'onclick="mirelMoveAffiliation(\'' +
+                '\')">編集</button>' +
+
+                '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelDeleteAffiliation(\'' +
                 escapeJs(
                   row.affiliationId
                 ) +
-                '\', 1)">↓</button>' +
+                '\')">削除</button>' +
               '</div>' +
-
-              '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelStartAffiliationEdit(\'' +
-              escapeJs(
-                row.affiliationId
-              ) +
-              '\')">編集</button>' +
-
-              '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelDeleteAffiliation(\'' +
-              escapeJs(
-                row.affiliationId
-              ) +
-              '\')">削除</button>' +
 
             '</div>' +
 
