@@ -703,6 +703,16 @@
             class="mirel-feature-grid"
           ></div>
 
+          <div class="mirel-feature-save-actions">
+            <button
+              class="primary"
+              type="button"
+              onclick="saveSettingsForm()"
+            >
+              設定を保存
+            </button>
+          </div>
+
 
           <div class="mirel-extra-section">
 
@@ -711,58 +721,12 @@
             </div>
 
             <div class="form-note">
-              所属はいくつでも作成できます。色も自由に変更できます。
+              所属ラベルは「追加」または「保存」を押した時点で反映されます。上の「設定を保存」は不要です。色はパステル候補またはカスタム色から選べます。
             </div>
 
             <div id="mirelAffiliationMaster"></div>
 
-            <div class="mirel-aff-master-row">
-
-              <input
-                id="mirelNewAffColor"
-                type="hidden"
-                value="#f7d8df"
-              >
-
-              <button
-                type="button"
-                class="mirel-aff-color-preview"
-                id="mirelNewAffColor_preview"
-                style="background:#f7d8df"
-                aria-label="新しい所属の色"
-              ></button>
-
-              <input
-                id="mirelNewAffName"
-                type="text"
-                placeholder="新しい所属名"
-              >
-
-              <button
-                class="primary"
-                type="button"
-                onclick="mirelAddAffiliation()"
-              >
-                追加
-              </button>
-
-              <span></span>
-
-            </div>
-
           </div>
-
-        </div>
-
-
-        <div class="form-actions">
-
-          <button
-            class="primary"
-            onclick="saveSettingsForm()"
-          >
-            設定を保存
-          </button>
 
         </div>
 
@@ -1663,7 +1627,7 @@
 
 <script src="./config.js?v=20261008-03"></script>
 
-<script src="./app.js?v=20261008-09"></script>
+<script src="./app.js?v=20261008-10"></script>
 
 <script src="./app-enhancements.js?v=20261008-07"></script>
 
