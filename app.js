@@ -7552,6 +7552,39 @@ function mirelInstallExtraStyles() {
       transform: scale(0.94);
     }
 
+    .mirel-aff-custom-color {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      padding: 5px 11px;
+      border: 1px solid #dfd4d1;
+      border-radius: 999px;
+      background: #fff;
+      color: #665d5a;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .mirel-aff-custom-color input[type="color"] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .mirel-feature-save-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px;
+      padding-bottom: 4px;
+    }
+
     .mirel-aff-picker {
       display: flex;
       flex-wrap: wrap;
@@ -7987,6 +8020,20 @@ function mirelAffiliationPaletteHtml(
         }
       )
       .join('') +
+      '<label class="mirel-aff-custom-color">' +
+        'カスタム色' +
+        '<input type="color" value="#f7d8df" aria-label="カスタム色を選択" ' +
+        'oninput="mirelSetAffiliationColor(\'' +
+        escapeJs(
+          inputId
+        ) +
+        '\',this.value)" ' +
+        'onchange="mirelSetAffiliationColor(\'' +
+        escapeJs(
+          inputId
+        ) +
+        '\',this.value)">' +
+      '</label>' +
     '</div>'
   );
 
@@ -9454,12 +9501,16 @@ function mirelInstallSettingsUi() {
 
     '<div id="mirelFeatureGrid" class="mirel-feature-grid"></div>' +
 
+    '<div class="mirel-feature-save-actions">' +
+      '<button class="primary" type="button" onclick="saveSettingsForm()">設定を保存</button>' +
+    '</div>' +
+
     '<div class="mirel-extra-section">' +
 
       '<div class="section-title">所属ラベル</div>' +
 
       '<div class="form-note">' +
-      '所属はいくつでも作成できます。色も自由に変更できます。' +
+      '所属ラベルは「追加」または「保存」を押した時点で反映されます。上の「設定を保存」は不要です。色はパステル候補またはカスタム色から選べます。' +
       '</div>' +
 
       '<div id="mirelAffiliationMaster"></div>' +
@@ -9468,6 +9519,9 @@ function mirelInstallSettingsUi() {
 
 
   if (actions) {
+
+    actions.style.display =
+      'none';
 
     card.insertBefore(
       area,
@@ -9666,7 +9720,7 @@ function mirelRenderAffiliationMaster() {
       '<div class="mirel-aff-create-title">新しい所属ラベルを作成</div>' +
 
       '<div class="small-note mirel-aff-create-note">' +
-        '①ラベル名を入力 → ②色を選択 → ③「追加」で保存' +
+        '①ラベル名を入力 → ②色を選択 → ③「追加」でその場で保存' +
       '</div>' +
 
       '<input id="mirelNewAffName" class="mirel-aff-name-input" type="text" placeholder="新しい所属ラベル名">' +
