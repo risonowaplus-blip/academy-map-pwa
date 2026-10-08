@@ -32,6 +32,8 @@ var appSettings = {
 var STORAGE_TOKEN = 'academyAccessToken';
 var STORAGE_EXPIRES = 'academyAccessTokenExpiresAt';
 var STORAGE_AUTHORIZED = 'academyGoogleAuthorized';
+var STORAGE_APP_SNAPSHOT = 'mirelAppSnapshotV2';
+var APP_SNAPSHOT_VERSION = 2;
 
 
 var prefectures = [
@@ -627,7 +629,35 @@ async function runScript(
 
 async function startApp() {
 
-  setLoading(true);
+  var restoredFromCache =
+    restoreCachedAppSnapshot();
+
+  if (restoredFromCache) {
+
+    /*
+     * 前回表示できたデータを先に描画する。
+     * Google通信はこの後バックグラウンドで行うため、
+     * 起動時に白画面・読込画面で待たせない。
+     */
+    mirelApplyProfileDerivedValues();
+    applySettingsToUi();
+    mirelInstallExtraStyles();
+    mirelInstallSettingsUi();
+    mirelInstallSearchFilters();
+    mirelApplyCurrentVisibility();
+    showAppScreen();
+    renderAll();
+    renderJapanMap();
+    setLoading(false);
+
+  } else {
+
+    setLoading(true);
+
+  }
+
+  /* 住所マスターはアプリ本体の表示を待たせず並行読込 */
+  loadAddressMaster();
 
   try {
 
@@ -654,14 +684,12 @@ async function startApp() {
         {}
       );
 
-
     var extraData =
       (
         data &&
         data.extra
       ) ||
       {};
-
 
     mirelAffiliations =
       extraData.affiliations ||
@@ -679,40 +707,151 @@ async function startApp() {
       extraData.featureSettings ||
       {};
 
-
     mirelApplyProfileDerivedValues();
-
     cacheUiSettings();
-
+    cacheAppSnapshot();
     applySettingsToUi();
-
     mirelInstallExtraStyles();
-
     mirelInstallSettingsUi();
-
     mirelInstallSearchFilters();
-
     mirelApplyCurrentVisibility();
-
     showAppScreen();
-
     mirelMaybeShowInitialSetup();
-
     renderAll();
-
     renderJapanMap();
-
-    loadAddressMaster();
 
   } catch (e) {
 
-    handleError(e);
+    if (restoredFromCache) {
+      if (typeof appToast === 'function') {
+        appToast(
+          '前回データを表示しています。最新データの取得に失敗しました。'
+        );
+      }
+    } else {
+      handleError(e);
+    }
 
   } finally {
 
     setLoading(false);
 
   }
+
+}
+
+
+function restoreCachedAppSnapshot() {
+
+  try {
+
+    var raw =
+      localStorage.getItem(
+        STORAGE_APP_SNAPSHOT
+      );
+
+    if (!raw) {
+      return false;
+    }
+
+    var snapshot =
+      JSON.parse(raw);
+
+    if (
+      !snapshot ||
+      snapshot.version !==
+        APP_SNAPSHOT_VERSION ||
+      !Array.isArray(
+        snapshot.teachers
+      )
+    ) {
+      return false;
+    }
+
+    teachers =
+      snapshot.teachers ||
+      [];
+
+    appSettings =
+      Object.assign(
+        {},
+        appSettings,
+        snapshot.settings ||
+        {}
+      );
+
+    var extra =
+      snapshot.extra ||
+      {};
+
+    mirelAffiliations =
+      extra.affiliations ||
+      [];
+
+    mirelTeacherAffiliations =
+      extra.teacherAffiliations ||
+      {};
+
+    mirelProfiles =
+      extra.profiles ||
+      {};
+
+    mirelFeatureSettings =
+      extra.featureSettings ||
+      {};
+
+    return true;
+
+  } catch (e) {
+
+    return false;
+
+  }
+
+}
+
+
+function cacheAppSnapshot() {
+
+  try {
+
+    var snapshot = {
+      version:
+        APP_SNAPSHOT_VERSION,
+      savedAt:
+        Date.now(),
+      teachers:
+        teachers || [],
+      settings:
+        appSettings || {},
+      extra: {
+        affiliations:
+          mirelAffiliations || [],
+        teacherAffiliations:
+          mirelTeacherAffiliations || {},
+        profiles:
+          mirelProfiles || {},
+        featureSettings:
+          mirelFeatureSettings || {}
+      }
+    };
+
+    var raw =
+      JSON.stringify(
+        snapshot
+      );
+
+    /* localStorage上限に近づいた場合は無理に保存しない */
+    if (raw.length > 4000000) {
+      return;
+    }
+
+    localStorage.setItem(
+      STORAGE_APP_SNAPSHOT,
+      raw
+    );
+
+  } catch (e) {}
 
 }
 
