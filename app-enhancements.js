@@ -1346,24 +1346,26 @@ function mirelTeacherListCard(
       '</div>' +
 
 
-      '<div class="mirel-list-line">' +
+      (
+        teacher.nickname
+          ? (
+              '<div class="mirel-list-line">' +
+                escapeHtml(teacher.nickname) +
+              '</div>'
+            )
+          : ''
+      ) +
 
-        escapeHtml(
-          teacher.nickname ||
-          '　'
-        ) +
 
-      '</div>' +
-
-
-      '<div class="mirel-list-line mirel-list-place">' +
-
-        escapeHtml(
-          teacher.salonName ||
-          '　'
-        ) +
-
-      '</div>' +
+      (
+        teacher.salonName
+          ? (
+              '<div class="mirel-list-line mirel-list-place">' +
+                escapeHtml(teacher.salonName) +
+              '</div>'
+            )
+          : ''
+      ) +
 
       (
         mirelFeatureOn(
