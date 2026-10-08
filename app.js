@@ -25,7 +25,8 @@ var appSettings = {
   appName: 'Mirel Map',
   personLabel: '人物',
   placeLabel: '店名',
-  placeKanaLabel: '店名ふりがな'
+  placeKanaLabel: '店名ふりがな',
+  fontSize: 'standard'
 };
 
 var STORAGE_TOKEN = 'academyAccessToken';
@@ -6485,6 +6486,14 @@ function fillSettingsForm() {
     placeKanaLabel()
   );
 
+  setValue(
+    'settingFontSize',
+    (
+      appSettings.fontSize ||
+      'standard'
+    )
+  );
+
 }
 
 
@@ -6514,7 +6523,13 @@ async function saveSettingsForm() {
       valueOf(
         'settingPlaceKanaLabel'
       ) ||
-      '店名ふりがな'
+      '店名ふりがな',
+
+    fontSize:
+      valueOf(
+        'settingFontSize'
+      ) ||
+      'standard'
 
   };
 
@@ -6555,7 +6570,42 @@ async function saveSettingsForm() {
 }
 
 
+function applyFontSizeSetting() {
+
+  if (!document.body) {
+    return;
+  }
+
+  var size =
+    String(
+      appSettings.fontSize ||
+      'standard'
+    );
+
+  if (
+    [
+      'small',
+      'standard',
+      'large'
+    ].indexOf(
+      size
+    ) === -1
+  ) {
+    size =
+      'standard';
+  }
+
+  document.body.setAttribute(
+    'data-mirel-font-size',
+    size
+  );
+
+}
+
+
 function applySettingsToUi() {
+
+  applyFontSizeSetting();
 
   var app =
     appName();
