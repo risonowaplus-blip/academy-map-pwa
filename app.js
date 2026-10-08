@@ -6990,3 +6990,2978 @@ function escapeJs(str) {
     );
 
 }
+
+/* =========================================================
+   Mirel Map
+   汎用化UI拡張
+   2026-10-08
+   ========================================================= */
+
+var mirelAffiliations =
+  [];
+
+var mirelTeacherAffiliations =
+  {};
+
+var mirelProfiles =
+  {};
+
+var mirelFeatureSettings =
+  {};
+
+
+var MIREL_FEATURE_DEFAULTS = {
+
+  gender: true,
+  birthday: true,
+  age: true,
+  grade: true,
+  affiliation: true,
+  place: true,
+  address: true,
+  sns: true,
+  interactions: true,
+  children: true
+
+};
+
+
+/* =========================================================
+   学年候補
+   ========================================================= */
+
+gradeOptions = [
+
+  '',
+
+  '年少',
+  '年中',
+  '年長',
+
+  '小1',
+  '小2',
+  '小3',
+  '小4',
+  '小5',
+  '小6',
+
+  '中1',
+  '中2',
+  '中3',
+
+  '高1',
+  '高2',
+  '高3',
+
+  '短大1',
+  '短大2',
+
+  '大学1',
+  '大学2',
+  '大学3',
+  '大学4',
+
+  '大学6年制1',
+  '大学6年制2',
+  '大学6年制3',
+  '大学6年制4',
+  '大学6年制5',
+  '大学6年制6',
+
+  '専門1',
+  '専門2',
+  '専門3',
+  '専門4',
+
+  '修士1',
+  '修士2',
+
+  '博士1',
+  '博士2',
+  '博士3',
+
+  'その他'
+
+];
+
+
+/* =========================================================
+   ON / OFF
+   ========================================================= */
+
+function mirelFeatureOn(
+  key
+) {
+
+  var value =
+    mirelFeatureSettings[
+      key
+    ];
+
+
+  if (
+    value === undefined ||
+    value === null ||
+    value === ''
+  ) {
+
+    return (
+      MIREL_FEATURE_DEFAULTS[
+        key
+      ] !== false
+    );
+
+  }
+
+
+  return (
+    value === true ||
+    value === 1 ||
+    value === '1' ||
+    value === 'true'
+  );
+
+}
+
+
+/* =========================================================
+   拡張データ読込
+   ========================================================= */
+
+async function mirelLoadExtraData() {
+
+  var data =
+    await runScript(
+      'getMirelExtraData'
+    );
+
+
+  data =
+    data ||
+    {};
+
+
+  mirelAffiliations =
+    data.affiliations ||
+    [];
+
+
+  mirelTeacherAffiliations =
+    data.teacherAffiliations ||
+    {};
+
+
+  mirelProfiles =
+    data.profiles ||
+    {};
+
+
+  mirelFeatureSettings =
+    data.featureSettings ||
+    {};
+
+}
+
+
+/* =========================================================
+   startApp 拡張
+   ========================================================= */
+
+var mirelBaseStartApp =
+  startApp;
+
+
+startApp =
+  async function() {
+
+    await mirelBaseStartApp();
+
+
+    try {
+
+      await mirelLoadExtraData();
+
+
+      mirelInstallExtraStyles();
+
+      mirelInstallSettingsUi();
+
+      mirelInstallSearchFilters();
+
+      mirelApplyCurrentVisibility();
+
+      mirelMaybeShowInitialSetup();
+
+
+      renderAll();
+
+      renderJapanMap();
+
+    } catch (e) {
+
+      console.error(
+        e
+      );
+
+    }
+
+  };
+
+
+/* =========================================================
+   CSS
+   ========================================================= */
+
+function mirelInstallExtraStyles() {
+
+  if (
+    document.getElementById(
+      'mirel-extra-style'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  var style =
+    document.createElement(
+      'style'
+    );
+
+
+  style.id =
+    'mirel-extra-style';
+
+
+  style.textContent = `
+
+    .mirel-extra-section {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid #eee3e1;
+    }
+
+    .mirel-feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .mirel-feature-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 12px;
+      border: 1px solid #eee2df;
+      border-radius: 14px;
+      background: #fffafa;
+      font-size: 14px;
+    }
+
+    .mirel-feature-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: #df607f;
+    }
+
+    .mirel-aff-master-row {
+      display: grid;
+      grid-template-columns: 42px 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+      margin-top: 9px;
+    }
+
+    .mirel-aff-master-row input[type="text"] {
+      min-width: 0;
+    }
+
+    .mirel-aff-master-row input[type="color"] {
+      width: 42px;
+      height: 40px;
+      border: 0;
+      padding: 2px;
+      background: transparent;
+    }
+
+    .mirel-aff-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .mirel-aff-choice {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .mirel-aff-choice input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mirel-aff-choice span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .mirel-aff-choice input:checked + span {
+      border-color: #444;
+      box-shadow: 0 0 0 2px #fff inset;
+    }
+
+    .mirel-aff-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 5px;
+    }
+
+    .mirel-aff-tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .mirel-filter-select {
+      width: 100%;
+      margin-top: 10px;
+      min-height: 44px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      padding: 0 12px;
+      font-size: 15px;
+    }
+
+    .mirel-hidden {
+      display: none !important;
+    }
+
+    .mirel-setup-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: rgba(255,255,255,.96);
+      overflow-y: auto;
+      padding: 24px 16px 60px;
+    }
+
+    .mirel-setup-card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #f1e3e2;
+      border-radius: 24px;
+      padding: 24px 18px;
+      box-shadow: 0 10px 40px rgba(80,50,50,.08);
+    }
+
+    .mirel-setup-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .mirel-setup-note {
+      color: #777;
+      font-size: 13px;
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+  `;
+
+
+  document.head.appendChild(
+    style
+  );
+
+}
+
+
+/* =========================================================
+   所属
+   ========================================================= */
+
+function mirelAffiliationById(
+  id
+) {
+
+  for (
+    var i = 0;
+    i < mirelAffiliations.length;
+    i++
+  ) {
+
+    if (
+      mirelAffiliations[i]
+        .affiliationId ===
+      id
+    ) {
+
+      return mirelAffiliations[
+        i
+      ];
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+function mirelAffiliationIds(
+  teacherId
+) {
+
+  return (
+    mirelTeacherAffiliations[
+      teacherId
+    ] ||
+    []
+  );
+
+}
+
+
+function mirelAffiliationNames(
+  teacherId
+) {
+
+  return mirelAffiliationIds(
+    teacherId
+  )
+    .map(
+      function(id) {
+
+        var row =
+          mirelAffiliationById(
+            id
+          );
+
+
+        return row
+          ? row.name
+          : '';
+
+      }
+    )
+    .filter(Boolean);
+
+}
+
+
+function mirelTeacherHasAffiliation(
+  teacherId,
+  affiliationId
+) {
+
+  if (!affiliationId) {
+    return true;
+  }
+
+
+  return (
+    mirelAffiliationIds(
+      teacherId
+    ).indexOf(
+      affiliationId
+    ) !== -1
+  );
+
+}
+
+
+/* =========================================================
+   学年
+   ========================================================= */
+
+function mirelCurrentFiscalYear() {
+
+  var now =
+    new Date();
+
+
+  return (
+    now.getMonth() + 1 >= 4
+      ? now.getFullYear()
+      : now.getFullYear() - 1
+  );
+
+}
+
+
+function mirelGradeGroups() {
+
+  return [
+
+    [
+      '年少',
+      '年中',
+      '年長'
+    ],
+
+    [
+      '小1',
+      '小2',
+      '小3',
+      '小4',
+      '小5',
+      '小6'
+    ],
+
+    [
+      '中1',
+      '中2',
+      '中3'
+    ],
+
+    [
+      '高1',
+      '高2',
+      '高3'
+    ],
+
+    [
+      '短大1',
+      '短大2'
+    ],
+
+    [
+      '大学1',
+      '大学2',
+      '大学3',
+      '大学4'
+    ],
+
+    [
+      '大学6年制1',
+      '大学6年制2',
+      '大学6年制3',
+      '大学6年制4',
+      '大学6年制5',
+      '大学6年制6'
+    ],
+
+    [
+      '専門1',
+      '専門2',
+      '専門3',
+      '専門4'
+    ],
+
+    [
+      '修士1',
+      '修士2'
+    ],
+
+    [
+      '博士1',
+      '博士2',
+      '博士3'
+    ]
+
+  ];
+
+}
+
+
+function mirelGradeDisplay(
+  grade,
+  baseYear
+) {
+
+  if (!grade) {
+    return '';
+  }
+
+
+  if (
+    grade ===
+    'その他'
+  ) {
+
+    return grade;
+
+  }
+
+
+  var diff =
+    mirelCurrentFiscalYear() -
+    Number(
+      baseYear ||
+      mirelCurrentFiscalYear()
+    );
+
+
+  if (diff < 0) {
+    diff = 0;
+  }
+
+
+  var groups =
+    mirelGradeGroups();
+
+
+  for (
+    var i = 0;
+    i < groups.length;
+    i++
+  ) {
+
+    var index =
+      groups[i].indexOf(
+        grade
+      );
+
+
+    if (
+      index !== -1
+    ) {
+
+      var next =
+        index +
+        diff;
+
+
+      if (
+        next >=
+        groups[i].length
+      ) {
+
+        return '卒業・修了';
+
+      }
+
+
+      return groups[i][
+        next
+      ];
+
+    }
+
+  }
+
+
+  return grade;
+
+}
+
+
+/* =========================================================
+   人物フォームへ
+   学年・所属を追加
+   ========================================================= */
+
+function mirelInstallTeacherExtraFields() {
+
+  var salon =
+    document.getElementById(
+      'salonName'
+    );
+
+
+  if (!salon) {
+    return;
+  }
+
+
+  var salonField =
+    salon.closest(
+      '.field'
+    );
+
+
+  if (!salonField) {
+    return;
+  }
+
+
+  if (
+    !document.getElementById(
+      'mirelGradeField'
+    )
+  ) {
+
+    var gradeField =
+      document.createElement(
+        'div'
+      );
+
+
+    gradeField.className =
+      'field';
+
+    gradeField.id =
+      'mirelGradeField';
+
+
+    var options =
+      '<option value=""></option>';
+
+
+    gradeOptions.forEach(
+      function(value) {
+
+        if (!value) {
+          return;
+        }
+
+
+        options +=
+
+          '<option value="' +
+          escapeHtml(
+            value
+          ) +
+          '">' +
+
+          escapeHtml(
+            value
+          ) +
+
+          '</option>';
+
+      }
+    );
+
+
+    gradeField.innerHTML =
+
+      '<label>学年</label>' +
+
+      '<select id="mirelGrade">' +
+
+      options +
+
+      '</select>';
+
+
+    salonField.parentNode.insertBefore(
+      gradeField,
+      salonField
+    );
+
+  }
+
+
+  if (
+    !document.getElementById(
+      'mirelAffiliationField'
+    )
+  ) {
+
+    var affField =
+      document.createElement(
+        'div'
+      );
+
+
+    affField.className =
+      'field';
+
+    affField.id =
+      'mirelAffiliationField';
+
+
+    affField.innerHTML =
+
+      '<label>所属</label>' +
+
+      '<div id="mirelAffiliationPicker" class="mirel-aff-picker"></div>';
+
+
+    salonField.parentNode.insertBefore(
+      affField,
+      salonField
+    );
+
+  }
+
+}
+
+
+function mirelRenderAffiliationPicker(
+  teacherId
+) {
+
+  var box =
+    document.getElementById(
+      'mirelAffiliationPicker'
+    );
+
+
+  if (!box) {
+    return;
+  }
+
+
+  var selected =
+    mirelAffiliationIds(
+      teacherId
+    );
+
+
+  if (
+    !mirelAffiliations.length
+  ) {
+
+    box.innerHTML =
+
+      '<div class="form-note">' +
+      '所属は設定画面から追加できます。' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  var html =
+    '';
+
+
+  mirelAffiliations.forEach(
+    function(row) {
+
+      var checked =
+        selected.indexOf(
+          row.affiliationId
+        ) !== -1;
+
+
+      html +=
+
+        '<label class="mirel-aff-choice">' +
+
+        '<input type="checkbox" ' +
+        'class="mirel-aff-checkbox" ' +
+        'value="' +
+        escapeHtml(
+          row.affiliationId
+        ) +
+        '"' +
+        (
+          checked
+            ? ' checked'
+            : ''
+        ) +
+        '>' +
+
+        '<span style="' +
+        'background:' +
+        escapeHtml(
+          row.color ||
+          '#f4b8c4'
+        ) +
+        '33;' +
+        'color:#444;' +
+        '">' +
+
+        escapeHtml(
+          row.name
+        ) +
+
+        '</span>' +
+
+        '</label>';
+
+    }
+  );
+
+
+  box.innerHTML =
+    html;
+
+}
+
+
+function mirelSelectedAffiliationIds() {
+
+  return Array
+    .from(
+      document.querySelectorAll(
+        '.mirel-aff-checkbox:checked'
+      )
+    )
+    .map(
+      function(input) {
+
+        return input.value;
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   openTeacherForm 拡張
+   ========================================================= */
+
+var mirelBaseOpenTeacherForm =
+  openTeacherForm;
+
+
+openTeacherForm =
+  function(id) {
+
+    mirelBaseOpenTeacherForm(
+      id
+    );
+
+
+    mirelInstallTeacherExtraFields();
+
+
+    var profile =
+      id
+        ? (
+            mirelProfiles[
+              id
+            ] ||
+            {}
+          )
+        : {};
+
+
+    var grade =
+      document.getElementById(
+        'mirelGrade'
+      );
+
+
+    if (grade) {
+
+      grade.value =
+        profile.grade ||
+        '';
+
+    }
+
+
+    mirelRenderAffiliationPicker(
+      id ||
+      ''
+    );
+
+
+    mirelApplyFormVisibility();
+
+  };
+
+
+/* =========================================================
+   saveTeacherForm 拡張
+   ========================================================= */
+
+var mirelBaseSaveTeacherForm =
+  saveTeacherForm;
+
+
+saveTeacherForm =
+  async function() {
+
+    var originalTeacherId =
+      valueOf(
+        'teacherId'
+      );
+
+
+    var gradeInput =
+      document.getElementById(
+        'mirelGrade'
+      );
+
+
+    var grade =
+      gradeInput
+        ? gradeInput.value
+        : '';
+
+
+    var affiliationIds =
+      mirelSelectedAffiliationIds();
+
+
+    await mirelBaseSaveTeacherForm();
+
+
+    var teacherId =
+      originalTeacherId ||
+      selectedTeacherId;
+
+
+    if (!teacherId) {
+      return;
+    }
+
+
+    try {
+
+      var result =
+        await runScript(
+
+          'saveMirelTeacherExtras',
+
+          [{
+
+            teacherId:
+              teacherId,
+
+            grade:
+              grade,
+
+            affiliationIds:
+              affiliationIds
+
+          }]
+
+        );
+
+
+      result =
+        result ||
+        {};
+
+
+      mirelAffiliations =
+        result.affiliations ||
+        mirelAffiliations;
+
+
+      mirelTeacherAffiliations =
+        result.teacherAffiliations ||
+        mirelTeacherAffiliations;
+
+
+      mirelProfiles =
+        result.profiles ||
+        mirelProfiles;
+
+
+      if (
+        selectedTeacherId ===
+        teacherId
+      ) {
+
+        var teacher =
+          findTeacher(
+            teacherId
+          );
+
+
+        if (teacher) {
+
+          renderTeacherDetail(
+            teacher
+          );
+
+        }
+
+      }
+
+
+      mirelRefreshAffiliationFilters();
+
+    } catch (e) {
+
+      handleError(
+        e
+      );
+
+    }
+
+  };
+
+
+/* =========================================================
+   詳細へ学年・所属を表示
+   ========================================================= */
+
+var mirelBaseRenderTeacherDetail =
+  renderTeacherDetail;
+
+
+renderTeacherDetail =
+  function(teacher) {
+
+    mirelBaseRenderTeacherDetail(
+      teacher
+    );
+
+
+    mirelInjectDetailExtras(
+      teacher
+    );
+
+
+    mirelApplyDetailVisibility();
+
+  };
+
+
+function mirelInjectDetailExtras(
+  teacher
+) {
+
+  var detail =
+    document.getElementById(
+      'detailContent'
+    );
+
+
+  if (!detail) {
+    return;
+  }
+
+
+  var firstCard =
+    detail.querySelector(
+      '.card'
+    );
+
+
+  if (!firstCard) {
+    return;
+  }
+
+
+  firstCard
+    .querySelectorAll(
+      '.mirel-extra-detail-row'
+    )
+    .forEach(
+      function(row) {
+
+        row.remove();
+
+      }
+    );
+
+
+  var beforeRow =
+    null;
+
+
+  firstCard
+    .querySelectorAll(
+      '.detail-row'
+    )
+    .forEach(
+      function(row) {
+
+        var label =
+          row.querySelector(
+            '.label'
+          );
+
+
+        if (
+          !beforeRow &&
+          label &&
+          (
+            label.textContent.trim() ===
+              placeLabel() ||
+            label.textContent.trim() ===
+              placeKanaLabel()
+          )
+        ) {
+
+          beforeRow =
+            row;
+
+        }
+
+      }
+    );
+
+
+  var profile =
+    mirelProfiles[
+      teacher.teacherId
+    ] ||
+    {};
+
+
+  if (
+    mirelFeatureOn(
+      'grade'
+    )
+  ) {
+
+    var gradeText =
+      mirelGradeDisplay(
+        profile.grade,
+        profile.gradeBaseYear
+      );
+
+
+    if (gradeText) {
+
+      var gradeRow =
+        document.createElement(
+          'div'
+        );
+
+
+      gradeRow.className =
+        'detail-row mirel-extra-detail-row';
+
+
+      gradeRow.innerHTML =
+
+        '<div class="label">学年</div>' +
+
+        '<div class="value">' +
+        escapeHtml(
+          gradeText
+        ) +
+        '</div>';
+
+
+      firstCard.insertBefore(
+        gradeRow,
+        beforeRow
+      );
+
+    }
+
+  }
+
+
+  if (
+    mirelFeatureOn(
+      'affiliation'
+    )
+  ) {
+
+    var ids =
+      mirelAffiliationIds(
+        teacher.teacherId
+      );
+
+
+    if (ids.length) {
+
+      var affRow =
+        document.createElement(
+          'div'
+        );
+
+
+      affRow.className =
+        'detail-row mirel-extra-detail-row';
+
+
+      var tags =
+        '';
+
+
+      ids.forEach(
+        function(id) {
+
+          var row =
+            mirelAffiliationById(
+              id
+            );
+
+
+          if (!row) {
+            return;
+          }
+
+
+          tags +=
+
+            '<span class="mirel-aff-tag" ' +
+            'style="background:' +
+            escapeHtml(
+              row.color ||
+              '#f4b8c4'
+            ) +
+            '33;">' +
+
+            escapeHtml(
+              row.name
+            ) +
+
+            '</span>';
+
+        }
+      );
+
+
+      affRow.innerHTML =
+
+        '<div class="label">所属</div>' +
+
+        '<div class="value mirel-aff-tags">' +
+        tags +
+        '</div>';
+
+
+      firstCard.insertBefore(
+        affRow,
+        beforeRow
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   検索に所属を追加
+   ========================================================= */
+
+var mirelBaseTeacherMatches =
+  teacherMatches;
+
+
+teacherMatches =
+  function(
+    teacher,
+    query
+  ) {
+
+    if (
+      mirelBaseTeacherMatches(
+        teacher,
+        query
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    if (!query) {
+      return true;
+    }
+
+
+    var affText =
+      mirelAffiliationNames(
+        teacher.teacherId
+      )
+        .join(
+          ' '
+        )
+        .toLowerCase();
+
+
+    return (
+      affText.indexOf(
+        query.toLowerCase()
+      ) !== -1
+    );
+
+  };
+
+
+/* =========================================================
+   所属絞り込み
+   ========================================================= */
+
+function mirelInstallSearchFilters() {
+
+  mirelInstallOneFilter(
+    'listSearch',
+    'mirelListAffiliationFilter',
+    renderFullTeacherList
+  );
+
+
+  mirelInstallOneFilter(
+    'globalSearch',
+    'mirelSearchAffiliationFilter',
+    renderSearchResults
+  );
+
+
+  mirelRefreshAffiliationFilters();
+
+}
+
+
+function mirelInstallOneFilter(
+  searchId,
+  filterId,
+  callback
+) {
+
+  var search =
+    document.getElementById(
+      searchId
+    );
+
+
+  if (
+    !search ||
+    document.getElementById(
+      filterId
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  var select =
+    document.createElement(
+      'select'
+    );
+
+
+  select.id =
+    filterId;
+
+  select.className =
+    'mirel-filter-select';
+
+
+  select.onchange =
+    callback;
+
+
+  search.insertAdjacentElement(
+    'afterend',
+    select
+  );
+
+}
+
+
+function mirelRefreshAffiliationFilters() {
+
+  [
+    'mirelListAffiliationFilter',
+    'mirelSearchAffiliationFilter'
+  ]
+    .forEach(
+      function(id) {
+
+        var select =
+          document.getElementById(
+            id
+          );
+
+
+        if (!select) {
+          return;
+        }
+
+
+        var current =
+          select.value;
+
+
+        var html =
+
+          '<option value="">' +
+          '所属：すべて' +
+          '</option>';
+
+
+        mirelAffiliations.forEach(
+          function(row) {
+
+            html +=
+
+              '<option value="' +
+              escapeHtml(
+                row.affiliationId
+              ) +
+              '">' +
+
+              escapeHtml(
+                row.name
+              ) +
+
+              '</option>';
+
+          }
+        );
+
+
+        select.innerHTML =
+          html;
+
+
+        if (
+          Array
+            .from(
+              select.options
+            )
+            .some(
+              function(option) {
+
+                return (
+                  option.value ===
+                  current
+                );
+
+              }
+            )
+        ) {
+
+          select.value =
+            current;
+
+        }
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   一覧絞り込み
+   ========================================================= */
+
+var mirelBaseRenderFullTeacherList =
+  renderFullTeacherList;
+
+
+renderFullTeacherList =
+  function() {
+
+    var filter =
+      document.getElementById(
+        'mirelListAffiliationFilter'
+      );
+
+
+    var affiliationId =
+      filter
+        ? filter.value
+        : '';
+
+
+    if (!affiliationId) {
+
+      mirelBaseRenderFullTeacherList();
+
+      return;
+
+    }
+
+
+    var original =
+      teachers;
+
+
+    teachers =
+      original.filter(
+        function(teacher) {
+
+          return mirelTeacherHasAffiliation(
+            teacher.teacherId,
+            affiliationId
+          );
+
+        }
+      );
+
+
+    try {
+
+      mirelBaseRenderFullTeacherList();
+
+    } finally {
+
+      teachers =
+        original;
+
+    }
+
+  };
+
+
+/* =========================================================
+   検索画面
+   ========================================================= */
+
+renderSearchResults =
+  function() {
+
+    var search =
+      document.getElementById(
+        'globalSearch'
+      );
+
+
+    var query =
+      search
+        ? (
+            search.value ||
+            ''
+          ).trim()
+        : '';
+
+
+    var filter =
+      document.getElementById(
+        'mirelSearchAffiliationFilter'
+      );
+
+
+    var affiliationId =
+      filter
+        ? filter.value
+        : '';
+
+
+    var resultBox =
+      document.getElementById(
+        'searchResults'
+      );
+
+
+    if (!resultBox) {
+      return;
+    }
+
+
+    if (
+      !query &&
+      !affiliationId
+    ) {
+
+      resultBox.innerHTML =
+
+        '<div class="empty">' +
+        '検索語を入力するか、所属を選択してください。' +
+        '</div>';
+
+      return;
+
+    }
+
+
+    var html =
+      '';
+
+
+    teachers.forEach(
+      function(teacher) {
+
+        if (
+          !teacherMatches(
+            teacher,
+            query
+          )
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          !mirelTeacherHasAffiliation(
+            teacher.teacherId,
+            affiliationId
+          )
+        ) {
+
+          return;
+
+        }
+
+
+        html +=
+          teacherCard(
+            teacher
+          );
+
+      }
+    );
+
+
+    resultBox.innerHTML =
+
+      html ||
+
+      (
+        '<div class="empty">' +
+        '該当する' +
+        escapeHtml(
+          personLabel()
+        ) +
+        'はいません。</div>'
+      );
+
+  };
+
+
+/* =========================================================
+   設定画面
+   ========================================================= */
+
+function mirelInstallSettingsUi() {
+
+  var page =
+    document.getElementById(
+      'pageSettings'
+    );
+
+
+  if (!page) {
+    return;
+  }
+
+
+  var card =
+    page.querySelector(
+      '.card'
+    );
+
+
+  if (
+    !card ||
+    document.getElementById(
+      'mirelExtraSettings'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  var actions =
+    card.querySelector(
+      '.form-actions'
+    );
+
+
+  var area =
+    document.createElement(
+      'div'
+    );
+
+
+  area.id =
+    'mirelExtraSettings';
+
+  area.className =
+    'mirel-extra-section';
+
+
+  area.innerHTML =
+
+    '<div class="section-title">使用する項目</div>' +
+
+    '<div class="form-note">' +
+    'OFFにしても登録済みデータは削除されません。再度ONにすると元のデータが表示されます。' +
+    '</div>' +
+
+    '<div id="mirelFeatureGrid" class="mirel-feature-grid"></div>' +
+
+    '<div class="mirel-extra-section">' +
+
+      '<div class="section-title">所属ラベル</div>' +
+
+      '<div class="form-note">' +
+      '所属はいくつでも作成できます。色も自由に変更できます。' +
+      '</div>' +
+
+      '<div id="mirelAffiliationMaster"></div>' +
+
+      '<div class="mirel-aff-master-row">' +
+
+        '<input id="mirelNewAffColor" type="color" value="#f4b8c4">' +
+
+        '<input id="mirelNewAffName" type="text" placeholder="新しい所属名">' +
+
+        '<button class="primary" type="button" onclick="mirelAddAffiliation()">追加</button>' +
+
+        '<span></span>' +
+
+      '</div>' +
+
+    '</div>';
+
+
+  if (actions) {
+
+    card.insertBefore(
+      area,
+      actions
+    );
+
+  } else {
+
+    card.appendChild(
+      area
+    );
+
+  }
+
+
+  mirelRenderFeatureSettings();
+
+  mirelRenderAffiliationMaster();
+
+}
+
+
+/* =========================================================
+   使用項目
+   ========================================================= */
+
+function mirelFeatureDefinitions() {
+
+  return [
+
+    ['gender', '性別'],
+    ['birthday', '誕生日'],
+    ['age', '年齢'],
+    ['grade', '学年'],
+    ['affiliation', '所属'],
+    ['place', placeLabel()],
+    ['address', '住所'],
+    ['sns', 'SNSリンク'],
+    ['interactions', '交流履歴'],
+    ['children', '子ども情報']
+
+  ];
+
+}
+
+
+function mirelRenderFeatureSettings() {
+
+  var grid =
+    document.getElementById(
+      'mirelFeatureGrid'
+    );
+
+
+  if (!grid) {
+    return;
+  }
+
+
+  var html =
+    '';
+
+
+  mirelFeatureDefinitions()
+    .forEach(
+      function(row) {
+
+        html +=
+
+          '<label class="mirel-feature-toggle">' +
+
+          '<input type="checkbox" ' +
+          'class="mirel-feature-setting" ' +
+          'data-feature="' +
+          row[0] +
+          '"' +
+          (
+            mirelFeatureOn(
+              row[0]
+            )
+              ? ' checked'
+              : ''
+          ) +
+          '>' +
+
+          '<span>' +
+          escapeHtml(
+            row[1]
+          ) +
+          '</span>' +
+
+          '</label>';
+
+      }
+    );
+
+
+  grid.innerHTML =
+    html;
+
+}
+
+
+/* =========================================================
+   設定保存を拡張
+   ========================================================= */
+
+var mirelBaseSaveSettingsForm =
+  saveSettingsForm;
+
+
+saveSettingsForm =
+  async function() {
+
+    await mirelBaseSaveSettingsForm();
+
+
+    var payload =
+      {};
+
+
+    document
+      .querySelectorAll(
+        '.mirel-feature-setting'
+      )
+      .forEach(
+        function(input) {
+
+          payload[
+            input.dataset.feature
+          ] =
+            input.checked;
+
+        }
+      );
+
+
+    try {
+
+      var result =
+        await runScript(
+
+          'saveMirelFeatureSettings',
+
+          [
+            payload
+          ]
+
+        );
+
+
+      mirelFeatureSettings =
+        (
+          result &&
+          result.featureSettings
+        ) ||
+        mirelFeatureSettings;
+
+
+      mirelApplyCurrentVisibility();
+
+      renderAll();
+
+      renderJapanMap();
+
+    } catch (e) {
+
+      handleError(
+        e
+      );
+
+    }
+
+  };
+
+
+/* =========================================================
+   所属マスター
+   ========================================================= */
+
+function mirelRenderAffiliationMaster() {
+
+  var box =
+    document.getElementById(
+      'mirelAffiliationMaster'
+    );
+
+
+  if (!box) {
+    return;
+  }
+
+
+  if (
+    !mirelAffiliations.length
+  ) {
+
+    box.innerHTML =
+
+      '<div class="empty">' +
+      '所属はまだありません。' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  var html =
+    '';
+
+
+  mirelAffiliations.forEach(
+    function(row) {
+
+      html +=
+
+        '<div class="mirel-aff-master-row">' +
+
+          '<input ' +
+          'type="color" ' +
+          'id="mirelAffColor_' +
+          row.affiliationId +
+          '" ' +
+          'value="' +
+          escapeHtml(
+            row.color ||
+            '#f4b8c4'
+          ) +
+          '">' +
+
+          '<input ' +
+          'type="text" ' +
+          'id="mirelAffName_' +
+          row.affiliationId +
+          '" ' +
+          'value="' +
+          escapeHtml(
+            row.name
+          ) +
+          '">' +
+
+          '<button ' +
+          'type="button" ' +
+          'class="secondary" ' +
+          'onclick="mirelUpdateAffiliation(\\'' +
+          escapeJs(
+            row.affiliationId
+          ) +
+          '\\')">' +
+          '保存' +
+          '</button>' +
+
+          '<button ' +
+          'type="button" ' +
+          'class="secondary" ' +
+          'onclick="mirelDeleteAffiliation(\\'' +
+          escapeJs(
+            row.affiliationId
+          ) +
+          '\\')">' +
+          '削除' +
+          '</button>' +
+
+        '</div>';
+
+    }
+  );
+
+
+  box.innerHTML =
+    html;
+
+}
+
+
+async function mirelAddAffiliation() {
+
+  var name =
+    valueOf(
+      'mirelNewAffName'
+    );
+
+
+  var colorInput =
+    document.getElementById(
+      'mirelNewAffColor'
+    );
+
+
+  var color =
+    colorInput
+      ? colorInput.value
+      : '#f4b8c4';
+
+
+  if (!name) {
+
+    alert(
+      '所属名を入力してください。'
+    );
+
+    return;
+
+  }
+
+
+  await mirelSaveAffiliation({
+    name: name,
+    color: color
+  });
+
+
+  setValue(
+    'mirelNewAffName',
+    ''
+  );
+
+}
+
+
+async function mirelUpdateAffiliation(
+  id
+) {
+
+  var name =
+    valueOf(
+      'mirelAffName_' +
+      id
+    );
+
+
+  var colorInput =
+    document.getElementById(
+      'mirelAffColor_' +
+      id
+    );
+
+
+  await mirelSaveAffiliation({
+
+    affiliationId:
+      id,
+
+    name:
+      name,
+
+    color:
+      colorInput
+        ? colorInput.value
+        : '#f4b8c4'
+
+  });
+
+}
+
+
+async function mirelSaveAffiliation(
+  payload
+) {
+
+  try {
+
+    setLoading(
+      true
+    );
+
+
+    var result =
+      await runScript(
+
+        'saveMirelAffiliation',
+
+        [
+          payload
+        ]
+
+      );
+
+
+    mirelAffiliations =
+      result.affiliations ||
+      [];
+
+
+    mirelTeacherAffiliations =
+      result.teacherAffiliations ||
+      {};
+
+
+    mirelRenderAffiliationMaster();
+
+    mirelRefreshAffiliationFilters();
+
+
+    if (
+      document.getElementById(
+        'mirelAffiliationPicker'
+      )
+    ) {
+
+      mirelRenderAffiliationPicker(
+        valueOf(
+          'teacherId'
+        )
+      );
+
+    }
+
+  } catch (e) {
+
+    handleError(
+      e
+    );
+
+  } finally {
+
+    setLoading(
+      false
+    );
+
+  }
+
+}
+
+
+async function mirelDeleteAffiliation(
+  id
+) {
+
+  if (
+    !confirm(
+      'この所属を削除しますか？\n人物との紐付けも解除されます。'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  try {
+
+    setLoading(
+      true
+    );
+
+
+    var result =
+      await runScript(
+
+        'deleteMirelAffiliation',
+
+        [
+          id
+        ]
+
+      );
+
+
+    mirelAffiliations =
+      result.affiliations ||
+      [];
+
+
+    mirelTeacherAffiliations =
+      result.teacherAffiliations ||
+      {};
+
+
+    mirelRenderAffiliationMaster();
+
+    mirelRefreshAffiliationFilters();
+
+    renderAll();
+
+  } catch (e) {
+
+    handleError(
+      e
+    );
+
+  } finally {
+
+    setLoading(
+      false
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   フォーム表示 ON/OFF
+   ========================================================= */
+
+function mirelToggleField(
+  id,
+  visible
+) {
+
+  var element =
+    document.getElementById(
+      id
+    );
+
+
+  if (!element) {
+    return;
+  }
+
+
+  var field =
+    element.closest(
+      '.field'
+    ) ||
+    element;
+
+
+  field.classList.toggle(
+    'mirel-hidden',
+    !visible
+  );
+
+}
+
+
+function mirelApplyFormVisibility() {
+
+  mirelToggleField(
+    'gender',
+    mirelFeatureOn(
+      'gender'
+    )
+  );
+
+
+  [
+    'birthYear',
+    'birthMonth',
+    'birthDay'
+  ]
+    .forEach(
+      function(id) {
+
+        mirelToggleField(
+          id,
+          mirelFeatureOn(
+            'birthday'
+          )
+        );
+
+      }
+    );
+
+
+  mirelToggleField(
+    'ageManual',
+    mirelFeatureOn(
+      'age'
+    )
+  );
+
+
+  mirelToggleField(
+    'mirelGrade',
+    mirelFeatureOn(
+      'grade'
+    )
+  );
+
+
+  var aff =
+    document.getElementById(
+      'mirelAffiliationField'
+    );
+
+
+  if (aff) {
+
+    aff.classList.toggle(
+      'mirel-hidden',
+      !mirelFeatureOn(
+        'affiliation'
+      )
+    );
+
+  }
+
+
+  mirelToggleField(
+    'salonName',
+    mirelFeatureOn(
+      'place'
+    )
+  );
+
+
+  mirelToggleField(
+    'salonKana',
+    mirelFeatureOn(
+      'place'
+    )
+  );
+
+
+  [
+    'prefecture',
+    'city',
+    'address1',
+    'address2'
+  ]
+    .forEach(
+      function(id) {
+
+        mirelToggleField(
+          id,
+          mirelFeatureOn(
+            'address'
+          )
+        );
+
+      }
+    );
+
+
+  var links =
+    document.getElementById(
+      'linkEditArea'
+    );
+
+
+  if (links) {
+
+    links.classList.toggle(
+      'mirel-hidden',
+      !mirelFeatureOn(
+        'sns'
+      )
+    );
+
+  }
+
+
+  var interactions =
+    document.getElementById(
+      'interactionEditArea'
+    );
+
+
+  if (interactions) {
+
+    interactions.classList.toggle(
+      'mirel-hidden',
+      !mirelFeatureOn(
+        'interactions'
+      )
+    );
+
+  }
+
+
+  var children =
+    document.getElementById(
+      'childrenEditArea'
+    );
+
+
+  if (children) {
+
+    children.classList.toggle(
+      'mirel-hidden',
+      !mirelFeatureOn(
+        'children'
+      )
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   Detail表示 ON/OFF
+   ========================================================= */
+
+function mirelApplyDetailVisibility() {
+
+  var detail =
+    document.getElementById(
+      'detailContent'
+    );
+
+
+  if (!detail) {
+    return;
+  }
+
+
+  detail
+    .querySelectorAll(
+      '.detail-row'
+    )
+    .forEach(
+      function(row) {
+
+        var label =
+          row.querySelector(
+            '.label'
+          );
+
+
+        if (!label) {
+          return;
+        }
+
+
+        var text =
+          label.textContent.trim();
+
+
+        var visible =
+          true;
+
+
+        if (
+          text ===
+          '性別'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'gender'
+            );
+
+        }
+
+
+        if (
+          text ===
+          '誕生日'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'birthday'
+            );
+
+        }
+
+
+        if (
+          text ===
+          '年齢'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'age'
+            );
+
+        }
+
+
+        if (
+          text ===
+          '学年'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'grade'
+            );
+
+        }
+
+
+        if (
+          text ===
+          '所属'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'affiliation'
+            );
+
+        }
+
+
+        if (
+          text ===
+            placeLabel() ||
+          text ===
+            placeKanaLabel()
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'place'
+            );
+
+        }
+
+
+        if (
+          text ===
+          '住所'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'address'
+            );
+
+        }
+
+
+        if (
+          text ===
+          'リンク・SNS'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'sns'
+            );
+
+        }
+
+
+        row.classList.toggle(
+          'mirel-hidden',
+          !visible
+        );
+
+      }
+    );
+
+
+  detail
+    .querySelectorAll(
+      '.card'
+    )
+    .forEach(
+      function(card) {
+
+        var title =
+          card.querySelector(
+            '.section-title'
+          );
+
+
+        if (!title) {
+          return;
+        }
+
+
+        var text =
+          title.textContent.trim();
+
+
+        if (
+          text.indexOf(
+            '交流履歴'
+          ) === 0
+        ) {
+
+          card.classList.toggle(
+            'mirel-hidden',
+            !mirelFeatureOn(
+              'interactions'
+            )
+          );
+
+        }
+
+
+        if (
+          text.indexOf(
+            '子ども情報'
+          ) === 0
+        ) {
+
+          card.classList.toggle(
+            'mirel-hidden',
+            !mirelFeatureOn(
+              'children'
+            )
+          );
+
+        }
+
+      }
+    );
+
+
+  if (
+    !mirelFeatureOn(
+      'address'
+    )
+  ) {
+
+    detail
+      .querySelectorAll(
+        '.actions button'
+      )
+      .forEach(
+        function(button) {
+
+          if (
+            button.textContent.indexOf(
+              'Google Maps'
+            ) !== -1
+          ) {
+
+            button
+              .closest(
+                '.actions'
+              )
+              .classList.add(
+                'mirel-hidden'
+              );
+
+          }
+
+        }
+      );
+
+  }
+
+}
+
+
+/* =========================================================
+   現在画面へ設定反映
+   ========================================================= */
+
+function mirelApplyCurrentVisibility() {
+
+  mirelApplyFormVisibility();
+
+
+  if (
+    selectedTeacherId
+  ) {
+
+    var teacher =
+      findTeacher(
+        selectedTeacherId
+      );
+
+
+    if (teacher) {
+
+      renderTeacherDetail(
+        teacher
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   初回セットアップ
+   ========================================================= */
+
+function mirelMaybeShowInitialSetup() {
+
+  if (
+    mirelFeatureSettings
+      .setupCompleted ===
+      '1'
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    document.getElementById(
+      'mirelSetupOverlay'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  var overlay =
+    document.createElement(
+      'div'
+    );
+
+
+  overlay.id =
+    'mirelSetupOverlay';
+
+  overlay.className =
+    'mirel-setup-overlay';
+
+
+  var checks =
+    '';
+
+
+  mirelFeatureDefinitions()
+    .forEach(
+      function(row) {
+
+        checks +=
+
+          '<label class="mirel-feature-toggle">' +
+
+          '<input ' +
+          'type="checkbox" ' +
+          'class="mirel-setup-feature" ' +
+          'data-feature="' +
+          row[0] +
+          '" checked>' +
+
+          '<span>' +
+          escapeHtml(
+            row[1]
+          ) +
+          '</span>' +
+
+          '</label>';
+
+      }
+    );
+
+
+  overlay.innerHTML =
+
+    '<div class="mirel-setup-card">' +
+
+      '<div class="mirel-setup-title">' +
+      '使用する項目を選択' +
+      '</div>' +
+
+      '<div class="mirel-setup-note">' +
+      '後から設定画面でいつでも変更できます。OFFにしてもデータは削除されません。' +
+      '</div>' +
+
+      '<div class="mirel-feature-grid">' +
+      checks +
+      '</div>' +
+
+      '<div class="form-actions" style="margin-top:22px;">' +
+
+        '<button class="primary" type="button" onclick="mirelFinishSetup()">' +
+        'この内容で始める' +
+        '</button>' +
+
+      '</div>' +
+
+    '</div>';
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+}
+
+
+async function mirelFinishSetup() {
+
+  var payload = {
+
+    setupCompleted:
+      true
+
+  };
+
+
+  document
+    .querySelectorAll(
+      '.mirel-setup-feature'
+    )
+    .forEach(
+      function(input) {
+
+        payload[
+          input.dataset.feature
+        ] =
+          input.checked;
+
+      }
+    );
+
+
+  try {
+
+    setLoading(
+      true
+    );
+
+
+    var result =
+      await runScript(
+
+        'saveMirelFeatureSettings',
+
+        [
+          payload
+        ]
+
+      );
+
+
+    mirelFeatureSettings =
+      result.featureSettings ||
+      {};
+
+
+    var overlay =
+      document.getElementById(
+        'mirelSetupOverlay'
+      );
+
+
+    if (overlay) {
+
+      overlay.remove();
+
+    }
+
+
+    mirelRenderFeatureSettings();
+
+    mirelApplyCurrentVisibility();
+
+  } catch (e) {
+
+    handleError(
+      e
+    );
+
+  } finally {
+
+    setLoading(
+      false
+    );
+
+  }
+
+}
