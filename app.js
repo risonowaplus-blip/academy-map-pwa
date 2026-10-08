@@ -10970,9 +10970,55 @@ function mirelApplyFormVisibility() {
   );
 
 
+  var addressVisible =
+    mirelFeatureOn(
+      'address'
+    );
+
+
+  /* 郵便番号＋「住所を入力」ボタンをまとめて非表示 */
+  var postal =
+    document.getElementById(
+      'postalCode'
+    );
+
+  var postalRow =
+    postal
+      ? postal.closest(
+          '.mirel-postal-row'
+        )
+      : null;
+
+  if (postalRow) {
+    postalRow.classList.toggle(
+      'mirel-hidden',
+      !addressVisible
+    );
+  }
+
+
+  /* 都道府県＋市区町村の行もまとめて非表示 */
+  var prefecture =
+    document.getElementById(
+      'prefecture'
+    );
+
+  var addressGrid =
+    prefecture
+      ? prefecture.closest(
+          '.grid2'
+        )
+      : null;
+
+  if (addressGrid) {
+    addressGrid.classList.toggle(
+      'mirel-hidden',
+      !addressVisible
+    );
+  }
+
+
   [
-    'postalCode',
-    'city',
     'address1',
     'address2'
   ]
@@ -10981,70 +11027,42 @@ function mirelApplyFormVisibility() {
 
         mirelToggleField(
           id,
-          mirelFeatureOn(
-            'address'
-          )
+          addressVisible
         );
 
       }
     );
 
 
-  var links =
-    document.getElementById(
-      'linkEditArea'
+  /* SNS・交流履歴・子ども情報は中身ではなく見出しごと消す */
+  [
+    ['linkEditSection', 'sns'],
+    ['interactionEditSection', 'interactions'],
+    ['childrenEditSection', 'children']
+  ]
+    .forEach(
+      function(row) {
+
+        var section =
+          document.getElementById(
+            row[0]
+          );
+
+        if (!section) {
+          return;
+        }
+
+        section.classList.toggle(
+          'mirel-hidden',
+          !mirelFeatureOn(
+            row[1]
+          )
+        );
+
+      }
     );
-
-
-  if (links) {
-
-    links.classList.toggle(
-      'mirel-hidden',
-      !mirelFeatureOn(
-        'sns'
-      )
-    );
-
-  }
-
-
-  var interactions =
-    document.getElementById(
-      'interactionEditArea'
-    );
-
-
-  if (interactions) {
-
-    interactions.classList.toggle(
-      'mirel-hidden',
-      !mirelFeatureOn(
-        'interactions'
-      )
-    );
-
-  }
-
-
-  var children =
-    document.getElementById(
-      'childrenEditArea'
-    );
-
-
-  if (children) {
-
-    children.classList.toggle(
-      'mirel-hidden',
-      !mirelFeatureOn(
-        'children'
-      )
-    );
-
-  }
 
 }
-
 
 /* =========================================================
    Detail表示 ON/OFF
@@ -11197,6 +11215,19 @@ function mirelApplyDetailVisibility() {
 
         if (
           text ===
+          '郵便番号'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'address'
+            );
+
+        }
+
+
+        if (
+          text ===
           'リンク・SNS'
         ) {
 
@@ -11274,39 +11305,37 @@ function mirelApplyDetailVisibility() {
     );
 
 
-  if (
-    !mirelFeatureOn(
-      'address'
+  detail
+    .querySelectorAll(
+      '.actions button'
     )
-  ) {
+    .forEach(
+      function(button) {
 
-    detail
-      .querySelectorAll(
-        '.actions button'
-      )
-      .forEach(
-        function(button) {
-
-          if (
-            button.textContent.indexOf(
-              'Google Maps'
-            ) !== -1
-          ) {
-
-            button
-              .closest(
-                '.actions'
-              )
-              .classList.add(
-                'mirel-hidden'
-              );
-
-          }
-
+        if (
+          button.textContent.indexOf(
+            'Google Maps'
+          ) === -1
+        ) {
+          return;
         }
-      );
 
-  }
+        var actions =
+          button.closest(
+            '.actions'
+          );
+
+        if (actions) {
+          actions.classList.toggle(
+            'mirel-hidden',
+            !mirelFeatureOn(
+              'address'
+            )
+          );
+        }
+
+      }
+    );
 
 }
 
