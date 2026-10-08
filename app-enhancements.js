@@ -4712,6 +4712,27 @@ saveTeacherForm =
         )
       );
 
+    var currentGrade =
+      currentTeacher && mirelProfiles[currentTeacher.teacherId]
+        ? String(mirelProfiles[currentTeacher.teacherId].grade || '')
+        : '';
+
+    var nextGrade =
+      String(valueOf('mirelGrade') || '');
+
+    var currentAffiliationIds =
+      currentTeacher
+        ? (mirelTeacherAffiliations[currentTeacher.teacherId] || []).map(String).slice().sort()
+        : [];
+
+    var nextAffiliationIds =
+      mirelSelectedAffiliationIds().map(String).slice().sort();
+
+    var extrasChanged =
+      !currentTeacher ||
+      currentGrade !== nextGrade ||
+      !mirelSameComparable(currentAffiliationIds, nextAffiliationIds);
+
     var bundle = {
 
       teacher:
@@ -4740,6 +4761,9 @@ saveTeacherForm =
 
       deletedInteractionIds:
         deletedInteractionIds.slice(),
+
+      extrasChanged:
+        extrasChanged,
 
       extras: {
 
@@ -4846,24 +4870,17 @@ saveTeacherForm =
 
       if (
         result &&
-        result.extra
+        result.extraPatch &&
+        savedTeacherId
       ) {
 
-        mirelAffiliations =
-          result.extra.affiliations ||
-          mirelAffiliations;
+        mirelTeacherAffiliations[savedTeacherId] =
+          (result.extraPatch.affiliationIds || []).slice();
 
-        mirelTeacherAffiliations =
-          result.extra.teacherAffiliations ||
-          mirelTeacherAffiliations;
-
-        mirelProfiles =
-          result.extra.profiles ||
-          mirelProfiles;
-
-        mirelFeatureSettings =
-          result.extra.featureSettings ||
-          mirelFeatureSettings;
+        mirelProfiles[savedTeacherId] = {
+          grade: result.extraPatch.grade || '',
+          gradeBaseYear: Number(result.extraPatch.gradeBaseYear || 0)
+        };
 
       }
 
