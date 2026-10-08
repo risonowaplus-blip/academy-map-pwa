@@ -2569,6 +2569,241 @@ function phoneDetailRow(
 }
 
 
+function mirelInteractionMonthKey(
+  interaction
+) {
+
+  var date =
+    String(
+      interaction &&
+      interaction.date ||
+      ''
+    );
+
+  if (/^\d{4}-\d{2}/.test(date)) {
+    return date.slice(0, 7);
+  }
+
+  return '__NONE__';
+
+}
+
+
+function mirelInteractionMonthLabel(
+  key
+) {
+
+  if (key === '__NONE__') {
+    return '日付未設定';
+  }
+
+  var parts =
+    key.split('-');
+
+  return (
+    parts[0] +
+    '年' +
+    Number(parts[1]) +
+    '月'
+  );
+
+}
+
+
+function mirelRenderInteractionHistoryHtml(
+  teacher
+) {
+
+  var interactions =
+    (
+      teacher.interactions ||
+      []
+    ).slice();
+
+  interactions.sort(
+    function(a, b) {
+      return String(b.date || '').localeCompare(
+        String(a.date || '')
+      );
+    }
+  );
+
+  var html =
+    '<div class="card mirel-history-card mirel-history-native">' +
+    '<div class="detail-head">' +
+    '<div class="section-title">交流履歴 ' +
+    interactions.length +
+    '件</div>' +
+    '<button class="primary" onclick="openInteractionForm()">＋ 追加</button>' +
+    '</div>';
+
+  if (!interactions.length) {
+    return html +
+      '<div class="empty">交流記録はまだありません。</div>' +
+      '</div>';
+  }
+
+  var months = [];
+
+  interactions.forEach(
+    function(interaction) {
+      var key =
+        mirelInteractionMonthKey(
+          interaction
+        );
+      if (months.indexOf(key) === -1) {
+        months.push(key);
+      }
+    }
+  );
+
+  html +=
+    '<div class="mirel-history-tabs">' +
+    '<button type="button" class="mirel-history-tab active" data-mirel-month="latest" onclick="mirelSetNativeHistoryMonth(\'latest\')">最新</button>';
+
+  months.forEach(
+    function(month) {
+      html +=
+        '<button type="button" class="mirel-history-tab" data-mirel-month="' +
+        escapeAttr(month) +
+        '" onclick="mirelSetNativeHistoryMonth(\'' +
+        escapeJs(month) +
+        '\')">' +
+        escapeHtml(
+          mirelInteractionMonthLabel(
+            month
+          )
+        ) +
+        '</button>';
+    }
+  );
+
+  html +=
+    '</div>';
+
+  interactions.forEach(
+    function(interaction, index) {
+      var row =
+        renderInteractionCard(
+          interaction
+        );
+      var month =
+        mirelInteractionMonthKey(
+          interaction
+        );
+      row =
+        row.replace(
+          '<div class="child mirel-interaction-row">',
+          '<div class="child mirel-interaction-row" data-mirel-month="' +
+          escapeAttr(month) +
+          '" style="display:' +
+          (index === 0 ? '' : 'none') +
+          '">'
+        );
+      html += row;
+    }
+  );
+
+  if (interactions.length > 1) {
+    html +=
+      '<button type="button" class="mirel-history-toggle" onclick="mirelToggleNativeHistory()">過去履歴を表示 ↓</button>';
+  }
+
+  html +=
+    '</div>';
+
+  return html;
+
+}
+
+
+var mirelNativeHistoryMode =
+  'latest';
+
+var mirelNativeHistoryExpanded =
+  false;
+
+
+function mirelApplyNativeHistoryView() {
+
+  var card =
+    document.querySelector(
+      '#detailContent .mirel-history-native'
+    );
+
+  if (!card) {
+    return;
+  }
+
+  var rows =
+    card.querySelectorAll(
+      ':scope > .mirel-interaction-row'
+    );
+
+  rows.forEach(
+    function(row, index) {
+      var show =
+        mirelNativeHistoryMode === 'latest'
+          ? (mirelNativeHistoryExpanded || index === 0)
+          : row.dataset.mirelMonth === mirelNativeHistoryMode;
+      row.style.display =
+        show ? '' : 'none';
+    }
+  );
+
+  card.querySelectorAll(
+    '.mirel-history-tab'
+  ).forEach(
+    function(button) {
+      button.classList.toggle(
+        'active',
+        button.dataset.mirelMonth === mirelNativeHistoryMode
+      );
+    }
+  );
+
+  var toggle =
+    card.querySelector(
+      '.mirel-history-toggle'
+    );
+
+  if (toggle) {
+    if (mirelNativeHistoryMode === 'latest' && rows.length > 1) {
+      toggle.style.display = '';
+      toggle.textContent =
+        mirelNativeHistoryExpanded
+          ? '過去履歴を閉じる ↑'
+          : '過去履歴を表示 ↓';
+    } else {
+      toggle.style.display = 'none';
+    }
+  }
+
+}
+
+
+function mirelSetNativeHistoryMonth(
+  month
+) {
+
+  mirelNativeHistoryMode =
+    month;
+  mirelNativeHistoryExpanded =
+    false;
+  mirelApplyNativeHistoryView();
+
+}
+
+
+function mirelToggleNativeHistory() {
+
+  mirelNativeHistoryExpanded =
+    !mirelNativeHistoryExpanded;
+  mirelApplyNativeHistoryView();
+
+}
+
+
 function renderTeacherDetail(
   teacher
 ) {
@@ -2742,54 +2977,10 @@ function renderTeacherDetail(
     '</div>';
 
 
-  var interactions =
-    teacher.interactions ||
-    [];
-
   html +=
-
-    '<div class="card">' +
-
-    '<div class="detail-head">' +
-
-    '<div class="section-title">交流履歴 ' +
-
-    interactions.length +
-
-    '件</div>' +
-
-    '<button class="primary" onclick="openInteractionForm()">＋ 追加</button>' +
-
-    '</div>';
-
-  if (
-    interactions.length === 0
-  ) {
-
-    html +=
-      '<div class="empty">交流記録はまだありません。</div>';
-
-  } else {
-
-    for (
-      var interactionIndex = 0;
-      interactionIndex < interactions.length;
-      interactionIndex++
-    ) {
-
-      html +=
-        renderInteractionCard(
-          interactions[
-            interactionIndex
-          ]
-        );
-
-    }
-
-  }
-
-  html +=
-    '</div>';
+    mirelRenderInteractionHistoryHtml(
+      teacher
+    );
 
 
   var children =
@@ -2970,6 +3161,14 @@ function renderTeacherDetail(
     'detailContent'
   ).innerHTML =
     html;
+
+  mirelNativeHistoryMode =
+    'latest';
+
+  mirelNativeHistoryExpanded =
+    false;
+
+  mirelApplyNativeHistoryView();
 
 }
 
@@ -3624,9 +3823,12 @@ function openTeacherForm(
   );
 
 
-teacherModal.classList.add(
-  'show'
-);
+  mirelResetTeacherEditSections();
+
+
+  teacherModal.classList.add(
+    'show'
+  );
 
 
 /* フォームを開くたびに最上部へ戻す */
@@ -3875,6 +4077,10 @@ function openTeacherFormForNewChild(
     teacherId
   );
 
+  mirelOpenTeacherEditSection(
+    'childrenEditSection'
+  );
+
   addChildRow();
 
   setTimeout(
@@ -3909,6 +4115,72 @@ function openTeacherFormForNewChild(
 
 
 /* ========================================
+   人物フォーム 折り畳みUI
+   ======================================== */
+
+function mirelSetEditSectionCount(
+  id,
+  count,
+  suffix
+) {
+
+  var el =
+    document.getElementById(
+      id
+    );
+
+  if (!el) {
+    return;
+  }
+
+  el.textContent =
+    String(count || 0) +
+    suffix;
+
+}
+
+
+function mirelResetTeacherEditSections() {
+
+  [
+    'linkEditSection',
+    'interactionEditSection',
+    'childrenEditSection'
+  ].forEach(
+    function(id) {
+
+      var section =
+        document.getElementById(
+          id
+        );
+
+      if (section) {
+        section.open = false;
+      }
+
+    }
+  );
+
+}
+
+
+function mirelOpenTeacherEditSection(
+  id
+) {
+
+  var section =
+    document.getElementById(
+      id
+    );
+
+  if (section) {
+    section.open = true;
+  }
+
+}
+
+
+/* ========================================
    先生フォーム内 交流履歴
    ======================================== */
 
@@ -3923,19 +4195,17 @@ function renderTeacherFormInteractions() {
     return;
   }
 
+  mirelSetEditSectionCount(
+    'mirelInteractionEditCount',
+    pendingInteractions.length,
+    '件'
+  );
+
   var html =
 
     '<div class="detail-head">' +
 
-    '<div class="section-title">' +
-
-    '交流履歴 ' +
-
-    pendingInteractions.length +
-
-    '件' +
-
-    '</div>' +
+    '<div></div>' +
 
     '<button type="button" class="secondary" onclick="openTeacherFormInteraction()">' +
 
@@ -4188,17 +4458,17 @@ function renderLinksEditor() {
     return;
   }
 
+  mirelSetEditSectionCount(
+    'mirelLinkEditCount',
+    pendingLinks.length,
+    '件'
+  );
+
   var html =
 
     '<div class="detail-head">' +
 
-    '<div class="section-title">' +
-
-    'リンク・SNS ' +
-
-    pendingLinks.length +
-
-    '件</div>' +
+    '<div></div>' +
 
     '<button type="button" class="secondary" onclick="openTeacherFormLink()">' +
 
@@ -5254,13 +5524,23 @@ function renderChildrenEditor(
   children
 ) {
 
+  children =
+    children ||
+    [];
+
+  mirelSetEditSectionCount(
+    'mirelChildrenEditCount',
+    children.length,
+    '人'
+  );
+
   document.getElementById(
     'childrenEditArea'
   ).innerHTML =
 
     '<div class="detail-head">' +
 
-    '<div class="section-title">子ども情報</div>' +
+    '<div></div>' +
 
     '<button type="button" class="secondary" onclick="addChildRow()">' +
 
@@ -5550,6 +5830,14 @@ function addChildRow(
     'childRows'
   ).appendChild(
     div
+  );
+
+  mirelSetEditSectionCount(
+    'mirelChildrenEditCount',
+    document.querySelectorAll(
+      '#childRows .child-edit'
+    ).length,
+    '人'
   );
 
 }
