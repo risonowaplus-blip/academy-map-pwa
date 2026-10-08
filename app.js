@@ -2323,12 +2323,17 @@ function showPage(name) {
     name === 'list'
   );
 
-  document.getElementById(
-    'navSearch'
-  ).classList.toggle(
-    'active',
-    name === 'search'
-  );
+  var navSearch =
+    document.getElementById(
+      'navSearch'
+    );
+
+  if (navSearch) {
+    navSearch.classList.toggle(
+      'active',
+      name === 'search'
+    );
+  }
 
   document.getElementById(
     'navSettings'
@@ -7481,9 +7486,33 @@ function mirelInstallExtraStyles() {
 
     .mirel-aff-view-row {
       display: grid;
-      grid-template-columns: 34px minmax(0, 1fr) auto auto;
+      grid-template-columns: 34px minmax(0, 1fr) auto auto auto;
       gap: 8px;
       align-items: center;
+    }
+
+    .mirel-aff-order-actions {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .mirel-aff-order-button {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      padding: 0 !important;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .mirel-aff-order-button:disabled {
+      opacity: .32;
+    }
+
+    .mirel-aff-order-note {
+      margin: 4px 0 10px;
     }
 
     .mirel-aff-view-swatch {
@@ -9153,6 +9182,24 @@ function mirelInstallOneFilter(
     callback;
 
 
+  if (
+    searchId === 'listSearch'
+  ) {
+
+    var row =
+      document.getElementById(
+        'mirelListFilterRow'
+      );
+
+    if (row) {
+      row.appendChild(
+        select
+      );
+      return;
+    }
+
+  }
+
   search.insertAdjacentElement(
     'afterend',
     select
@@ -9743,7 +9790,8 @@ function mirelRenderAffiliationMaster() {
     '</div>' +
 
     '<div class="mirel-aff-master-list">' +
-      '<div class="mirel-aff-existing-title">登録済みの所属ラベル</div>';
+      '<div class="mirel-aff-existing-title">登録済みの所属ラベル</div>' +
+      '<div class="small-note mirel-aff-order-note">上にあるラベルほど、人物フォームでは左から先に表示されます。</div>';
 
   if (!mirelAffiliations.length) {
 
@@ -9753,7 +9801,7 @@ function mirelRenderAffiliationMaster() {
   } else {
 
     mirelAffiliations.forEach(
-      function(row) {
+      function(row, index) {
 
         var color =
           mirelAffiliationDisplayColor(
@@ -9784,6 +9832,23 @@ function mirelRenderAffiliationMaster() {
               escapeHtml(
                 row.name
               ) +
+              '</div>' +
+
+              '<div class="mirel-aff-order-actions" aria-label="表示順">' +
+                '<button type="button" class="secondary mirel-aff-order-button" title="前へ" ' +
+                (index === 0 ? 'disabled ' : '') +
+                'onclick="mirelMoveAffiliation(\'' +
+                escapeJs(
+                  row.affiliationId
+                ) +
+                '\', -1)">↑</button>' +
+                '<button type="button" class="secondary mirel-aff-order-button" title="後へ" ' +
+                (index === mirelAffiliations.length - 1 ? 'disabled ' : '') +
+                'onclick="mirelMoveAffiliation(\'' +
+                escapeJs(
+                  row.affiliationId
+                ) +
+                '\', 1)">↓</button>' +
               '</div>' +
 
               '<button type="button" class="secondary" onclick="mirelStartAffiliationEdit(\'' +
@@ -9877,6 +9942,151 @@ function mirelRenderAffiliationMaster() {
 
   box.innerHTML =
     html;
+
+}
+
+
+async function mirelMoveAffiliation(
+  id,
+  direction
+) {
+
+  var currentIndex =
+    mirelAffiliations.findIndex(
+      function(row) {
+        return String(
+          row.affiliationId
+        ) === String(
+          id
+        );
+      }
+    );
+
+
+  if (
+    currentIndex === -1
+  ) {
+    return;
+  }
+
+
+  var nextIndex =
+    currentIndex +
+    Number(
+      direction ||
+      0
+    );
+
+
+  if (
+    nextIndex < 0 ||
+    nextIndex >= mirelAffiliations.length
+  ) {
+    return;
+  }
+
+
+  var reordered =
+    mirelAffiliations.slice();
+
+
+  var moved =
+    reordered.splice(
+      currentIndex,
+      1
+    )[0];
+
+
+  reordered.splice(
+    nextIndex,
+    0,
+    moved
+  );
+
+
+  var previous =
+    mirelAffiliations;
+
+
+  mirelAffiliations =
+    reordered;
+
+
+  mirelRenderAffiliationMaster();
+  mirelRefreshAffiliationFilters();
+
+
+  if (
+    document.getElementById(
+      'mirelAffiliationPicker'
+    )
+  ) {
+
+    mirelRenderAffiliationPicker(
+      valueOf(
+        'teacherId'
+      )
+    );
+
+  }
+
+
+  try {
+
+    var result =
+      await runScript(
+        'saveMirelAffiliationOrder',
+        [
+          reordered.map(
+            function(row) {
+              return row.affiliationId;
+            }
+          )
+        ]
+      );
+
+
+    mirelAffiliations =
+      result.affiliations ||
+      reordered;
+
+
+    mirelTeacherAffiliations =
+      result.teacherAffiliations ||
+      mirelTeacherAffiliations;
+
+
+    mirelRenderAffiliationMaster();
+    mirelRefreshAffiliationFilters();
+
+
+    if (
+      document.getElementById(
+        'mirelAffiliationPicker'
+      )
+    ) {
+
+      mirelRenderAffiliationPicker(
+        valueOf(
+          'teacherId'
+        )
+      );
+
+    }
+
+  } catch (e) {
+
+    mirelAffiliations =
+      previous;
+
+    mirelRenderAffiliationMaster();
+    mirelRefreshAffiliationFilters();
+
+    handleError(
+      e
+    );
+
+  }
 
 }
 
