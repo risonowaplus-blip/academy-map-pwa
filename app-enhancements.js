@@ -3018,7 +3018,7 @@ async function mirelAutoLookupPostalFromAddress() {
     return;
   }
 
-  var query = pref + city + town;
+  var query = [pref, city, town].filter(Boolean).join(' ');
 
   try {
     var response = await fetch(
@@ -4216,6 +4216,13 @@ mirelRenderCityResults =
               box.classList.remove(
                 'show'
               );
+
+              /* 町名候補を選択した直後に住所→郵便番号を逆引き */
+              setTimeout(function() {
+                if (typeof mirelAutoLookupPostalFromAddress === 'function') {
+                  mirelAutoLookupPostalFromAddress();
+                }
+              }, 0);
 
             };
 
