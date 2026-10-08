@@ -2135,6 +2135,18 @@ fillSettingsForm =
     ];
 
 
+    var fontSizeInput =
+      document.getElementById(
+        'settingFontSize'
+      );
+
+    if (fontSizeInput) {
+      fontSizeInput.value =
+        appSettings.fontSize ||
+        'standard';
+    }
+
+
     rows.forEach(
       function(row) {
 
@@ -2193,7 +2205,13 @@ saveSettingsForm =
         valueOf(
           'settingPlaceKanaLabel'
         ) ||
-        placeKanaLabel()
+        placeKanaLabel(),
+
+      fontSize:
+        valueOf(
+          'settingFontSize'
+        ) ||
+        (appSettings.fontSize || 'standard')
 
     };
 
