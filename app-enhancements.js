@@ -2777,6 +2777,10 @@ function mirelHandlePostalInput() {
   input.value =
     normalized;
 
+  /* 手入力した郵便番号は住所自動検索由来ではない */
+  input.dataset.mirelAddressAuto =
+    '';
+
   if (caretAtEnd) {
     try {
       input.setSelectionRange(
@@ -2970,6 +2974,125 @@ async function mirelLookupPostalCode(
 
   }
 
+}
+
+
+/* =========================================================
+   住所 → 郵便番号
+   ポストくん REST API（住所検索）を使用
+   ========================================================= */
+
+function mirelNormalizeAddressForPostalSearch(value) {
+  var s = String(value || '')
+    .replace(/[０-９]/g, function(ch) {
+      return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0);
+    })
+    .replace(/\s+/g, '')
+    .trim();
+
+  /* 番地以降は郵便番号町域検索には不要 */
+  s = s.replace(/[0-9]+(?:[-－ー−―‐‑–—﹣－][0-9]+)*(?:番地?|号)?(?:.*)?$/, '');
+  return s;
+}
+
+async function mirelAutoLookupPostalFromAddress() {
+  var pref = valueOf('prefecture');
+  var city = valueOf('city');
+  var address1 = valueOf('address1');
+  var postal = document.getElementById('postalCode');
+
+  if (!postal || !pref || !city || !address1) {
+    return;
+  }
+
+  /* 手入力済み郵便番号は勝手に上書きしない */
+  if (
+    String(postal.value || '').replace(/[^0-9]/g, '').length === 7 &&
+    postal.dataset.mirelAddressAuto !== '1'
+  ) {
+    return;
+  }
+
+  var town = mirelNormalizeAddressForPostalSearch(address1);
+  if (!town) {
+    return;
+  }
+
+  var query = pref + city + town;
+
+  try {
+    var response = await fetch(
+      'https://postcode.teraren.com/postcodes.json?s=' +
+        encodeURIComponent(query) +
+        '&per=20',
+      { cache: 'no-store' }
+    );
+
+    if (!response.ok) {
+      return;
+    }
+
+    var rows = await response.json();
+    if (!Array.isArray(rows) || !rows.length) {
+      return;
+    }
+
+    var normalizedTown = town.replace(/ヶ/g, 'ケ');
+    var ranked = rows
+      .filter(function(row) {
+        return (
+          String(row.prefecture || '') === pref &&
+          String(row.city || '') === city
+        );
+      })
+      .map(function(row) {
+        var suburb = String(row.suburb || '');
+        var normalizedSuburb = suburb.replace(/ヶ/g, 'ケ');
+        var score = 0;
+        if (normalizedSuburb === normalizedTown) score += 100;
+        if (
+          normalizedTown.indexOf(normalizedSuburb) === 0 ||
+          normalizedSuburb.indexOf(normalizedTown) === 0
+        ) score += 50;
+        score += Math.min(normalizedSuburb.length, normalizedTown.length);
+        return { row: row, score: score };
+      })
+      .sort(function(a, b) {
+        return b.score - a.score;
+      });
+
+    if (!ranked.length || ranked[0].score < 50) {
+      return;
+    }
+
+    var topScore = ranked[0].score;
+    var topCodes = [];
+    ranked.forEach(function(item) {
+      if (item.score !== topScore) return;
+      var code = String(item.row.new || '').replace(/[^0-9]/g, '');
+      if (code.length === 7 && topCodes.indexOf(code) === -1) {
+        topCodes.push(code);
+      }
+    });
+
+    /* 同点で複数の郵便番号がある住所は自動確定しない */
+    if (topCodes.length !== 1) {
+      if (typeof mirelShowToast === 'function') {
+        mirelShowToast('住所に複数の郵便番号候補があります。郵便番号は自動確定しませんでした。');
+      }
+      return;
+    }
+
+    postal.value = mirelNormalizePostalCode(topCodes[0]);
+    postal.dataset.mirelAddressAuto = '1';
+
+    if (typeof mirelShowToast === 'function') {
+      mirelShowToast('住所から郵便番号を入力しました。');
+    }
+
+  } catch (e) {
+    /* 住所入力自体を妨げないため、逆引き失敗は静かに無視 */
+  }
 }
 
 
@@ -4419,6 +4542,17 @@ function mirelSameComparable(a, b) {
 saveTeacherForm =
   async function() {
 
+    var mirelSaveStartedAt =
+      (typeof mirelPerfNow === 'function')
+        ? mirelPerfNow()
+        : Date.now();
+
+    var mirelSaveApiFinishedAt =
+      null;
+
+    var mirelSaveResult =
+      null;
+
     var teacherPayload = {
 
       teacherId:
@@ -4633,6 +4767,14 @@ saveTeacherForm =
 
         );
 
+      mirelSaveResult =
+        result;
+
+      mirelSaveApiFinishedAt =
+        (typeof mirelPerfNow === 'function')
+          ? mirelPerfNow()
+          : Date.now();
+
 
       if (
         result &&
@@ -4755,6 +4897,40 @@ saveTeacherForm =
 
         }
 
+      }
+
+
+      var mirelSaveFinishedAt =
+        (typeof mirelPerfNow === 'function')
+          ? mirelPerfNow()
+          : Date.now();
+
+      if (typeof mirelSavePerformance === 'function') {
+        mirelSavePerformance(
+          'save',
+          {
+            totalMs:
+              mirelSaveFinishedAt -
+              mirelSaveStartedAt,
+            apiMs:
+              mirelSaveApiFinishedAt
+                ? mirelSaveApiFinishedAt - mirelSaveStartedAt
+                : 0,
+            uiMs:
+              mirelSaveApiFinishedAt
+                ? mirelSaveFinishedAt - mirelSaveApiFinishedAt
+                : 0,
+            server:
+              mirelSaveResult && mirelSaveResult.__perf
+                ? mirelSaveResult.__perf
+                : (
+                    mirelLastApiTimings &&
+                    mirelLastApiTimings.saveTeacherBundle
+                      ? mirelLastApiTimings.saveTeacherBundle.server
+                      : null
+                  )
+          }
+        );
       }
 
 
