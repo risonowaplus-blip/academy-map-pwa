@@ -22,8 +22,8 @@ var deletedLinkIds = [];
 var editingPendingLinkIndex = -1;
 
 var appSettings = {
-  appName: 'Academy Map',
-  personLabel: '先生',
+  appName: 'Mirel Map',
+  personLabel: '人物',
   placeLabel: '店名',
   placeKanaLabel: '店名ふりがな'
 };
@@ -101,9 +101,29 @@ var gradeOptions = [
   '高1',
   '高2',
   '高3',
-  '卒業'
+  '短大1',
+  '短大2',
+  '大学1',
+  '大学2',
+  '大学3',
+  '大学4',
+  '大学6年制1',
+  '大学6年制2',
+  '大学6年制3',
+  '大学6年制4',
+  '大学6年制5',
+  '大学6年制6',
+  '専門1',
+  '専門2',
+  '専門3',
+  '専門4',
+  '修士1',
+  '修士2',
+  '博士1',
+  '博士2',
+  '博士3',
+  'その他'
 ];
-
 
 /* ========================================
    起動
@@ -351,14 +371,49 @@ async function restoreOrLogin() {
   }
 
   /*
-   * 有効なトークンがない場合は、
-   * 起動時にGoogle認証を自動で開かない。
-   *
-   * 必ずログイン画面を表示し、
-   * ユーザーが「Googleでログイン」を押した時だけ
-   * 認証を開始する。
+   * 過去に一度認証済みなら、
+   * Googleセッションが残っている範囲で
+   * 無操作の再取得を先に試す。
    */
+  var authorizedBefore =
+    false;
+
+  try {
+
+    authorizedBefore =
+      localStorage.getItem(
+        STORAGE_AUTHORIZED
+      ) === '1';
+
+  } catch (e) {}
+
+
   clearAccessToken();
+
+
+  if (authorizedBefore) {
+
+    try {
+
+      await requestGoogleToken(
+        ''
+      );
+
+      await startApp();
+
+      return;
+
+    } catch (e) {
+
+      /*
+       * Google側セッションが切れている場合だけ
+       * 通常のログイン画面へ戻す。
+       */
+
+    }
+
+  }
+
 
   showLoginScreen();
 
@@ -650,11 +705,49 @@ async function startApp() {
         {}
       );
 
+
+    var extraData =
+      (
+        data &&
+        data.extra
+      ) ||
+      {};
+
+
+    mirelAffiliations =
+      extraData.affiliations ||
+      [];
+
+    mirelTeacherAffiliations =
+      extraData.teacherAffiliations ||
+      {};
+
+    mirelProfiles =
+      extraData.profiles ||
+      {};
+
+    mirelFeatureSettings =
+      extraData.featureSettings ||
+      {};
+
+
+    mirelApplyProfileDerivedValues();
+
     cacheUiSettings();
 
     applySettingsToUi();
 
+    mirelInstallExtraStyles();
+
+    mirelInstallSettingsUi();
+
+    mirelInstallSearchFilters();
+
+    mirelApplyCurrentVisibility();
+
     showAppScreen();
+
+    mirelMaybeShowInitialSetup();
 
     renderAll();
 
@@ -1849,6 +1942,7 @@ function teacherMatches(
     teacher.name,
     teacher.kana,
     teacher.nickname,
+    teacher.phone,
     teacher.salonName,
     teacher.salonKana,
     teacher.prefecture,
@@ -1929,6 +2023,10 @@ function teacherCard(teacher) {
           ) +
           '</div>'
         : '<div class="meta">所在地不明</div>'
+    ) +
+
+    mirelAffiliationTagsHtml(
+      teacher.teacherId
     ) +
 
     '</div>'
@@ -2445,6 +2543,32 @@ function detailRow(
 }
 
 
+function phoneDetailRow(
+  phone
+) {
+
+  if (!phone) {
+    return '';
+  }
+
+  return (
+    '<div class="detail-row">' +
+    '<div class="label">電話番号</div>' +
+    '<div class="value">' +
+    '<a href="tel:' +
+    escapeAttr(
+      String(phone).replace(/[^0-9+]/g, '')
+    ) +
+    '" class="mirel-phone-link">' +
+    escapeHtml(phone) +
+    '</a>' +
+    '</div>' +
+    '</div>'
+  );
+
+}
+
+
 function renderTeacherDetail(
   teacher
 ) {
@@ -2524,6 +2648,11 @@ function renderTeacherDetail(
     detailRow(
       '年齢',
       teacher.ageDisplay
+    );
+
+  html +=
+    phoneDetailRow(
+      teacher.phone
     );
 
   html +=
@@ -3379,6 +3508,12 @@ function openTeacherForm(
     );
 
     setValue(
+      'phone',
+      teacher.phone ||
+      ''
+    );
+
+    setValue(
       'birthYear',
       teacher.birthYear
     );
@@ -3558,6 +3693,7 @@ function clearTeacherForm() {
     'name',
     'kana',
     'nickname',
+    'phone',
     'birthYear',
     'birthMonth',
     'birthDay',
@@ -3623,6 +3759,11 @@ async function saveTeacherForm() {
     gender:
       valueOf(
         'gender'
+      ),
+
+    phone:
+      valueOf(
+        'phone'
       ),
 
     birthYear:
@@ -6313,9 +6454,9 @@ function personLabel() {
 
   return String(
     appSettings.personLabel ||
-    '先生'
+    '人物'
   ).trim() ||
-    '先生';
+    '人物';
 
 }
 
@@ -6346,9 +6487,9 @@ function appName() {
 
   return String(
     appSettings.appName ||
-    'Academy Map'
+    'Mirel Map'
   ).trim() ||
-    'Academy Map';
+    'Mirel Map';
 
 }
 
@@ -6386,13 +6527,13 @@ async function saveSettingsForm() {
       valueOf(
         'settingAppName'
       ) ||
-      'Academy Map',
+      'Mirel Map',
 
     personLabel:
       valueOf(
         'settingPersonLabel'
       ) ||
-      '先生',
+      '人物',
 
     placeLabel:
       valueOf(
@@ -7013,6 +7154,7 @@ var mirelFeatureSettings =
 var MIREL_FEATURE_DEFAULTS = {
 
   gender: true,
+  phone: true,
   birthday: true,
   age: true,
   grade: true,
@@ -7160,11 +7302,15 @@ async function mirelLoadExtraData() {
     data.featureSettings ||
     {};
 
+
+  mirelApplyProfileDerivedValues();
+
 }
 
 
 /* =========================================================
-   startApp 拡張
+   startApp
+   初期データは1回のAPI通信でまとめて取得
    ========================================================= */
 
 var mirelBaseStartApp =
@@ -7176,37 +7322,7 @@ startApp =
 
     await mirelBaseStartApp();
 
-
-    try {
-
-      await mirelLoadExtraData();
-
-
-      mirelInstallExtraStyles();
-
-      mirelInstallSettingsUi();
-
-      mirelInstallSearchFilters();
-
-      mirelApplyCurrentVisibility();
-
-      mirelMaybeShowInitialSetup();
-
-
-      renderAll();
-
-      renderJapanMap();
-
-    } catch (e) {
-
-      console.error(
-        e
-      );
-
-    }
-
   };
-
 
 /* =========================================================
    CSS
@@ -7385,6 +7501,36 @@ function mirelInstallExtraStyles() {
       margin-bottom: 18px;
     }
 
+    .mirel-phone-link {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .mirel-toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(86px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(12px);
+      z-index: 100000;
+      max-width: min(88vw, 420px);
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: rgba(35,35,35,.92);
+      color: #fff;
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      box-shadow: 0 8px 30px rgba(0,0,0,.18);
+    }
+
+    .mirel-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
   `;
 
 
@@ -7486,6 +7632,156 @@ function mirelTeacherHasAffiliation(
     ).indexOf(
       affiliationId
     ) !== -1
+  );
+
+}
+
+
+function mirelAffiliationTagsHtml(
+  teacherId
+) {
+
+  var ids =
+    mirelAffiliationIds(
+      teacherId
+    );
+
+  if (!ids.length) {
+    return '';
+  }
+
+  var tags =
+    '';
+
+  ids.forEach(
+    function(id) {
+
+      var row =
+        mirelAffiliationById(
+          id
+        );
+
+      if (!row) {
+        return;
+      }
+
+      tags +=
+        '<span class="mirel-aff-tag" style="background:' +
+        escapeAttr(
+          row.color ||
+          '#f4b8c4'
+        ) +
+        '33;">' +
+        escapeHtml(
+          row.name
+        ) +
+        '</span>';
+
+    }
+  );
+
+  return tags
+    ? '<div class="mirel-aff-tags">' +
+      tags +
+      '</div>'
+    : '';
+
+}
+
+
+function mirelGradeAgeDisplay(
+  grade
+) {
+
+  var ranges = {
+    '年少': [3, 4],
+    '年中': [4, 5],
+    '年長': [5, 6],
+    '小1': [6, 7],
+    '小2': [7, 8],
+    '小3': [8, 9],
+    '小4': [9, 10],
+    '小5': [10, 11],
+    '小6': [11, 12],
+    '中1': [12, 13],
+    '中2': [13, 14],
+    '中3': [14, 15],
+    '高1': [15, 16],
+    '高2': [16, 17],
+    '高3': [17, 18],
+    '短大1': [18, 19],
+    '短大2': [19, 20],
+    '大学1': [18, 19],
+    '大学2': [19, 20],
+    '大学3': [20, 21],
+    '大学4': [21, 22],
+    '大学6年制1': [18, 19],
+    '大学6年制2': [19, 20],
+    '大学6年制3': [20, 21],
+    '大学6年制4': [21, 22],
+    '大学6年制5': [22, 23],
+    '大学6年制6': [23, 24],
+    '専門1': [18, 19],
+    '専門2': [19, 20],
+    '専門3': [20, 21],
+    '専門4': [21, 22],
+    '修士1': [22, 23],
+    '修士2': [23, 24],
+    '博士1': [24, 25],
+    '博士2': [25, 26],
+    '博士3': [26, 27]
+  };
+
+  var range =
+    ranges[grade];
+
+  if (!range) {
+    return '';
+  }
+
+  return (
+    range[0] === range[1]
+      ? String(range[0]) + '歳'
+      : String(range[0]) + '〜' + String(range[1]) + '歳'
+  );
+
+}
+
+
+function mirelApplyProfileDerivedValues() {
+
+  teachers.forEach(
+    function(teacher) {
+
+      var profile =
+        mirelProfiles[
+          teacher.teacherId
+        ] ||
+        {};
+
+      var gradeDisplay =
+        mirelGradeDisplay(
+          profile.grade,
+          profile.gradeBaseYear
+        );
+
+      teacher.gradeDisplay =
+        gradeDisplay;
+
+      if (
+        !teacher.ageDisplay &&
+        gradeDisplay &&
+        gradeDisplay !== '卒業・修了'
+      ) {
+
+        teacher.ageDisplay =
+          mirelGradeAgeDisplay(
+            gradeDisplay
+          );
+
+      }
+
+    }
   );
 
 }
@@ -8057,6 +8353,9 @@ saveTeacherForm =
       mirelProfiles =
         result.profiles ||
         mirelProfiles;
+
+
+      mirelApplyProfileDerivedValues();
 
 
       if (
@@ -8743,12 +9042,24 @@ function mirelInstallSettingsUi() {
     );
 
 
-  if (
-    !card ||
+  if (!card) {
+
+    return;
+
+  }
+
+
+  var existingArea =
     document.getElementById(
       'mirelExtraSettings'
-    )
-  ) {
+    );
+
+
+  if (existingArea) {
+
+    mirelRenderFeatureSettings();
+
+    mirelRenderAffiliationMaster();
 
     return;
 
@@ -8841,11 +9152,12 @@ function mirelFeatureDefinitions() {
   return [
 
     ['gender', '性別'],
+    ['phone', '電話番号'],
     ['birthday', '誕生日'],
     ['age', '年齢'],
     ['grade', '学年'],
     ['affiliation', '所属'],
-    ['place', placeLabel()],
+    ['place', '店名'],
     ['address', '住所'],
     ['sns', 'SNSリンク'],
     ['interactions', '交流履歴'],
@@ -9055,27 +9367,24 @@ function mirelRenderAffiliationMaster() {
           '<button ' +
           'type="button" ' +
           'class="secondary" ' +
-          '<button ' +
-'type="button" ' +
-'class="secondary" ' +
-'onclick="mirelUpdateAffiliation(\'' +
-escapeJs(
-  row.affiliationId
-) +
-'\')">' +
-'保存' +
-'</button>' +
+          'onclick="mirelUpdateAffiliation(\'' +
+          escapeJs(
+            row.affiliationId
+          ) +
+          '\')">' +
+          '保存' +
+          '</button>' +
 
-'<button ' +
-'type="button" ' +
-'class="secondary" ' +
-'onclick="mirelDeleteAffiliation(\'' +
-escapeJs(
-  row.affiliationId
-) +
-'\')">' +
-'削除' +
-'</button>' +
+          '<button ' +
+          'type="button" ' +
+          'class="secondary" ' +
+          'onclick="mirelDeleteAffiliation(\'' +
+          escapeJs(
+            row.affiliationId
+          ) +
+          '\')">' +
+          '削除' +
+          '</button>' +
 
         '</div>';
 
@@ -9111,7 +9420,7 @@ async function mirelAddAffiliation() {
 
   if (!name) {
 
-    alert(
+    appToast(
       '所属名を入力してください。'
     );
 
@@ -9244,9 +9553,10 @@ async function mirelDeleteAffiliation(
 ) {
 
   if (
-    !confirm(
-      'この所属を削除しますか？\n人物との紐付けも解除されます。'
-    )
+    !(await appConfirm(
+      '所属を削除しますか？',
+      'この所属を削除すると、人物との紐付けも解除されます。'
+    ))
   ) {
 
     return;
@@ -9351,6 +9661,14 @@ function mirelApplyFormVisibility() {
   );
 
 
+  mirelToggleField(
+    'phone',
+    mirelFeatureOn(
+      'phone'
+    )
+  );
+
+
   [
     'birthYear',
     'birthMonth',
@@ -9421,7 +9739,6 @@ function mirelApplyFormVisibility() {
 
 
   [
-    'prefecture',
     'city',
     'address1',
     'address2'
@@ -9547,6 +9864,19 @@ function mirelApplyDetailVisibility() {
           visible =
             mirelFeatureOn(
               'gender'
+            );
+
+        }
+
+
+        if (
+          text ===
+          '電話番号'
+        ) {
+
+          visible =
+            mirelFeatureOn(
+              'phone'
             );
 
         }
@@ -9776,6 +10106,63 @@ function mirelApplyCurrentVisibility() {
     }
 
   }
+
+}
+
+
+function appToast(
+  message
+) {
+
+  var toast =
+    document.getElementById(
+      'mirelToast'
+    );
+
+  if (!toast) {
+
+    toast =
+      document.createElement(
+        'div'
+      );
+
+    toast.id =
+      'mirelToast';
+
+    toast.className =
+      'mirel-toast';
+
+    document.body.appendChild(
+      toast
+    );
+
+  }
+
+  toast.textContent =
+    String(
+      message ||
+      ''
+    );
+
+  toast.classList.add(
+    'show'
+  );
+
+  clearTimeout(
+    appToast._timer
+  );
+
+  appToast._timer =
+    setTimeout(
+      function() {
+
+        toast.classList.remove(
+          'show'
+        );
+
+      },
+      2200
+    );
 
 }
 
