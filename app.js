@@ -7894,7 +7894,7 @@ function mirelInstallExtraStyles() {
     .mirel-aff-view-row {
       display: grid;
       grid-template-columns: 34px minmax(0, 1fr) auto auto auto;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     }
 
@@ -7905,13 +7905,22 @@ function mirelInstallExtraStyles() {
     }
 
     .mirel-aff-order-button {
-      width: 34px;
-      height: 34px;
-      min-width: 34px;
+      width: 28px;
+      height: 32px;
+      min-width: 28px;
       padding: 0 !important;
-      border-radius: 10px;
-      font-size: 14px;
+      border-radius: 9px;
+      font-size: 13px;
       line-height: 1;
+    }
+
+    .mirel-aff-mini-action {
+      min-width: 0 !important;
+      padding: 7px 10px !important;
+      border-radius: 10px !important;
+      font-size: 13px !important;
+      line-height: 1.1 !important;
+      white-space: nowrap;
     }
 
     .mirel-aff-order-button:disabled {
@@ -7933,6 +7942,10 @@ function mirelInstallExtraStyles() {
       min-width: 0;
       font-size: 15px;
       font-weight: 600;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      overflow-wrap: anywhere;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -10268,13 +10281,13 @@ function mirelRenderAffiliationMaster() {
                 '\', 1)">↓</button>' +
               '</div>' +
 
-              '<button type="button" class="secondary" onclick="mirelStartAffiliationEdit(\'' +
+              '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelStartAffiliationEdit(\'' +
               escapeJs(
                 row.affiliationId
               ) +
               '\')">編集</button>' +
 
-              '<button type="button" class="secondary" onclick="mirelDeleteAffiliation(\'' +
+              '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelDeleteAffiliation(\'' +
               escapeJs(
                 row.affiliationId
               ) +
