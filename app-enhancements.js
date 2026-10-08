@@ -2710,6 +2710,249 @@ document.addEventListener(
   }
 );
 
+
+/* =========================================================
+   郵便番号 → 住所
+   ZipCloud APIを使用
+   ========================================================= */
+
+function mirelNormalizePostalCode(value) {
+  var digits =
+    String(value || '')
+      .replace(/[^0-9]/g, '')
+      .slice(0, 7);
+
+  if (digits.length === 7) {
+    return (
+      digits.slice(0, 3) +
+      '-' +
+      digits.slice(3)
+    );
+  }
+
+  return digits;
+}
+
+
+function mirelHandlePostalInput() {
+
+  var input =
+    document.getElementById(
+      'postalCode'
+    );
+
+  if (!input) {
+    return;
+  }
+
+  var caretAtEnd =
+    input.selectionStart ===
+    input.value.length;
+
+  var normalized =
+    mirelNormalizePostalCode(
+      input.value
+    );
+
+  input.value =
+    normalized;
+
+  if (caretAtEnd) {
+    try {
+      input.setSelectionRange(
+        normalized.length,
+        normalized.length
+      );
+    } catch (e) {}
+  }
+
+}
+
+
+async function mirelAutoLookupPostalCode() {
+
+  var input =
+    document.getElementById(
+      'postalCode'
+    );
+
+  if (!input) {
+    return;
+  }
+
+  var digits =
+    String(
+      input.value ||
+      ''
+    ).replace(
+      /[^0-9]/g,
+      ''
+    );
+
+  if (digits.length !== 7) {
+    return;
+  }
+
+  await mirelLookupPostalCode(
+    true
+  );
+
+}
+
+
+async function mirelLookupPostalCode(
+  silent
+) {
+
+  var input =
+    document.getElementById(
+      'postalCode'
+    );
+
+  if (!input) {
+    return;
+  }
+
+  var digits =
+    String(
+      input.value ||
+      ''
+    ).replace(
+      /[^0-9]/g,
+      ''
+    );
+
+  if (digits.length !== 7) {
+
+    if (!silent) {
+      if (
+        typeof mirelShowToast ===
+        'function'
+      ) {
+        mirelShowToast(
+          '郵便番号を7桁で入力してください。'
+        );
+      }
+    }
+
+    return;
+
+  }
+
+  input.value =
+    mirelNormalizePostalCode(
+      digits
+    );
+
+  try {
+
+    var response =
+      await fetch(
+        'https://zipcloud.ibsnet.co.jp/api/search?zipcode=' +
+        encodeURIComponent(
+          digits
+        ),
+        {
+          cache:
+            'no-store'
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        '郵便番号検索に失敗しました。'
+      );
+    }
+
+    var data =
+      await response.json();
+
+    if (
+      !data ||
+      Number(data.status) !== 200 ||
+      !Array.isArray(
+        data.results
+      ) ||
+      !data.results.length
+    ) {
+
+      if (!silent) {
+        if (
+          typeof mirelShowToast ===
+          'function'
+        ) {
+          mirelShowToast(
+            '該当する住所が見つかりませんでした。'
+          );
+        }
+      }
+
+      return;
+
+    }
+
+    var row =
+      data.results[0];
+
+    setValue(
+      'prefecture',
+      row.address1 ||
+      ''
+    );
+
+    setValue(
+      'city',
+      row.address2 ||
+      ''
+    );
+
+    var address1 =
+      document.getElementById(
+        'address1'
+      );
+
+    if (
+      address1 &&
+      (
+        !address1.value ||
+        address1.dataset.mirelPostalAuto ===
+          '1'
+      )
+    ) {
+
+      address1.value =
+        row.address3 ||
+        '';
+
+      address1.dataset.mirelPostalAuto =
+        '1';
+
+    }
+
+    if (!silent) {
+      if (
+        typeof mirelShowToast ===
+        'function'
+      ) {
+        mirelShowToast(
+          '郵便番号から住所を入力しました。'
+        );
+      }
+    }
+
+  } catch (e) {
+
+    if (!silent) {
+      handleError(
+        e
+      );
+    }
+
+  }
+
+}
+
+
 /* =========================================================
    2026-10-07 追加修正
    ・交流した場所・種別：検索＋候補＋新規追加
@@ -4099,6 +4342,57 @@ function mirelCollectChildren() {
 
 
 /* =========================================================
+   関連情報の変更判定
+   基本情報だけの保存時に、子ども・SNS・交流履歴を
+   毎回すべて書き直さないための比較用
+   ========================================================= */
+
+function mirelComparableChildren(rows) {
+  return (rows || []).map(function(row) {
+    return {
+      childId: String(row.childId || ''),
+      name: String(row.name || ''),
+      kana: String(row.kana || ''),
+      nickname: String(row.nickname || ''),
+      gender: String(row.gender || ''),
+      grade: String(row.grade || ''),
+      birthYear: String(row.birthYear || ''),
+      birthMonth: String(row.birthMonth || ''),
+      birthDay: String(row.birthDay || ''),
+      ageManual: String(row.ageManual || ''),
+      memo: String(row.memo || '')
+    };
+  });
+}
+
+function mirelComparableLinks(rows) {
+  return (rows || []).map(function(row) {
+    return {
+      linkId: String(row.linkId || ''),
+      type: String(row.type || ''),
+      displayName: String(row.displayName || ''),
+      value: String(row.value || '')
+    };
+  });
+}
+
+function mirelComparableInteractions(rows) {
+  return (rows || []).map(function(row) {
+    return {
+      interactionId: String(row.interactionId || ''),
+      date: String(row.date || ''),
+      interactionType: String(row.interactionType || ''),
+      memo: String(row.memo || '')
+    };
+  });
+}
+
+function mirelSameComparable(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+
+/* =========================================================
    保存を1回のAPI通信へまとめる
    ========================================================= */
 
@@ -4135,6 +4429,11 @@ saveTeacherForm =
       phone:
         valueOf(
           'phone'
+        ),
+
+      postalCode:
+        valueOf(
+          'postalCode'
         ),
 
       birthYear:
@@ -4198,22 +4497,85 @@ saveTeacherForm =
     };
 
 
+    var currentTeacher =
+      teacherPayload.teacherId
+        ? findTeacher(
+            teacherPayload.teacherId
+          )
+        : null;
+
+    var collectedChildren =
+      mirelCollectChildren();
+
+    var currentLinks =
+      pendingLinks.slice();
+
+    var currentInteractions =
+      pendingInteractions.slice();
+
+    var childrenChanged =
+      !currentTeacher ||
+      !mirelSameComparable(
+        mirelComparableChildren(
+          collectedChildren
+        ),
+        mirelComparableChildren(
+          currentTeacher.children ||
+          []
+        )
+      );
+
+    var linksChanged =
+      deletedLinkIds.length > 0 ||
+      !currentTeacher ||
+      !mirelSameComparable(
+        mirelComparableLinks(
+          currentLinks
+        ),
+        mirelComparableLinks(
+          currentTeacher.links ||
+          []
+        )
+      );
+
+    var interactionsChanged =
+      deletedInteractionIds.length > 0 ||
+      !currentTeacher ||
+      !mirelSameComparable(
+        mirelComparableInteractions(
+          currentInteractions
+        ),
+        mirelComparableInteractions(
+          currentTeacher.interactions ||
+          []
+        )
+      );
+
     var bundle = {
 
       teacher:
         teacherPayload,
 
       children:
-        mirelCollectChildren(),
+        collectedChildren,
+
+      childrenChanged:
+        childrenChanged,
 
       links:
-        pendingLinks.slice(),
+        currentLinks,
+
+      linksChanged:
+        linksChanged,
 
       deletedLinkIds:
         deletedLinkIds.slice(),
 
       interactions:
-        pendingInteractions.slice(),
+        currentInteractions,
+
+      interactionsChanged:
+        interactionsChanged,
 
       deletedInteractionIds:
         deletedInteractionIds.slice(),
@@ -4252,12 +4614,58 @@ saveTeacherForm =
         );
 
 
-      teachers =
-        (
-          result &&
-          result.teachers
-        ) ||
-        [];
+      if (
+        result &&
+        result.teacher
+      ) {
+
+        var replaced =
+          false;
+
+        for (
+          var teacherIndex = 0;
+          teacherIndex < teachers.length;
+          teacherIndex++
+        ) {
+
+          if (
+            String(
+              teachers[teacherIndex].teacherId ||
+              ''
+            ) ===
+            String(
+              result.teacher.teacherId ||
+              ''
+            )
+          ) {
+
+            teachers[teacherIndex] =
+              result.teacher;
+
+            replaced =
+              true;
+
+            break;
+
+          }
+
+        }
+
+        if (!replaced) {
+          teachers.push(
+            result.teacher
+          );
+        }
+
+      } else if (
+        result &&
+        result.teachers
+      ) {
+
+        teachers =
+          result.teachers;
+
+      }
 
 
       var savedTeacherId =
@@ -6709,14 +7117,6 @@ function mirelEnhanceInteractionHistory(
   teacher
 ) {
 
-  if (
-    document.querySelector(
-      '#detailContent .mirel-history-native'
-    )
-  ) {
-    return;
-  }
-
   var cards =
     document.querySelectorAll(
       '#detailContent .card'
@@ -7190,7 +7590,42 @@ function mirelFixTeacherTopActions() {
   }
 
 
-  if (buttons[1]) {
+  if (!buttons[1]) {
+
+    var deleteButton =
+      document.createElement(
+        'button'
+      );
+
+    deleteButton.type =
+      'button';
+
+    deleteButton.className =
+      'detail-delete-button mirel-action-mini mirel-teacher-top-action';
+
+    deleteButton.textContent =
+      '削除';
+
+    deleteButton.onclick =
+      function() {
+
+        if (
+          selectedTeacherId
+        ) {
+
+          deleteTeacherAction(
+            selectedTeacherId
+          );
+
+        }
+
+      };
+
+    actions.appendChild(
+      deleteButton
+    );
+
+  } else {
 
     buttons[1].textContent =
       '削除';
