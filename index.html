@@ -52,6 +52,36 @@
   </title>
 
   <style>
+    .mirel-field-compact {
+      max-width: 320px;
+    }
+
+    .mirel-postal-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .mirel-postal-row .field {
+      flex: 0 1 220px;
+      margin: 0;
+    }
+
+    .mirel-postal-button {
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 560px) {
+      .mirel-field-compact {
+        max-width: 280px;
+      }
+    }
+  </style>
+
+
+  <style>
     #teacherModal .modal {
       padding-bottom: calc(92px + env(safe-area-inset-bottom));
     }
@@ -863,7 +893,7 @@
 
 <!-- 学年 -->
 <div
-  class="field"
+  class="field mirel-field-compact"
   id="mirelGradeField"
 >
 
@@ -986,24 +1016,6 @@
 </div>
 
 
-<!-- 電話番号 -->
-<div class="field">
-
-  <label>
-    電話番号
-  </label>
-
-  <input
-    id="phone"
-    type="tel"
-    autocomplete="tel"
-    inputmode="tel"
-    placeholder="例：090-1234-5678"
-  >
-
-</div>
-
-
 <!-- 所属 -->
 <div
   class="field"
@@ -1041,6 +1053,40 @@
   </label>
 
   <input id="salonKana">
+
+</div>
+
+
+
+<!-- 郵便番号 -->
+<div class="mirel-postal-row">
+
+  <div class="field mirel-field-compact">
+
+    <label>
+      郵便番号
+    </label>
+
+    <input
+      id="postalCode"
+      type="text"
+      inputmode="numeric"
+      autocomplete="postal-code"
+      maxlength="8"
+      placeholder="例：525-0032"
+      oninput="mirelHandlePostalInput()"
+      onblur="mirelAutoLookupPostalCode()"
+    >
+
+  </div>
+
+  <button
+    type="button"
+    class="secondary mirel-postal-button"
+    onclick="mirelLookupPostalCode()"
+  >
+    住所を入力
+  </button>
 
 </div>
 
@@ -1116,6 +1162,24 @@
   </label>
 
   <input id="address2">
+
+</div>
+
+
+<!-- 電話番号 -->
+<div class="field mirel-field-compact">
+
+  <label>
+    電話番号
+  </label>
+
+  <input
+    id="phone"
+    type="tel"
+    autocomplete="tel"
+    inputmode="tel"
+    placeholder="例：090-1234-5678"
+  >
 
 </div>
 
@@ -1511,11 +1575,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261008-02"></script>
+<script src="./config.js?v=20261008-03"></script>
 
-<script src="./app.js?v=20261008-02"></script>
+<script src="./app.js?v=20261008-03"></script>
 
-<script src="./app-enhancements.js?v=20261008-02"></script>
+<script src="./app-enhancements.js?v=20261008-03"></script>
 
 </body>
 
