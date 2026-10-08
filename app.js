@@ -371,50 +371,14 @@ async function restoreOrLogin() {
   }
 
   /*
-   * 過去に一度認証済みなら、
-   * Googleセッションが残っている範囲で
-   * 無操作の再取得を先に試す。
+   * 起動時の無操作トークン再取得は行わない。
+   * Android/Samsung Internet等ではバックグラウンドの
+   * OAuthポップアップ扱いとなり、
+   * 「ポップアップがブロックされました」が出るため。
+   * 有効期限切れ時はログイン画面を表示し、
+   * ユーザーのタップ操作から再認証する。
    */
-  var authorizedBefore =
-    false;
-
-  try {
-
-    authorizedBefore =
-      localStorage.getItem(
-        STORAGE_AUTHORIZED
-      ) === '1';
-
-  } catch (e) {}
-
-
   clearAccessToken();
-
-
-  if (authorizedBefore) {
-
-    try {
-
-      await requestGoogleToken(
-        ''
-      );
-
-      await startApp();
-
-      return;
-
-    } catch (e) {
-
-      /*
-       * Google側セッションが切れている場合だけ
-       * 通常のログイン画面へ戻す。
-       */
-
-    }
-
-  }
-
-
   showLoginScreen();
 
 }
@@ -598,31 +562,15 @@ async function runScript(
     );
 
   if (
-    response.status === 401 &&
-    !retried
+    response.status === 401
   ) {
 
     clearAccessToken();
+    showLoginScreen();
 
-    try {
-
-      await requestGoogleToken('');
-
-      return await runScript(
-        functionName,
-        parameters,
-        true
-      );
-
-    } catch (e) {
-
-      showLoginScreen();
-
-      throw new Error(
-        'Googleログインの有効期限が切れました。再度ログインしてください。'
-      );
-
-    }
+    throw new Error(
+      'Googleログインの有効期限が切れました。Googleでログインを押してください。'
+    );
 
   }
 
@@ -6590,7 +6538,7 @@ async function saveSettingsForm() {
 
     renderJapanMap();
 
-    alert(
+    appToast(
       '設定を保存しました。'
     );
 
@@ -7062,14 +7010,20 @@ function handleError(error) {
 
   setLoading(false);
 
-  alert(
-
+  var message =
     error &&
     error.message
       ? error.message
-      : String(error)
+      : String(error);
 
-  );
+  if (message === 'Failed to fetch') {
+    message =
+      '通信に失敗しました。通信状態を確認して、もう一度お試しください。';
+  }
+
+  if (typeof appToast === 'function') {
+    appToast(message);
+  }
 
 }
 
