@@ -1664,12 +1664,124 @@ renderFullTeacherList =
         'はいません。</div>'
       );
 
+
+    mirelRefreshRegionJump();
+
   };
 
 
 /* =========================================================
    地域ジャンプ
    ========================================================= */
+
+function mirelVisibleRegionJumpOptions() {
+
+  var affiliationFilter =
+    document.getElementById(
+      'mirelListAffiliationFilter'
+    );
+
+  var affiliationId =
+    affiliationFilter
+      ? affiliationFilter.value
+      : '';
+
+  var query =
+    (
+      document.getElementById(
+        'listSearch'
+      ) &&
+      document.getElementById(
+        'listSearch'
+      ).value
+    ) ||
+    '';
+
+  var visible = {};
+
+  teachers.forEach(
+    function(teacher) {
+
+      if (
+        affiliationId &&
+        !mirelTeacherHasAffiliation(
+          teacher.teacherId,
+          affiliationId
+        )
+      ) {
+        return;
+      }
+
+      if (
+        query &&
+        !teacherMatches(
+          teacher,
+          query
+        )
+      ) {
+        return;
+      }
+
+      visible[
+        mirelListRegion(
+          teacher.prefecture
+        )
+      ] = true;
+
+    }
+  );
+
+  return MIREL_REGION_ORDER.filter(
+    function(region) {
+      return !!visible[region];
+    }
+  );
+
+}
+
+
+function mirelRefreshRegionJump() {
+
+  var select =
+    document.getElementById(
+      'mirelRegionJump'
+    );
+
+  if (!select) {
+    return;
+  }
+
+  var current =
+    select.value || '';
+
+  var regions =
+    mirelVisibleRegionJumpOptions();
+
+  select.innerHTML =
+    '<option value="">地域へジャンプ</option>' +
+    regions
+      .map(
+        function(region) {
+          return (
+            '<option value="' +
+            escapeAttr(region) +
+            '">' +
+            escapeHtml(region) +
+            '</option>'
+          );
+        }
+      )
+      .join('');
+
+  if (
+    current &&
+    regions.indexOf(current) !== -1
+  ) {
+    select.value = current;
+  }
+
+}
+
 
 function mirelInstallRegionJump() {
 
@@ -1678,26 +1790,24 @@ function mirelInstallRegionJump() {
       'listSearch'
     );
 
-
-  if (
+  var existing =
     document.getElementById(
       'mirelRegionJump'
-    )
-  ) {
+    );
+
+  if (existing) {
+    mirelRefreshRegionJump();
     return;
   }
-
 
   var title =
     document.getElementById(
       'listPageTitle'
     );
 
-
   if (!title) {
     return;
   }
-
 
   var wrapper =
     document.createElement(
@@ -1707,7 +1817,6 @@ function mirelInstallRegionJump() {
   wrapper.className =
     'mirel-region-jump';
 
-
   var select =
     document.createElement(
       'select'
@@ -1716,49 +1825,15 @@ function mirelInstallRegionJump() {
   select.id =
     'mirelRegionJump';
 
-
-  select.innerHTML =
-
-    '<option value="">地域へジャンプ</option>' +
-
-    MIREL_REGION_ORDER
-      .map(
-        function(region) {
-
-          return (
-
-            '<option value="' +
-
-            escapeAttr(
-              region
-            ) +
-
-            '">' +
-
-            escapeHtml(
-              region
-            ) +
-
-            '</option>'
-
-          );
-
-        }
-      )
-      .join('');
-
-
   select.onchange =
     function() {
 
       var region =
         this.value;
 
-
       if (!region) {
         return;
       }
-
 
       var id =
         'mirelRegion_' +
@@ -1769,63 +1844,47 @@ function mirelInstallRegionJump() {
           ''
         );
 
-
       var target =
         document.getElementById(
           id
         );
 
-
       if (target) {
-
         target.scrollIntoView({
-
-          behavior:
-            'smooth',
-
-          block:
-            'start'
-
+          behavior: 'smooth',
+          block: 'start'
         });
-
       }
 
     };
 
-
   wrapper.appendChild(
     select
   );
-
 
   var filterRow =
     document.getElementById(
       'mirelListFilterRow'
     );
 
-
   if (filterRow) {
-
     filterRow.insertBefore(
       wrapper,
       filterRow.firstChild
     );
-
   } else if (listSearch) {
-
     listSearch.insertAdjacentElement(
       'afterend',
       wrapper
     );
-
   } else {
-
     title.insertAdjacentElement(
       'afterend',
       wrapper
     );
-
   }
+
+  mirelRefreshRegionJump();
 
 }
 
