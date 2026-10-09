@@ -10,7 +10,7 @@
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
-  <meta name="mirel-app-version" content="2026.10.09-30">
+  <meta name="mirel-app-version" content="2026.10.09-33">
 
   <meta
     name="theme-color"
@@ -36,7 +36,7 @@
   <link
     id="appManifest"
     rel="manifest"
-    href="./manifest.webmanifest?v=20261009-32"
+    href="./manifest.webmanifest?v=20261009-33"
   >
 
   <link
@@ -46,7 +46,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261009-32"
+    href="./style.css?v=20261009-33"
   >
 
   <title>
@@ -545,6 +545,89 @@
   .mirel-range-row { display:grid; grid-template-columns:minmax(0,1fr) 76px auto; gap:8px; align-items:center; margin-top:6px; }
   .mirel-range-row input[type="range"] { width:100%; min-width:0; }
   .mirel-range-number { width:76px !important; min-width:0 !important; text-align:right; }
+
+  /* プレビュー：項目間余白と文章内の行間を分けて見せる */
+  .mirel-preview-section-label {
+    font-size: calc(12px * var(--preview-scale)) !important;
+    font-weight: 700;
+    color: #756b67;
+    margin: 0 0 6px !important;
+  }
+  .mirel-preview-field-stack { display:grid; gap:var(--preview-gap); }
+  .mirel-preview-field {
+    display:grid;
+    grid-template-columns:72px minmax(0,1fr);
+    gap:10px;
+    align-items:start;
+    margin:0 !important;
+    line-height:1.35 !important;
+  }
+  .mirel-preview-field span { font-size:calc(12px * var(--preview-scale)) !important; opacity:.62; }
+  .mirel-preview-field strong { font-size:calc(15px * var(--preview-scale)) !important; font-weight:600; }
+  .mirel-preview-line-label { margin-top:18px !important; }
+  .mirel-preview-longtext {
+    width:100%;
+    max-width:310px;
+    font-size:calc(15px * var(--preview-scale)) !important;
+    line-height:var(--preview-line-height) !important;
+    margin:0 !important;
+    padding:10px 11px;
+    border-radius:10px;
+    background:#faf7f6;
+    box-sizing:border-box;
+  }
+
+  /* 実画面：文字倍率と余白設定を主要UIへ確実に反映 */
+  .teacher.mirel-list-card {
+    min-height:0 !important;
+    padding:var(--mirel-card-pad-y, 10px) var(--mirel-card-pad-x, 13px) !important;
+    margin-bottom:var(--mirel-list-card-gap, 7px) !important;
+  }
+  .teacher.mirel-list-card .teacher-name { font-size:var(--mirel-ui-title-size) !important; line-height:1.25 !important; }
+  .teacher.mirel-list-card .mirel-list-address,
+  .teacher.mirel-list-card .mirel-list-line,
+  .teacher.mirel-list-card .mirel-aff-tag { font-size:var(--mirel-ui-body-size) !important; }
+  .teacher.mirel-list-card .mirel-list-first,
+  .teacher.mirel-list-card .mirel-aff-tags { gap:var(--mirel-inner-gap, 5px) !important; }
+
+  #detailContent .card {
+    padding:var(--mirel-detail-card-pad, 13px) !important;
+    margin-bottom:var(--mirel-section-gap, 10px) !important;
+  }
+  #detailContent .detail-row {
+    padding-top:0 !important;
+    padding-bottom:0 !important;
+    margin-bottom:var(--mirel-content-row-gap) !important;
+  }
+  #detailContent .detail-row .label,
+  #detailContent .mirel-child-detail-label { font-size:var(--mirel-ui-small-size) !important; }
+  #detailContent .detail-row .value,
+  #detailContent .mirel-child-detail-info,
+  #detailContent .mirel-interaction-row,
+  #detailContent .link-list { font-size:var(--mirel-ui-body-size) !important; }
+  #detailContent .section-title,
+  #detailContent .detail-name,
+  #detailContent .interaction-date,
+  #detailContent .child-name-text { font-size:var(--mirel-ui-title-size) !important; }
+  #detailContent .mirel-interaction-row,
+  #detailContent .mirel-child-card {
+    padding:var(--mirel-card-pad-y, 10px) var(--mirel-card-pad-x, 13px) !important;
+  }
+
+  #teacherModal .modal, #detailModal .modal, #settingsModal .modal {
+    font-size:var(--mirel-ui-body-size) !important;
+  }
+  #teacherModal .field, #pageSettings .field { margin-bottom:var(--mirel-ui-gap) !important; }
+  #teacherModal label, #pageSettings label { font-size:var(--mirel-ui-small-size) !important; }
+  #teacherModal input, #teacherModal select, #teacherModal textarea,
+  #pageSettings input, #pageSettings select, #pageSettings textarea, #pageSettings button {
+    font-size:var(--mirel-ui-body-size) !important;
+  }
+  .mirel-edit-accordion > summary {
+    font-size:var(--mirel-ui-body-size) !important;
+    padding:var(--mirel-accordion-pad-y, 10px) var(--mirel-card-pad-x, 13px) !important;
+  }
+  #pageMap, #pageSettings, #pageList, #pageAdd { font-size:var(--mirel-ui-body-size) !important; }
 </style>
 
 </head>
@@ -1028,9 +1111,14 @@
             </div>
             <div id="settingTypographyPreviewDetail" class="mirel-font-preview-detail">100% / 行間 1.50 / 余白 9px</div>
             <div class="mirel-font-preview-card">
-              <div class="mirel-font-preview-name">山田 花子</div>
-              <div class="mirel-font-preview-body">東京都千代田区｜友人</div>
-              <div class="mirel-font-preview-small">誕生日 4月15日　電話 070-1234-5678</div>
+              <div class="mirel-preview-section-label">項目間の余白</div>
+              <div class="mirel-preview-field-stack">
+                <div class="mirel-preview-field"><span>名前</span><strong>山田 花子</strong></div>
+                <div class="mirel-preview-field"><span>住所</span><strong>東京都千代田区丸の内1-9-1</strong></div>
+                <div class="mirel-preview-field"><span>所属</span><strong>友人・仕事関係</strong></div>
+              </div>
+              <div class="mirel-preview-section-label mirel-preview-line-label">行間</div>
+              <div class="mirel-preview-longtext">先日の交流では、今後の予定についてゆっくり話しました。次回は資料を持参して、具体的な内容を確認する予定です。</div>
             </div>
           </div>
 
@@ -1958,11 +2046,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261009-32"></script>
+<script src="./config.js?v=20261009-33"></script>
 
-<script src="./app.js?v=20261009-32"></script>
+<script src="./app.js?v=20261009-33"></script>
 
-<script src="./app-enhancements.js?v=20261009-32"></script>
+<script src="./app-enhancements.js?v=20261009-33"></script>
 
 </body>
 
