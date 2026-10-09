@@ -27,7 +27,10 @@ var appSettings = {
   placeLabel: '店名',
   placeKanaLabel: '店名ふりがな',
   fontSize: 'standard',
-  lineSpacing: 'standard'
+  lineSpacing: 'standard',
+  fontScale: 100,
+  lineHeight: 1.50,
+  itemGap: 9
 };
 
 var STORAGE_TOKEN = 'academyAccessToken';
@@ -6960,6 +6963,24 @@ function mirelSyncTypographyRange(numberId, rangeId, presetId) {
   var preset = document.getElementById(presetId);
   if (preset) preset.value = 'custom';
   updateFontSizePreview();
+}
+
+function mirelTypographyNumberTyping(numberId, rangeId, presetId) {
+  var range = document.getElementById(rangeId);
+  var number = document.getElementById(numberId);
+  if (!range || !number) return;
+  var raw = String(number.value == null ? '' : number.value).trim();
+  if (raw === '' || raw === '-' || raw === '.' || raw === '-.') return;
+  var val = Number(raw);
+  if (!isFinite(val)) return;
+  var min = Number(range.min || 0);
+  var max = Number(range.max || 999);
+  if (val >= min && val <= max) {
+    range.value = val;
+    var preset = document.getElementById(presetId);
+    if (preset) preset.value = 'custom';
+    updateFontSizePreview();
+  }
 }
 
 function mirelTypographyCustomChanged(kind) {
