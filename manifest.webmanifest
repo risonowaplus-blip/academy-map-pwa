@@ -1,12 +1,14 @@
 {
-  "name": "Academy Map",
-  "short_name": "Academy Map",
-  "description": "全国のアカデミー先生管理",
+  "name": "Mirel Map",
+  "short_name": "Mirel Map",
+  "description": "全国地図と人物情報をまとめて管理できるMirel Map",
+  "lang": "ja",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f7f5f3",
-  "theme_color": "#8f625b",
+  "orientation": "portrait-primary",
+  "background_color": "#eaf8ff",
+  "theme_color": "#eaf8ff",
   "icons": [
     {
       "src": "./icon-192.png",
@@ -22,3 +24,4 @@
     }
   ]
 }
+
