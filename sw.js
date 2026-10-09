@@ -1,14 +1,19 @@
-/* Mirel Map Service Worker - 2026.10.09-38 */
-const MIREL_SW_VERSION = '2026.10.09-38';
+/* Mirel Map Service Worker - 2026.10.09-39 */
+const MIREL_SW_VERSION = '2026.10.09-39';
 const MIREL_CACHE = 'mirel-map-' + MIREL_SW_VERSION;
 const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './style.css?v=20261009-37',
-  './config.js?v=20261009-37',
-  './app.js?v=20261009-37',
-  './app-enhancements.js?v=20261009-37'
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
+  './splash-828x1792.png',
+  './loading-screen.png',
+  './style.css?v=20261009-39',
+  './config.js?v=20261009-39',
+  './app.js?v=20261009-39',
+  './app-enhancements.js?v=20261009-39'
 ];
 
 self.addEventListener('install', event => {
