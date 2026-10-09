@@ -8223,3 +8223,362 @@ openTeacherDetail =
     );
 
   };
+
+/* =========================================================
+   2026-10-09-28
+   販売前UI・詳細・子ども情報・アカウント切替 最終調整
+   ========================================================= */
+
+/* ---------- 電話番号表示：失われた携帯番号先頭0を表示時に補正 ---------- */
+function mirelNormalizePhoneDisplay(value) {
+  var raw = String(value == null ? '' : value).trim();
+  if (!raw) return '';
+  var digits = raw.replace(/\D/g, '');
+  if (/^(70|80|90)\d{8}$/.test(digits)) {
+    return '0' + digits;
+  }
+  return raw;
+}
+
+/* ---------- 設定画面：販売用の並び・固定保存ボタン ---------- */
+function mirelArrangeSettingsForRelease() {
+  var page = document.getElementById('pageSettings');
+  if (!page) return;
+  var card = page.querySelector('.card');
+  if (!card) return;
+
+  /* 速度診断は販売画面から撤去 */
+  card.querySelectorAll('.mirel-perf-section').forEach(function(node) {
+    node.remove();
+  });
+
+  var extra = document.getElementById('mirelExtraSettings');
+  var affHost = document.getElementById('mirelAffiliationMaster');
+  var affSection = affHost ? affHost.closest('.mirel-extra-section') : null;
+  var workspace = document.getElementById('mirelWorkspaceSection');
+
+  /* 表示名・文字サイズを専用セクションにまとめる */
+  var displaySection = document.getElementById('mirelDisplaySettingsSection');
+  if (!displaySection) {
+    displaySection = document.createElement('div');
+    displaySection.id = 'mirelDisplaySettingsSection';
+    displaySection.className = 'mirel-extra-section mirel-display-settings-section';
+    displaySection.innerHTML = '<div class="section-title">表示名・文字サイズの変更</div>';
+  }
+
+  ['settingAppName','settingPersonLabel','settingPlaceLabel','settingPlaceKanaLabel','settingFontSize']
+    .forEach(function(id) {
+      var el = document.getElementById(id);
+      var field = el ? el.closest('.field') : null;
+      if (field && field.parentNode !== displaySection) displaySection.appendChild(field);
+    });
+
+  var directNotes = Array.prototype.slice.call(card.children).filter(function(node) {
+    return node.classList && node.classList.contains('form-note');
+  });
+  directNotes.forEach(function(note) {
+    if (note.textContent.indexOf('表示名') !== -1) {
+      displaySection.insertBefore(note, displaySection.children[1] || null);
+    }
+  });
+
+  /* 使用項目内の通常保存ボタンは固定ボタンへ一本化 */
+  if (extra) {
+    extra.querySelectorAll('.mirel-feature-save-actions').forEach(function(node) {
+      node.style.display = 'none';
+    });
+  }
+
+  /* desired: 所属ラベル → 使用する項目 → 表示名/文字サイズ → データの使い分け */
+  if (affSection) card.appendChild(affSection);
+  if (extra) card.appendChild(extra);
+  card.appendChild(displaySection);
+  if (workspace) card.appendChild(workspace);
+
+  var fixed = document.getElementById('mirelFixedSettingsSave');
+  if (!fixed) {
+    fixed = document.createElement('button');
+    fixed.id = 'mirelFixedSettingsSave';
+    fixed.type = 'button';
+    fixed.className = 'primary mirel-fixed-settings-save';
+    fixed.textContent = '設定を保存';
+    fixed.onclick = function() { saveSettingsForm(); };
+    document.body.appendChild(fixed);
+  }
+  fixed.classList.toggle('show', page.classList.contains('active'));
+}
+
+var mirelPrevInstallSettingsForRelease = mirelInstallSettingsUi;
+mirelInstallSettingsUi = function() {
+  var result = mirelPrevInstallSettingsForRelease.apply(this, arguments);
+  setTimeout(mirelArrangeSettingsForRelease, 0);
+  return result;
+};
+
+var mirelPrevShowPageForRelease = showPage;
+showPage = function(pageName) {
+  var result = mirelPrevShowPageForRelease.apply(this, arguments);
+  var fixed = document.getElementById('mirelFixedSettingsSave');
+  if (fixed) fixed.classList.toggle('show', pageName === 'settings');
+  if (pageName === 'settings') setTimeout(mirelArrangeSettingsForRelease, 0);
+  return result;
+};
+
+/* ---------- アカウント切替時に前アカウントのワークスペース一覧を残さない ---------- */
+if (typeof mirelLogoutAndSwitchAccount === 'function') {
+  var mirelPrevLogoutForWorkspaceReset = mirelLogoutAndSwitchAccount;
+  mirelLogoutAndSwitchAccount = function() {
+    mirelWorkspaceState = null;
+    mirelWorkspaceLoading = false;
+    return mirelPrevLogoutForWorkspaceReset.apply(this, arguments);
+  };
+}
+
+/* ---------- 新規人物フォーム内の1人目の子どもも、2人目以降と同じ順序・年齢自動計算 ---------- */
+addChildRow = function(child) {
+  child = child || {};
+  var div = document.createElement('div');
+  div.className = 'child-edit';
+  div.setAttribute('data-child-id', child.childId || '');
+
+  var gradeSelect = '<select class="child-grade">';
+  for (var i = 0; i < gradeOptions.length; i++) {
+    var grade = gradeOptions[i];
+    gradeSelect += '<option value="' + escapeAttr(grade) + '"' +
+      (child.grade === grade ? ' selected' : '') + '>' +
+      escapeHtml(grade || '未設定') + '</option>';
+  }
+  gradeSelect += '</select>';
+
+  div.innerHTML =
+    '<div class="grid2">' +
+      '<div class="field"><label>名前</label><input class="child-name" value="' + escapeAttr(child.name || '') + '"></div>' +
+      '<div class="field"><label>ふりがな</label><input class="child-kana" value="' + escapeAttr(child.kana || '') + '"></div>' +
+    '</div>' +
+    '<div class="grid2">' +
+      '<div class="field"><label>呼び名</label><input class="child-nickname" value="' + escapeAttr(child.nickname || '') + '"></div>' +
+      '<div class="field"><label>性別</label><select class="child-gender">' +
+        '<option value=""' + (!child.gender ? ' selected' : '') + '>未設定</option>' +
+        '<option value="女"' + (child.gender === '女' ? ' selected' : '') + '>女</option>' +
+        '<option value="男"' + (child.gender === '男' ? ' selected' : '') + '>男</option>' +
+      '</select></div>' +
+    '</div>' +
+    '<div class="field mirel-field-compact"><label>学年</label>' + gradeSelect + '</div>' +
+    '<div class="grid2">' +
+      '<div class="field"><label>生まれ年</label><input type="number" class="child-year" value="' + escapeAttr(child.birthYear || '') + '"></div>' +
+      '<div class="field"><label>誕生月</label><input type="number" min="1" max="12" class="child-month" value="' + escapeAttr(child.birthMonth || '') + '"></div>' +
+    '</div>' +
+    '<div class="grid2">' +
+      '<div class="field"><label>誕生日</label><input type="number" min="1" max="31" class="child-day" value="' + escapeAttr(child.birthDay || '') + '"></div>' +
+      '<div class="field"><label>年齢</label><input type="number" min="0" class="child-age" value="' + escapeAttr(child.ageManual || '') + '" placeholder="生年月日入力時は自動計算。手入力も可"></div>' +
+    '</div>' +
+    '<div class="field"><label>メモ</label><textarea class="child-memo">' + escapeHtml(child.memo || '') + '</textarea></div>' +
+    '<button type="button" class="detail-delete-button" onclick="removeChildRow(this)">この子ども情報を削除</button>';
+
+  var rows = document.getElementById('childRows');
+  if (!rows) return;
+  rows.appendChild(div);
+
+  var year = div.querySelector('.child-year');
+  var month = div.querySelector('.child-month');
+  var day = div.querySelector('.child-day');
+  var age = div.querySelector('.child-age');
+  var grade = div.querySelector('.child-grade');
+
+  if (typeof mirelAttachSearchSelect === 'function') {
+    mirelAttachSearchSelect(year, 'year');
+    mirelAttachSearchSelect(month, 'month');
+    mirelAttachSearchSelect(day, 'day');
+  }
+  if (typeof mirelProtectAgeInput === 'function') mirelProtectAgeInput(age);
+  if (typeof mirelBindAgePreview === 'function') mirelBindAgePreview(year, month, day, age, grade);
+};
+
+/* ---------- 子ども編集：表示順インデックスから確実に既存データを開く ---------- */
+function mirelOpenChildEditorByIndex(index) {
+  var teacher = findTeacher(selectedTeacherId);
+  if (!teacher || !Array.isArray(teacher.children) || !teacher.children[index]) return;
+  var child = teacher.children[index];
+  var modal = mirelEnsureChildEditModal();
+  var title = modal.querySelector('.modal-title');
+  if (title) title.textContent = '子ども情報を編集';
+
+  var values = {
+    mirelChildId: child.childId || '',
+    mirelChildName: child.name || '',
+    mirelChildKana: child.kana || '',
+    mirelChildNickname: child.nickname || '',
+    mirelChildGender: child.gender || '',
+    mirelChildGrade: child.grade || '',
+    mirelChildBirthYear: child.birthYear || '',
+    mirelChildBirthMonth: child.birthMonth || '',
+    mirelChildBirthDay: child.birthDay || '',
+    mirelChildAge: child.ageManual || '',
+    mirelChildMemo: child.memo || ''
+  };
+  Object.keys(values).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = values[id];
+  });
+
+  var age = document.getElementById('mirelChildAge');
+  if (age) {
+    age.dataset.mirelManualAge = age.value !== '' ? '1' : '0';
+    if (age.value === '') {
+      var calc = mirelCalcAgePreview(
+        document.getElementById('mirelChildBirthYear').value,
+        document.getElementById('mirelChildBirthMonth').value,
+        document.getElementById('mirelChildBirthDay').value
+      );
+      if (calc !== '') age.value = calc;
+    }
+  }
+  modal.classList.add('show');
+}
+
+/* ---------- 詳細画面の項目順・所属・SNS・子ども表示を統一 ---------- */
+function mirelPolishDetailForRelease(teacher) {
+  var detail = document.getElementById('detailContent');
+  if (!detail) return;
+  var firstCard = detail.querySelector('.card');
+  if (!firstCard) return;
+
+  /* 所属ラベルは名前より上 */
+  var affiliationRow = null;
+  firstCard.querySelectorAll('.detail-row').forEach(function(row) {
+    var label = row.querySelector('.label');
+    if (label && label.textContent.trim() === '所属') affiliationRow = row;
+  });
+  firstCard.querySelectorAll('.mirel-detail-affiliation-top').forEach(function(n){ n.remove(); });
+  if (affiliationRow) {
+    var tags = affiliationRow.querySelector('.mirel-aff-tags');
+    if (tags && tags.innerHTML.trim()) {
+      var top = document.createElement('div');
+      top.className = 'mirel-detail-affiliation-top';
+      top.innerHTML = tags.innerHTML;
+      var head = firstCard.querySelector('.detail-head');
+      firstCard.insertBefore(top, head || firstCard.firstChild);
+    }
+    affiliationRow.remove();
+  }
+
+  /* 基本情報はフォーム順：呼び名→性別→学年→誕生日→年齢→店名→住所→電話→メモ */
+  function rowByLabel(labelText) {
+    var found = null;
+    firstCard.querySelectorAll(':scope > .detail-row').forEach(function(row) {
+      var label = row.querySelector('.label');
+      if (label && label.textContent.trim() === labelText) found = row;
+    });
+    return found;
+  }
+  var head = firstCard.querySelector('.detail-head');
+  var labels = ['呼び名','性別','学年','誕生日','年齢', placeLabel(), placeKanaLabel(), '郵便番号','住所','電話番号','メモ'];
+  var cursor = head;
+  labels.forEach(function(labelText) {
+    var row = rowByLabel(labelText);
+    if (row) {
+      if (cursor && cursor.nextSibling !== row) firstCard.insertBefore(row, cursor.nextSibling);
+      cursor = row;
+    }
+  });
+
+  /* SNSは基本情報カードから分離 */
+  var snsRow = rowByLabel('リンク・SNS');
+  detail.querySelectorAll('.mirel-detail-sns-card').forEach(function(n){ n.remove(); });
+  if (snsRow) {
+    if (mirelFeatureOn('sns')) {
+      var snsCard = document.createElement('div');
+      snsCard.className = 'card mirel-detail-sns-card';
+      var list = snsRow.querySelector('.link-list');
+      snsCard.innerHTML = '<div class="section-title">リンク・SNS</div>' +
+        (list && list.innerHTML.trim() ? '<div class="link-list">' + list.innerHTML + '</div>' : '<div class="empty">リンク・SNSはまだありません。</div>');
+      firstCard.insertAdjacentElement('afterend', snsCard);
+    }
+    snsRow.remove();
+  }
+
+  /* iPhone等で数値化された携帯番号の先頭0を表示時に補正 */
+  var phoneRow = rowByLabel('電話番号');
+  if (phoneRow) {
+    var link = phoneRow.querySelector('a');
+    if (link) {
+      var normalized = mirelNormalizePhoneDisplay(link.textContent);
+      link.textContent = normalized;
+      link.setAttribute('href', 'tel:' + normalized.replace(/[^0-9+]/g, ''));
+    }
+  }
+
+  /* 交流種別が空なら「種別未登録」は表示しない */
+  detail.querySelectorAll('.interaction-type-label').forEach(function(label) {
+    if (!label.textContent.trim() || label.textContent.trim() === '種別未登録') label.remove();
+  });
+
+  /* 子ども情報は登録した主要項目をすべて確認できるようにする */
+  var childCard = null;
+  detail.querySelectorAll('.card').forEach(function(card) {
+    var title = card.querySelector('.section-title');
+    if (title && title.textContent.trim().indexOf('子ども情報') === 0) childCard = card;
+  });
+  if (childCard) {
+    var rows = childCard.querySelectorAll(':scope > .child');
+    var children = Array.isArray(teacher.children) ? teacher.children : [];
+    rows.forEach(function(row, index) {
+      var child = children[index];
+      if (!child) return;
+      var head = row.querySelector('.detail-head');
+      if (!head) return;
+      var name = head.querySelector('.child-name-text');
+      if (name) name.textContent = child.name || child.nickname || '名前未登録';
+      Array.prototype.slice.call(row.children).forEach(function(node) {
+        if (node !== head) node.remove();
+      });
+      var lines = [];
+      function add(label, value) {
+        if (value === '' || value === null || value === undefined) return;
+        lines.push('<div class="mirel-child-detail-line"><span class="mirel-child-detail-label">' + escapeHtml(label) + '</span><span>' + escapeHtml(String(value)) + '</span></div>');
+      }
+      add('ふりがな', child.kana);
+      add('呼び名', child.nickname && child.nickname !== child.name ? child.nickname : '');
+      add('性別', child.gender);
+      add('学年', child.gradeDisplay || child.grade);
+      add('年齢', child.ageDisplay);
+      add('誕生日', birthdayText(child));
+      add('メモ', child.memo);
+      if (lines.length) {
+        var info = document.createElement('div');
+        info.className = 'mirel-child-detail-info';
+        info.innerHTML = lines.join('');
+        row.appendChild(info);
+      }
+      var actions = head.querySelector('.detail-head-actions');
+      if (actions) {
+        var edit = actions.querySelector('button');
+        if (edit) edit.setAttribute('onclick', 'mirelOpenChildEditorByIndex(' + index + ')');
+      }
+    });
+  }
+}
+
+var mirelPrevRenderTeacherDetailRelease = renderTeacherDetail;
+renderTeacherDetail = function(teacher) {
+  mirelPrevRenderTeacherDetailRelease(teacher);
+  mirelPolishDetailForRelease(teacher);
+};
+
+/* ---------- 既存人物編集時も電話番号を安全に表示 ---------- */
+var mirelPrevOpenTeacherFormPhoneRelease = openTeacherForm;
+openTeacherForm = function(id) {
+  var result = mirelPrevOpenTeacherFormPhoneRelease.apply(this, arguments);
+  if (id) {
+    setTimeout(function() {
+      var teacher = findTeacher(id);
+      var input = document.getElementById('phone');
+      if (teacher && input) input.value = mirelNormalizePhoneDisplay(teacher.phone);
+    }, 0);
+  }
+  return result;
+};
+
+/* 初期配置 */
+setTimeout(mirelArrangeSettingsForRelease, 0);
+
