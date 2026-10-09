@@ -10,7 +10,7 @@
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
-  <meta name="mirel-app-version" content="2026.10.09-27">
+  <meta name="mirel-app-version" content="2026.10.09-30">
 
   <meta
     name="theme-color"
@@ -36,7 +36,7 @@
   <link
     id="appManifest"
     rel="manifest"
-    href="./manifest.webmanifest?v=20261009-27"
+    href="./manifest.webmanifest?v=20261009-30"
   >
 
   <link
@@ -46,7 +46,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261009-27"
+    href="./style.css?v=20261009-30"
   >
 
   <title>
@@ -364,6 +364,171 @@
       grid-template-columns: 1fr;
     }
   }
+</style>
+
+
+
+<style id="mirel-release-polish-20261009-30">
+  /* 文字サイズ差を明確化 */
+  body[data-mirel-font-size="small"] {
+    --mirel-detail-primary-size: 14px;
+    --mirel-detail-body-size: 12px;
+    --mirel-detail-small-size: 11px;
+  }
+  body[data-mirel-font-size="standard"] {
+    --mirel-detail-primary-size: 18px;
+    --mirel-detail-body-size: 15px;
+    --mirel-detail-small-size: 13px;
+  }
+  body[data-mirel-font-size="large"] {
+    --mirel-detail-primary-size: 22px;
+    --mirel-detail-body-size: 18px;
+    --mirel-detail-small-size: 16px;
+  }
+  #detailContent .detail-name { font-size: var(--mirel-detail-primary-size) !important; }
+  #detailContent .detail-row .value,
+  #detailContent .link-list,
+  #detailContent .mirel-child-detail-info,
+  #detailContent .mirel-interaction-row { font-size: var(--mirel-detail-body-size) !important; }
+  #detailContent .detail-row .label,
+  #detailContent .meta,
+  #detailContent .mirel-child-detail-label { font-size: var(--mirel-detail-small-size) !important; }
+
+  /* 行間・余白設定 */
+  body {
+    --mirel-content-line-height: 1.45;
+    --mirel-content-row-gap: 8px;
+    --mirel-content-card-pad-y: 12px;
+  }
+  body[data-mirel-line-spacing="compact"] {
+    --mirel-content-line-height: 1.25;
+    --mirel-content-row-gap: 4px;
+    --mirel-content-card-pad-y: 8px;
+  }
+  body[data-mirel-line-spacing="standard"] {
+    --mirel-content-line-height: 1.5;
+    --mirel-content-row-gap: 8px;
+    --mirel-content-card-pad-y: 12px;
+  }
+  body[data-mirel-line-spacing="spacious"] {
+    --mirel-content-line-height: 1.8;
+    --mirel-content-row-gap: 14px;
+    --mirel-content-card-pad-y: 18px;
+  }
+  #detailContent,
+  #detailContent .detail-row,
+  #detailContent .detail-row .value,
+  #detailContent .link-list,
+  #detailContent .mirel-child-detail-info,
+  #detailContent .mirel-interaction-row,
+  .mirel-list-card,
+  .mirel-list-card .mirel-list-line,
+  .mirel-list-card .mirel-list-address {
+    line-height: var(--mirel-content-line-height) !important;
+  }
+  #detailContent .detail-row {
+    margin-bottom: var(--mirel-content-row-gap) !important;
+  }
+  #detailContent .mirel-interaction-row,
+  #detailContent .mirel-child-card,
+  .mirel-list-card {
+    padding-top: var(--mirel-content-card-pad-y) !important;
+    padding-bottom: var(--mirel-content-card-pad-y) !important;
+  }
+
+  /* 設定画面の固定保存 */
+  .mirel-fixed-settings-save {
+    position: fixed;
+    right: 16px;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    z-index: 1200;
+    min-width: 132px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.16);
+    display: none;
+  }
+  .mirel-fixed-settings-save.show { display: inline-flex; align-items:center; justify-content:center; }
+  #pageSettings.active { padding-bottom: 96px; }
+  .mirel-perf-section { display:none !important; }
+
+  /* 設定セクション */
+  #pageSettings .mirel-extra-section { margin-top: 18px; }
+  #pageSettings #mirelWorkspaceSection { margin-bottom: 12px; }
+
+  /* 詳細：所属は名前より上 */
+  .mirel-detail-affiliation-top {
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:10px;
+  }
+  .mirel-detail-sns-card .link-list { margin-top:8px; }
+
+  /* 子ども詳細 */
+  .mirel-child-detail-info { margin-top:10px; display:grid; gap:7px; }
+  .mirel-child-detail-line { display:grid; grid-template-columns:72px minmax(0,1fr); gap:10px; align-items:start; }
+  .mirel-child-detail-label { opacity:.68; }
+
+
+  /* 文字サイズ設定プレビュー */
+  .mirel-font-preview {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #eadfdb;
+    border-radius: 14px;
+    background: #fbf8f7;
+  }
+  .mirel-font-preview-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #756b67;
+  }
+  .mirel-font-preview-head span {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #efe6e3;
+    color: #5f5551;
+    font-size: 11px;
+  }
+  .mirel-font-preview-card {
+    padding: 12px 13px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #eee7e4;
+  }
+  .mirel-font-preview-name {
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 6px;
+  }
+  .mirel-font-preview-body {
+    line-height: 1.45;
+    margin-bottom: 5px;
+  }
+  .mirel-font-preview-small {
+    line-height: 1.45;
+    color: #77706c;
+  }
+  .mirel-font-preview[data-preview-font-size="small"] .mirel-font-preview-name { font-size: 14px; }
+  .mirel-font-preview[data-preview-font-size="small"] .mirel-font-preview-body { font-size: 12px; }
+  .mirel-font-preview[data-preview-font-size="small"] .mirel-font-preview-small { font-size: 11px; }
+  .mirel-font-preview[data-preview-font-size="standard"] .mirel-font-preview-name { font-size: 18px; }
+  .mirel-font-preview[data-preview-font-size="standard"] .mirel-font-preview-body { font-size: 15px; }
+  .mirel-font-preview[data-preview-font-size="standard"] .mirel-font-preview-small { font-size: 13px; }
+  .mirel-font-preview[data-preview-font-size="large"] .mirel-font-preview-name { font-size: 22px; }
+  .mirel-font-preview[data-preview-font-size="large"] .mirel-font-preview-body { font-size: 18px; }
+  .mirel-font-preview[data-preview-font-size="large"] .mirel-font-preview-small { font-size: 16px; }
+  .mirel-font-preview[data-preview-line-spacing="compact"] .mirel-font-preview-card { padding-top: 10px; padding-bottom: 10px; }
+  .mirel-font-preview[data-preview-line-spacing="compact"] .mirel-font-preview-card > div { margin-top: 2px; line-height: 1.2; }
+  .mirel-font-preview[data-preview-line-spacing="standard"] .mirel-font-preview-card { padding-top: 14px; padding-bottom: 14px; }
+  .mirel-font-preview[data-preview-line-spacing="standard"] .mirel-font-preview-card > div { margin-top: 6px; line-height: 1.45; }
+  .mirel-font-preview[data-preview-line-spacing="spacious"] .mirel-font-preview-card { padding-top: 20px; padding-bottom: 20px; }
+  .mirel-font-preview[data-preview-line-spacing="spacious"] .mirel-font-preview-card > div { margin-top: 11px; line-height: 1.75; }
+  .mirel-font-preview-card > div:first-child { margin-top: 0 !important; }
 </style>
 
 </head>
@@ -791,14 +956,40 @@
             文字サイズ
           </label>
 
-          <select id="settingFontSize">
+          <select id="settingFontSize" onchange="updateFontSizePreview()" oninput="updateFontSizePreview()">
             <option value="small">小さめ</option>
             <option value="standard">標準</option>
             <option value="large">大きめ</option>
           </select>
 
           <div class="small-note">
-            一覧・詳細画面の文字サイズを調整できます。標準は現在の子ども情報と同程度です。
+            一覧・詳細画面の文字サイズを調整できます。
+          </div>
+
+          <label style="margin-top:14px;display:block;">
+            行間・余白
+          </label>
+
+          <select id="settingLineSpacing" onchange="updateFontSizePreview()" oninput="updateFontSizePreview()">
+            <option value="compact">狭め</option>
+            <option value="standard">標準</option>
+            <option value="spacious">広め</option>
+          </select>
+
+          <div class="small-note">
+            一覧・詳細画面の行間と項目同士の余白を調整できます。文字サイズとあわせて下で確認できます。
+          </div>
+
+          <div id="settingFontSizePreview" class="mirel-font-preview" data-preview-font-size="standard" data-preview-line-spacing="standard">
+            <div class="mirel-font-preview-head">
+              プレビュー
+              <span><span id="settingFontSizePreviewLabel">標準</span>・余白<span id="settingLineSpacingPreviewLabel">標準</span></span>
+            </div>
+            <div class="mirel-font-preview-card">
+              <div class="mirel-font-preview-name">山田 花子</div>
+              <div class="mirel-font-preview-body">東京都千代田区｜友人</div>
+              <div class="mirel-font-preview-small">誕生日 4月15日　電話 070-1234-5678</div>
+            </div>
           </div>
 
         </div>
@@ -831,17 +1022,7 @@
               設定を保存
             </button>
           </div>
-
-          <div class="mirel-extra-section mirel-perf-section">
-            <div class="section-title">速度診断</div>
-            <div class="form-note">
-              直近の起動・保存を自動計測します。「計測結果をコピー」でそのまま送れます。
-            </div>
-            <div id="mirelPerformancePanel"></div>
-          </div>
-
-
-          <div class="mirel-extra-section">
+<div class="mirel-extra-section">
 
             <div class="section-title">
               所属ラベル
@@ -1735,11 +1916,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261009-27"></script>
+<script src="./config.js?v=20261009-30"></script>
 
-<script src="./app.js?v=20261009-27"></script>
+<script src="./app.js?v=20261009-30"></script>
 
-<script src="./app-enhancements.js?v=20261009-27"></script>
+<script src="./app-enhancements.js?v=20261009-30"></script>
 
 </body>
 
