@@ -10,7 +10,7 @@
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
-  <meta name="mirel-app-version" content="2026.10.09-38">
+  <meta name="mirel-app-version" content="2026.10.09-39">
 
   <meta
     name="theme-color"
@@ -36,18 +36,45 @@
   <link
     id="appManifest"
     rel="manifest"
-    href="./manifest.webmanifest?v=20261009-38"
+    href="./manifest.webmanifest?v=20261009-39"
   >
 
   <link
     rel="apple-touch-icon"
-    href="./icon-192.png"
+    href="./apple-touch-icon.png"
+  >
+
+  <link
+    rel="apple-touch-startup-image"
+    href="./splash-828x1792.png"
+    media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
   >
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261009-38"
+    href="./style.css?v=20261009-39"
   >
+
+  <style id="mirel-pwa-loading-20261009-39">
+    #loading.mirel-loading-screen {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 99999 !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #eaf8ff !important;
+      overflow: hidden !important;
+    }
+    #loading.mirel-loading-screen img {
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+    }
+  </style>
 
   <title>
     Mirel Map
@@ -769,9 +796,13 @@
 
 <div
   id="loading"
-  class="loading"
+  class="loading mirel-loading-screen"
+  aria-label="読み込み中"
 >
-  読み込み中…
+  <img
+    src="./loading-screen.png"
+    alt="Mirel Map 読み込み中"
+  >
 </div>
 
 
@@ -2152,11 +2183,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261009-38"></script>
+<script src="./config.js?v=20261009-39"></script>
 
-<script src="./app.js?v=20261009-38"></script>
+<script src="./app.js?v=20261009-39"></script>
 
-<script src="./app-enhancements.js?v=20261009-38"></script>
+<script src="./app-enhancements.js?v=20261009-39"></script>
 
 </body>
 
