@@ -8364,9 +8364,10 @@ function mirelArrangeSettingsForRelease() {
     fixed.className = 'primary mirel-fixed-settings-save';
     fixed.textContent = '設定を保存';
     fixed.onclick = function() { saveSettingsForm(); };
-    document.body.appendChild(fixed);
   }
-  fixed.classList.toggle('show', page.classList.contains('active'));
+  /* 設定ページの子要素にすることで、他ページへ移動した瞬間に確実に非表示になる */
+  if (fixed.parentNode !== page) page.appendChild(fixed);
+  fixed.classList.add('show');
 }
 
 var mirelPrevInstallSettingsForRelease = mirelInstallSettingsUi;
@@ -8380,7 +8381,10 @@ var mirelPrevShowPageForRelease = showPage;
 showPage = function(pageName) {
   var result = mirelPrevShowPageForRelease.apply(this, arguments);
   var fixed = document.getElementById('mirelFixedSettingsSave');
-  if (fixed) fixed.classList.toggle('show', pageName === 'settings');
+  if (fixed) {
+    /* fixed は pageSettings 配下。念のため表示状態も同期 */
+    fixed.classList.toggle('show', pageName === 'settings');
+  }
   if (pageName === 'settings') setTimeout(mirelArrangeSettingsForRelease, 0);
   return result;
 };
