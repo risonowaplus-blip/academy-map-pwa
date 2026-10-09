@@ -10,6 +10,8 @@
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
+  <meta name="mirel-app-version" content="2026.10.09-27">
+
   <meta
     name="theme-color"
     content="#d95b72"
@@ -34,7 +36,7 @@
   <link
     id="appManifest"
     rel="manifest"
-    href="./manifest.webmanifest"
+    href="./manifest.webmanifest?v=20261009-27"
   >
 
   <link
@@ -44,7 +46,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261007-03"
+    href="./style.css?v=20261009-27"
   >
 
   <title>
@@ -292,6 +294,77 @@
       font-size: var(--mirel-detail-body-size) !important;
     }
   </style>
+
+
+<style id="mirel-workspace-and-detail-font-20261009-26">
+  /* 詳細画面も文字サイズ設定を全面反映 */
+  #detailContent {
+    font-size: var(--mirel-detail-body-size) !important;
+  }
+  #detailContent .detail-name,
+  #detailContent .section-title,
+  #detailContent .child-name-text,
+  #detailContent .interaction-date {
+    font-size: var(--mirel-detail-primary-size) !important;
+  }
+  #detailContent .detail-row,
+  #detailContent .detail-row > div:not(.label),
+  #detailContent .link-list,
+  #detailContent .empty,
+  #detailContent .child,
+  #detailContent .mirel-interaction-row {
+    font-size: var(--mirel-detail-body-size) !important;
+  }
+  #detailContent .label,
+  #detailContent .meta,
+  #detailContent .small-note,
+  #detailContent .child-meta,
+  #detailContent .interaction-type-label {
+    font-size: var(--mirel-detail-small-size) !important;
+  }
+
+  .mirel-workspace-section {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #eee3e1;
+  }
+  .mirel-workspace-switch-row,
+  .mirel-workspace-create-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+  }
+  .mirel-workspace-switch-row select,
+  .mirel-workspace-create-row input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .mirel-workspace-create-box {
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid #eee2df;
+    border-radius: 14px;
+    background: #fffafa;
+  }
+  .mirel-workspace-create-title {
+    margin-bottom: 9px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .mirel-account-actions {
+    margin-top: 16px;
+  }
+  .mirel-account-actions button {
+    width: 100%;
+  }
+  @media (max-width: 480px) {
+    .mirel-workspace-create-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 
 </head>
 
@@ -1662,11 +1735,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261008-03"></script>
+<script src="./config.js?v=20261009-27"></script>
 
-<script src="./app.js?v=20261008-25"></script>
+<script src="./app.js?v=20261009-27"></script>
 
-<script src="./app-enhancements.js?v=20261008-25"></script>
+<script src="./app-enhancements.js?v=20261009-27"></script>
 
 </body>
 
