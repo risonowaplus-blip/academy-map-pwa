@@ -6470,18 +6470,21 @@ deleteInteractionAction =
     interactionId
   ) {
 
+    var teacher =
+      findTeacher(
+        selectedTeacherId
+      );
+
     var interaction =
       findInteraction(
         interactionId
       );
-
 
     var dateText =
       interaction &&
       interaction.date
         ? interaction.date
         : '日付未登録';
-
 
     if (
       !(await appConfirm(
@@ -6494,11 +6497,62 @@ deleteInteractionAction =
       return;
     }
 
+    /*
+     * 削除時は全画面ローディングを出さない。
+     * 先に現在画面から対象レコードを外して体感上は即時反映し、
+     * GASへの削除通信はその後に完了させる。
+     */
+    var beforeInteractions =
+      teacher &&
+      Array.isArray(
+        teacher.interactions
+      )
+        ? teacher.interactions.slice()
+        : [];
 
-    setLoading(
-      true
+    if (teacher) {
+      teacher.interactions =
+        beforeInteractions.filter(
+          function(row) {
+            return String(
+              row &&
+              row.interactionId ||
+              ''
+            ) !== String(
+              interactionId ||
+              ''
+            );
+          }
+        );
+
+      renderTeacherDetail(
+        teacher
+      );
+    }
+
+    if (
+      Array.isArray(
+        pendingInteractions
+      )
+    ) {
+      pendingInteractions =
+        pendingInteractions.filter(
+          function(row) {
+            return String(
+              row &&
+              row.interactionId ||
+              ''
+            ) !== String(
+              interactionId ||
+              ''
+            );
+          }
+        );
+    }
+
+    mirelShowPersistentToast(
+      '削除中…'
     );
-
 
     try {
 
@@ -6509,23 +6563,30 @@ deleteInteractionAction =
         ]
       );
 
-
-      await refreshTeacherData(
-        selectedTeacherId
+      mirelHidePersistentToast();
+      appToast(
+        '削除しました'
       );
-
 
     } catch (e) {
 
+      /* 通信失敗時だけ画面を元に戻す */
+      if (teacher) {
+        teacher.interactions =
+          beforeInteractions;
+
+        renderTeacherDetail(
+          teacher
+        );
+      }
+
+      pendingInteractions =
+        beforeInteractions.slice();
+
+      mirelHidePersistentToast();
+
       handleError(
         e
-      );
-
-
-    } finally {
-
-      setLoading(
-        false
       );
 
     }
