@@ -1,250 +1,68 @@
-var CACHE_NAME =
-  'academy-map-v20261006-01';
-
-
-var APP_FILES = [
-
+/* Mirel Map Service Worker - 2026.10.09-27 */
+const MIREL_SW_VERSION = '2026.10.09-27';
+const MIREL_CACHE = 'mirel-map-' + MIREL_SW_VERSION;
+const CORE = [
   './',
-
   './index.html',
-
-  './style.css?v=20261006-01',
-
-  './app.js?v=20261006-01',
-
-  './config.js?v=20261006-01',
-
   './manifest.webmanifest',
-
-  './icon-192.png',
-
-  './icon-512.png'
-
+  './style.css?v=20261009-27',
+  './config.js?v=20261009-27',
+  './app.js?v=20261009-27',
+  './app-enhancements.js?v=20261009-27'
 ];
 
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(MIREL_CACHE);
+    await Promise.allSettled(CORE.map(url => cache.add(url)));
+    await self.skipWaiting();
+  })());
+});
 
-self.addEventListener(
-  'install',
-  function(event) {
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key.startsWith('mirel-map-') && key !== MIREL_CACHE).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
 
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
-
-    event.waitUntil(
-
-      caches
-        .open(
-          CACHE_NAME
-        )
-        .then(
-          function(cache) {
-
-            return Promise.all(
-
-              APP_FILES.map(
-                function(url) {
-
-                  return cache
-                    .add(
-                      url
-                    )
-                    .catch(
-                      function() {
-                        return null;
-                      }
-                    );
-
-                }
-              )
-
-            );
-
-          }
-        )
-
-    );
-
   }
-);
+});
 
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
-self.addEventListener(
-  'activate',
-  function(event) {
-
-    event.waitUntil(
-
-      caches
-        .keys()
-        .then(
-          function(keys) {
-
-            return Promise.all(
-
-              keys.map(
-                function(key) {
-
-                  if (
-                    key !==
-                    CACHE_NAME
-                  ) {
-
-                    return caches.delete(
-                      key
-                    );
-
-                  }
-
-                  return null;
-
-                }
-              )
-
-            );
-
-          }
-        )
-        .then(
-          function() {
-
-            return self.clients.claim();
-
-          }
-        )
-
-    );
-
+  /* HTML/画面遷移は常にネットを先に見て、最新版を優先 */
+  if (event.request.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(event.request, { cache: 'no-store' });
+        const cache = await caches.open(MIREL_CACHE);
+        cache.put(event.request, fresh.clone());
+        return fresh;
+      } catch (e) {
+        return (await caches.match(event.request)) || (await caches.match('./index.html')) || Response.error();
+      }
+    })());
+    return;
   }
-);
 
-
-self.addEventListener(
-  'fetch',
-  function(event) {
-
-    if (
-      event.request.method !==
-      'GET'
-    ) {
-
-      return;
-
+  /* JS/CSS/manifestはネット優先。失敗時だけキャッシュ */
+  event.respondWith((async () => {
+    try {
+      const fresh = await fetch(event.request, { cache: 'no-store' });
+      const cache = await caches.open(MIREL_CACHE);
+      cache.put(event.request, fresh.clone());
+      return fresh;
+    } catch (e) {
+      return (await caches.match(event.request)) || Response.error();
     }
+  })());
+});
 
-
-    var url =
-      new URL(
-        event.request.url
-      );
-
-
-    /*
-      Google認証/APIは
-      Service Workerでキャッシュしない
-    */
-
-    if (
-      url.hostname.indexOf(
-        'googleapis.com'
-      ) !== -1 ||
-      url.hostname.indexOf(
-        'accounts.google.com'
-      ) !== -1
-    ) {
-
-      return;
-
-    }
-
-
-    /*
-      同一オリジンは
-      network first
-    */
-
-    if (
-      url.origin ===
-      self.location.origin
-    ) {
-
-      event.respondWith(
-
-        fetch(
-          event.request,
-          {
-            cache:
-              'no-store'
-          }
-        )
-          .then(
-            function(response) {
-
-              var copy =
-                response.clone();
-
-              caches
-                .open(
-                  CACHE_NAME
-                )
-                .then(
-                  function(cache) {
-
-                    cache.put(
-                      event.request,
-                      copy
-                    );
-
-                  }
-                );
-
-              return response;
-
-            }
-          )
-          .catch(
-            function() {
-
-              return caches.match(
-                event.request
-              );
-
-            }
-          )
-
-      );
-
-      return;
-
-    }
-
-
-    /*
-      外部SVGなどは
-      cache fallback
-    */
-
-    event.respondWith(
-
-      fetch(
-        event.request
-      )
-        .then(
-          function(response) {
-
-            return response;
-
-          }
-        )
-        .catch(
-          function() {
-
-            return caches.match(
-              event.request
-            );
-
-          }
-        )
-
-    );
-
-  }
-);
