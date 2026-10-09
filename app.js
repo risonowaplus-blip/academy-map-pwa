@@ -26,7 +26,8 @@ var appSettings = {
   personLabel: '人物',
   placeLabel: '店名',
   placeKanaLabel: '店名ふりがな',
-  fontSize: 'standard'
+  fontSize: 'standard',
+  lineSpacing: 'standard'
 };
 
 var STORAGE_TOKEN = 'academyAccessToken';
@@ -333,7 +334,7 @@ var gradeOptions = [
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.09-27';
+var MIREL_APP_VERSION = '2026.10.09-30';
 var MIREL_APP_BUILD = '20261009-27';
 
 function mirelNotifyAppUpdated_() {
@@ -6923,6 +6924,46 @@ function appName() {
 }
 
 
+function updateFontSizePreview() {
+
+  var preview = document.getElementById('settingFontSizePreview');
+  if (!preview) {
+    return;
+  }
+
+  var size = valueOf('settingFontSize') || 'standard';
+
+  if (['small', 'standard', 'large'].indexOf(size) === -1) {
+    size = 'standard';
+  }
+
+  preview.setAttribute('data-preview-font-size', size);
+
+  var spacing = valueOf('settingLineSpacing') || 'standard';
+  if (['compact', 'standard', 'spacious'].indexOf(spacing) === -1) {
+    spacing = 'standard';
+  }
+  preview.setAttribute('data-preview-line-spacing', spacing);
+
+  var spacingLabel = document.getElementById('settingLineSpacingPreviewLabel');
+  if (spacingLabel) {
+    spacingLabel.textContent =
+      spacing === 'compact' ? '狭め' :
+      spacing === 'spacious' ? '広め' :
+      '標準';
+  }
+
+  var label = document.getElementById('settingFontSizePreviewLabel');
+  if (label) {
+    label.textContent =
+      size === 'small' ? '小さめ' :
+      size === 'large' ? '大きめ' :
+      '標準';
+  }
+
+}
+
+
 function fillSettingsForm() {
 
   setValue(
@@ -6952,6 +6993,16 @@ function fillSettingsForm() {
       'standard'
     )
   );
+
+  setValue(
+    'settingLineSpacing',
+    (
+      appSettings.lineSpacing ||
+      'standard'
+    )
+  );
+
+  updateFontSizePreview();
 
 }
 
@@ -6987,6 +7038,12 @@ async function saveSettingsForm() {
     fontSize:
       valueOf(
         'settingFontSize'
+      ) ||
+      'standard',
+
+    lineSpacing:
+      valueOf(
+        'settingLineSpacing'
       ) ||
       'standard'
 
@@ -7062,9 +7119,43 @@ function applyFontSizeSetting() {
 }
 
 
+function applyLineSpacingSetting() {
+
+  if (!document.body) {
+    return;
+  }
+
+  var spacing =
+    String(
+      appSettings.lineSpacing ||
+      'standard'
+    );
+
+  if (
+    [
+      'compact',
+      'standard',
+      'spacious'
+    ].indexOf(
+      spacing
+    ) === -1
+  ) {
+    spacing =
+      'standard';
+  }
+
+  document.body.setAttribute(
+    'data-mirel-line-spacing',
+    spacing
+  );
+
+}
+
+
 function applySettingsToUi() {
 
   applyFontSizeSetting();
+  applyLineSpacingSetting();
 
   var app =
     appName();
