@@ -1376,6 +1376,62 @@ function getRegionTeacherColor(region) {
 
 
 /* ========================================
+   地図表示モード
+   ======================================== */
+
+function mirelMapEnabled() {
+  return mirelFeatureOn('map');
+}
+
+function mirelMapUsesPeople() {
+  return mirelMapEnabled() && mirelFeatureOn('address');
+}
+
+function mirelApplyMapVisibility() {
+  var enabled = mirelMapEnabled();
+  var usesPeople = mirelMapUsesPeople();
+
+  var navMap = document.getElementById('navMap');
+  var pageMap = document.getElementById('pageMap');
+
+  if (navMap) {
+    navMap.style.display = enabled ? '' : 'none';
+  }
+
+  if (!enabled) {
+    if (pageMap && pageMap.classList.contains('active')) {
+      showPage('list');
+    }
+    return;
+  }
+
+  var search = document.getElementById('mapSearch');
+  var stats = document.getElementById('stats');
+  var mapSide = document.getElementById('mapSide');
+  var activeBtn = document.getElementById('activePrefBtn');
+  var allBtn = document.getElementById('allPrefBtn');
+  var segmented = activeBtn ? activeBtn.closest('.segmented') : null;
+  var activeLegend = document.getElementById('mapLegendActive');
+  var activeLegendItem = activeLegend ? activeLegend.closest('.legend-item') : null;
+
+  if (search) search.style.display = usesPeople ? '' : 'none';
+  if (segmented) segmented.style.display = usesPeople ? '' : 'none';
+  if (activeLegendItem) activeLegendItem.style.display = usesPeople ? '' : 'none';
+
+  if (!usesPeople) {
+    prefMode = 'all';
+    if (stats) {
+      stats.innerHTML = '<div class="stat">全都道府県</div>';
+    }
+    if (mapSide) {
+      mapSide.innerHTML = selectedPrefecture
+        ? '<div class="section-title">' + escapeHtml(selectedPrefecture) + '</div><div class="empty">地図上の位置と都道府県名を確認できます。</div>'
+        : '<div class="empty">日本地図または都道府県名を選択してください。</div>';
+    }
+  }
+}
+
+/* ========================================
    日本地図
    ======================================== */
 
@@ -1848,6 +1904,7 @@ async function loadAddressMaster() {
 
 function renderAll() {
 
+  mirelApplyMapVisibility();
   renderStats();
   renderPrefList();
   renderMapTeacherPreview();
@@ -1860,12 +1917,18 @@ function renderAll() {
 
 function renderStats() {
 
+  var statsEl = document.getElementById('stats');
+  if (!statsEl) return;
+
+  if (!mirelMapUsesPeople()) {
+    statsEl.innerHTML = '<div class="stat">全都道府県</div>';
+    return;
+  }
+
   var unknown =
     getUnknownCount();
 
-  document.getElementById(
-    'stats'
-  ).innerHTML =
+  statsEl.innerHTML =
 
     '<div class="stat">全国 ' +
     teachers.length +
@@ -1881,6 +1944,10 @@ function renderStats() {
 function getPrefCounts() {
 
   var result = {};
+
+  if (!mirelMapUsesPeople()) {
+    return result;
+  }
 
   for (
     var i = 0;
@@ -1910,6 +1977,10 @@ function getPrefCounts() {
 
 
 function getUnknownCount() {
+
+  if (!mirelMapUsesPeople()) {
+    return 0;
+  }
 
   var count = 0;
 
@@ -1943,6 +2014,13 @@ function updateSelectedPrefHeading() {
 
   var person =
     personLabel();
+
+  if (!mirelMapUsesPeople()) {
+    el.textContent = selectedPrefecture && selectedPrefecture !== '__UNKNOWN__'
+      ? selectedPrefecture
+      : '都道府県を選択';
+    return;
+  }
 
   if (
     selectedPrefecture ===
@@ -2069,6 +2147,7 @@ function renderPrefList() {
       0;
 
     if (
+      mirelMapUsesPeople() &&
       prefMode === 'active' &&
       count === 0
     ) {
@@ -2163,6 +2242,7 @@ function renderPrefList() {
         'chip';
 
       if (
+        mirelMapUsesPeople() &&
         row.count > 0
       ) {
 
@@ -2200,7 +2280,7 @@ function renderPrefList() {
         ) +
 
         (
-          row.count
+          mirelMapUsesPeople() && row.count
             ? ' ' +
               row.count +
               '名'
@@ -2222,7 +2302,7 @@ function renderPrefList() {
   var unknown =
     getUnknownCount();
 
-  if (unknown > 0) {
+  if (mirelMapUsesPeople() && unknown > 0) {
 
     html +=
 
@@ -2457,6 +2537,13 @@ function renderMapTeacherPreview() {
 
     return;
 
+  }
+
+  if (!mirelMapUsesPeople()) {
+    mapSide.innerHTML = selectedPrefecture && selectedPrefecture !== '__UNKNOWN__'
+      ? '<div class="section-title">' + escapeHtml(selectedPrefecture) + '</div><div class="empty">地図上の位置と都道府県名を確認できます。</div>'
+      : '<div class="empty">日本地図または都道府県名を選択してください。</div>';
+    return;
   }
 
   var query =
@@ -2731,6 +2818,10 @@ function renderSearchResults() {
    ======================================== */
 
 function showPage(name) {
+
+  if (name === 'map' && !mirelMapEnabled()) {
+    name = 'list';
+  }
 
   var pages = {
 
@@ -7837,6 +7928,7 @@ var MIREL_FEATURE_DEFAULTS = {
   grade: true,
   affiliation: true,
   place: true,
+  map: true,
   address: true,
   sns: true,
   interactions: true,
@@ -10303,6 +10395,7 @@ function mirelFeatureDefinitions() {
     ['grade', '学年'],
     ['affiliation', '所属'],
     ['place', '店名'],
+    ['map', '地図表示'],
     ['address', '住所'],
     ['sns', 'SNSリンク'],
     ['interactions', '交流履歴'],
@@ -11586,6 +11679,7 @@ function mirelApplyDetailVisibility() {
 
 function mirelApplyCurrentVisibility() {
 
+  mirelApplyMapVisibility();
   mirelApplyFormVisibility();
 
 
