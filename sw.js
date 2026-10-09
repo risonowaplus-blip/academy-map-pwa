@@ -1,5 +1,5 @@
-/* Mirel Map Service Worker - 2026.10.09-39 */
-const MIREL_SW_VERSION = '2026.10.09-39';
+/* Mirel Map Service Worker - 2026.10.09-40 */
+const MIREL_SW_VERSION = '2026.10.09-40';
 const MIREL_CACHE = 'mirel-map-' + MIREL_SW_VERSION;
 const CORE = [
   './',
