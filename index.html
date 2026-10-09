@@ -36,7 +36,7 @@
   <link
     id="appManifest"
     rel="manifest"
-    href="./manifest.webmanifest?v=20261009-30"
+    href="./manifest.webmanifest?v=20261009-32"
   >
 
   <link
@@ -46,7 +46,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261009-30"
+    href="./style.css?v=20261009-32"
   >
 
   <title>
@@ -368,7 +368,7 @@
 
 
 
-<style id="mirel-release-polish-20261009-30">
+<style id="mirel-release-polish-20261009-32">
   /* 文字サイズ差を明確化 */
   body[data-mirel-font-size="small"] {
     --mirel-detail-primary-size: 14px;
@@ -454,6 +454,26 @@
   #pageSettings .mirel-extra-section { margin-top: 18px; }
   #pageSettings #mirelWorkspaceSection { margin-bottom: 12px; }
 
+  /* アプリ全体へ文字サイズ・行間・余白を反映 */
+  body {
+    --mirel-ui-scale: 1;
+    --mirel-ui-title-size: 18px;
+    --mirel-ui-body-size: 15px;
+    --mirel-ui-small-size: 13px;
+    --mirel-ui-micro-size: 11px;
+    --mirel-ui-gap: 9px;
+  }
+  body, .page, .modal, .card, .confirm-card, .bottom-nav { line-height: var(--mirel-content-line-height) !important; }
+  .page, .modal, .card, .confirm-card, .setting-results, .mirel-toast { font-size: var(--mirel-ui-body-size) !important; }
+  input, select, textarea, button { font-size: var(--mirel-ui-body-size) !important; line-height: var(--mirel-content-line-height) !important; }
+  .section-title, .modal-title, .page-title, .teacher-name, .detail-name, .confirm-title { font-size: var(--mirel-ui-title-size) !important; }
+  .field label, .small-note, .meta, .form-note, .bottom-nav span, .mirel-font-preview-detail { font-size: var(--mirel-ui-small-size) !important; }
+  .field { margin-bottom: var(--mirel-ui-gap) !important; }
+  .grid2, .grid3, .form-grid, .mirel-feature-grid { gap: var(--mirel-ui-gap) !important; }
+  .card, .mirel-list-card, .mirel-interaction-row, .mirel-child-card { line-height: var(--mirel-content-line-height) !important; }
+  #pageMap button, #pageMap input, #pageMap select, #pageMap .map-label, #pageMap .map-info { font-size: var(--mirel-ui-body-size) !important; }
+  .bottom-nav button { font-size: var(--mirel-ui-small-size) !important; }
+
   /* 詳細：所属は名前より上 */
   .mirel-detail-affiliation-top {
     display:flex;
@@ -513,22 +533,18 @@
     line-height: 1.45;
     color: #77706c;
   }
-  .mirel-font-preview[data-preview-font-size="small"] .mirel-font-preview-name { font-size: 14px; }
-  .mirel-font-preview[data-preview-font-size="small"] .mirel-font-preview-body { font-size: 12px; }
-  .mirel-font-preview[data-preview-font-size="small"] .mirel-font-preview-small { font-size: 11px; }
-  .mirel-font-preview[data-preview-font-size="standard"] .mirel-font-preview-name { font-size: 18px; }
-  .mirel-font-preview[data-preview-font-size="standard"] .mirel-font-preview-body { font-size: 15px; }
-  .mirel-font-preview[data-preview-font-size="standard"] .mirel-font-preview-small { font-size: 13px; }
-  .mirel-font-preview[data-preview-font-size="large"] .mirel-font-preview-name { font-size: 22px; }
-  .mirel-font-preview[data-preview-font-size="large"] .mirel-font-preview-body { font-size: 18px; }
-  .mirel-font-preview[data-preview-font-size="large"] .mirel-font-preview-small { font-size: 16px; }
-  .mirel-font-preview[data-preview-line-spacing="compact"] .mirel-font-preview-card { padding-top: 10px; padding-bottom: 10px; }
-  .mirel-font-preview[data-preview-line-spacing="compact"] .mirel-font-preview-card > div { margin-top: 2px; line-height: 1.2; }
-  .mirel-font-preview[data-preview-line-spacing="standard"] .mirel-font-preview-card { padding-top: 14px; padding-bottom: 14px; }
-  .mirel-font-preview[data-preview-line-spacing="standard"] .mirel-font-preview-card > div { margin-top: 6px; line-height: 1.45; }
-  .mirel-font-preview[data-preview-line-spacing="spacious"] .mirel-font-preview-card { padding-top: 20px; padding-bottom: 20px; }
-  .mirel-font-preview[data-preview-line-spacing="spacious"] .mirel-font-preview-card > div { margin-top: 11px; line-height: 1.75; }
+  .mirel-font-preview { --preview-scale: 1; --preview-line-height: 1.5; --preview-gap: 9px; }
+  .mirel-font-preview-name { font-size: calc(18px * var(--preview-scale)) !important; }
+  .mirel-font-preview-body { font-size: calc(15px * var(--preview-scale)) !important; }
+  .mirel-font-preview-small { font-size: calc(13px * var(--preview-scale)) !important; }
+  .mirel-font-preview-card { padding-top: calc(var(--preview-gap) + 5px); padding-bottom: calc(var(--preview-gap) + 5px); }
+  .mirel-font-preview-card > div { margin-top: var(--preview-gap); line-height: var(--preview-line-height); }
   .mirel-font-preview-card > div:first-child { margin-top: 0 !important; }
+  .mirel-font-preview-detail { margin: 6px 0 8px; font-size: 12px; opacity: .68; }
+  .mirel-typography-detail { margin-top: 10px; padding: 12px; border: 1px solid #eee4e1; border-radius: 12px; background: #fffafa; }
+  .mirel-range-row { display:grid; grid-template-columns:minmax(0,1fr) 76px auto; gap:8px; align-items:center; margin-top:6px; }
+  .mirel-range-row input[type="range"] { width:100%; min-width:0; }
+  .mirel-range-number { width:76px !important; min-width:0 !important; text-align:right; }
 </style>
 
 </head>
@@ -956,35 +972,61 @@
             文字サイズ
           </label>
 
-          <select id="settingFontSize" onchange="updateFontSizePreview()" oninput="updateFontSizePreview()">
+          <select id="settingFontSize" onchange="applyTypographyPreset('font')">
             <option value="small">小さめ</option>
             <option value="standard">標準</option>
             <option value="large">大きめ</option>
+            <option value="custom">詳細設定</option>
           </select>
 
           <div class="small-note">
-            一覧・詳細画面の文字サイズを調整できます。
+            アプリ全体の文字サイズを調整します。プリセット選択後に、下の詳細設定で自由に微調整できます。
           </div>
 
-          <label style="margin-top:14px;display:block;">
+          <div class="mirel-typography-detail">
+            <label>文字倍率 <span id="settingFontScaleLabel"></span></label>
+            <div class="mirel-range-row">
+              <input id="settingFontScale" type="range" min="80" max="140" step="1" value="100" oninput="mirelTypographyCustomChanged('font')">
+              <input id="settingFontScaleNumber" class="mirel-range-number" type="number" min="80" max="140" step="1" value="100" oninput="mirelSyncTypographyRange('settingFontScaleNumber','settingFontScale','settingFontSize')">
+              <span>%</span>
+            </div>
+          </div>
+
+          <label style="margin-top:16px;display:block;">
             行間・余白
           </label>
 
-          <select id="settingLineSpacing" onchange="updateFontSizePreview()" oninput="updateFontSizePreview()">
+          <select id="settingLineSpacing" onchange="applyTypographyPreset('spacing')">
             <option value="compact">狭め</option>
             <option value="standard">標準</option>
             <option value="spacious">広め</option>
+            <option value="custom">詳細設定</option>
           </select>
 
           <div class="small-note">
-            一覧・詳細画面の行間と項目同士の余白を調整できます。文字サイズとあわせて下で確認できます。
+            アプリ全体の行間と項目間隔を調整します。必要に応じて数値で細かく設定できます。
+          </div>
+
+          <div class="mirel-typography-detail">
+            <label>行間</label>
+            <div class="mirel-range-row">
+              <input id="settingLineHeight" type="range" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelTypographyCustomChanged('spacing')">
+              <input id="settingLineHeightNumber" class="mirel-range-number" type="number" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelSyncTypographyRange('settingLineHeightNumber','settingLineHeight','settingLineSpacing')">
+            </div>
+            <label style="margin-top:10px;">項目間の余白</label>
+            <div class="mirel-range-row">
+              <input id="settingItemGap" type="range" min="2" max="24" step="1" value="9" oninput="mirelTypographyCustomChanged('spacing')">
+              <input id="settingItemGapNumber" class="mirel-range-number" type="number" min="2" max="24" step="1" value="9" oninput="mirelSyncTypographyRange('settingItemGapNumber','settingItemGap','settingLineSpacing')">
+              <span>px</span>
+            </div>
           </div>
 
           <div id="settingFontSizePreview" class="mirel-font-preview" data-preview-font-size="standard" data-preview-line-spacing="standard">
             <div class="mirel-font-preview-head">
               プレビュー
-              <span><span id="settingFontSizePreviewLabel">標準</span>・余白<span id="settingLineSpacingPreviewLabel">標準</span></span>
+              <span><span id="settingFontSizePreviewLabel">標準</span>・<span id="settingLineSpacingPreviewLabel">標準</span></span>
             </div>
+            <div id="settingTypographyPreviewDetail" class="mirel-font-preview-detail">100% / 行間 1.50 / 余白 9px</div>
             <div class="mirel-font-preview-card">
               <div class="mirel-font-preview-name">山田 花子</div>
               <div class="mirel-font-preview-body">東京都千代田区｜友人</div>
@@ -1916,11 +1958,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261009-30"></script>
+<script src="./config.js?v=20261009-32"></script>
 
-<script src="./app.js?v=20261009-30"></script>
+<script src="./app.js?v=20261009-32"></script>
 
-<script src="./app-enhancements.js?v=20261009-30"></script>
+<script src="./app-enhancements.js?v=20261009-32"></script>
 
 </body>
 
