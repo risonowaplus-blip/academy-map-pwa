@@ -334,7 +334,7 @@ var gradeOptions = [
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.09-33';
+var MIREL_APP_VERSION = '2026.10.09-34';
 var MIREL_APP_BUILD = '20261009-27';
 
 function mirelNotifyAppUpdated_() {
@@ -6932,12 +6932,12 @@ function mirelClampNumber(value, min, max, fallback) {
 
 function mirelTypographyPresetValues(kind, preset) {
   if (kind === 'font') {
-    if (preset === 'small') return { fontScale: 85 };
-    if (preset === 'large') return { fontScale: 120 };
+    if (preset === 'small') return { fontScale: 82 };
+    if (preset === 'large') return { fontScale: 125 };
     return { fontScale: 100 };
   }
-  if (preset === 'compact') return { lineHeight: 1.30, itemGap: 5 };
-  if (preset === 'spacious') return { lineHeight: 1.80, itemGap: 16 };
+  if (preset === 'compact') return { lineHeight: 1.25, itemGap: 4 };
+  if (preset === 'spacious') return { lineHeight: 1.85, itemGap: 18 };
   return { lineHeight: 1.50, itemGap: 9 };
 }
 
@@ -6997,8 +6997,8 @@ function applyTypographyPreset(kind) {
 
 function updateFontSizePreview() {
 
-  var preview = document.getElementById('settingFontSizePreview');
-  if (!preview) return;
+  var fontPreview = document.getElementById('settingFontSizePreview');
+  var spacingPreview = document.getElementById('settingSpacingPreview');
 
   var size = valueOf('settingFontSize') || 'standard';
   if (['small', 'standard', 'large', 'custom'].indexOf(size) === -1) size = 'standard';
@@ -7010,11 +7010,17 @@ function updateFontSizePreview() {
   var lineHeight = mirelClampNumber(valueOf('settingLineHeight'), 1.10, 2.00, 1.50);
   var itemGap = mirelClampNumber(valueOf('settingItemGap'), 2, 24, 9);
 
-  preview.setAttribute('data-preview-font-size', size);
-  preview.setAttribute('data-preview-line-spacing', spacing);
-  preview.style.setProperty('--preview-scale', String(fontScale / 100));
-  preview.style.setProperty('--preview-line-height', String(lineHeight));
-  preview.style.setProperty('--preview-gap', itemGap + 'px');
+  if (fontPreview) {
+    fontPreview.setAttribute('data-preview-font-size', size);
+    fontPreview.style.setProperty('--preview-scale', String(fontScale / 100));
+  }
+
+  if (spacingPreview) {
+    spacingPreview.setAttribute('data-preview-line-spacing', spacing);
+    spacingPreview.style.setProperty('--preview-scale', String(fontScale / 100));
+    spacingPreview.style.setProperty('--preview-line-height', String(lineHeight));
+    spacingPreview.style.setProperty('--preview-gap', itemGap + 'px');
+  }
 
   var spacingLabel = document.getElementById('settingLineSpacingPreviewLabel');
   if (spacingLabel) {
@@ -7033,8 +7039,9 @@ function updateFontSizePreview() {
   }
 
   var detail = document.getElementById('settingTypographyPreviewDetail');
-  if (detail) detail.textContent = fontScale + '% / 行間 ' + lineHeight.toFixed(2) + ' / 余白 ' + itemGap + 'px';
+  if (detail) detail.textContent = '行間 ' + lineHeight.toFixed(2) + ' / 余白 ' + itemGap + 'px';
 }
+
 
 
 function fillSettingsForm() {
@@ -7152,6 +7159,12 @@ async function saveSettingsForm() {
     renderAll();
 
     renderJapanMap();
+
+    /* 再描画後に生成された一覧・詳細・フォーム要素にも設定を再適用 */
+    requestAnimationFrame(function() {
+      applySettingsToUi();
+      requestAnimationFrame(applySettingsToUi);
+    });
 
     appToast(
       '設定を保存しました。'
@@ -12010,4 +12023,19 @@ showPage = function(pageName) {
   return result;
 };
 
+
+
+/* 2026-10-09-34: 動的再描画後も文字・余白設定を保持 */
+(function(){
+  if (typeof renderAll === 'function' && !renderAll.__mirelTypographyWrapped) {
+    var baseRenderAll = renderAll;
+    var wrapped = function(){
+      var result = baseRenderAll.apply(this, arguments);
+      requestAnimationFrame(function(){ if (typeof applySettingsToUi === 'function') applySettingsToUi(); });
+      return result;
+    };
+    wrapped.__mirelTypographyWrapped = true;
+    renderAll = wrapped;
+  }
+})();
 
