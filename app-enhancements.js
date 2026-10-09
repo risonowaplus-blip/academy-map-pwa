@@ -2099,77 +2099,37 @@ fillSettingsForm =
   function() {
 
     var rows = [
-
-      {
-        id:
-          'settingAppName',
-
-        placeholder:
-          appName()
-      },
-
-      {
-        id:
-          'settingPersonLabel',
-
-        placeholder:
-          personLabel()
-      },
-
-      {
-        id:
-          'settingPlaceLabel',
-
-        placeholder:
-          placeLabel()
-      },
-
-      {
-        id:
-          'settingPlaceKanaLabel',
-
-        placeholder:
-          placeKanaLabel()
-      }
-
+      { id:'settingAppName', placeholder:appName() },
+      { id:'settingPersonLabel', placeholder:personLabel() },
+      { id:'settingPlaceLabel', placeholder:placeLabel() },
+      { id:'settingPlaceKanaLabel', placeholder:placeKanaLabel() }
     ];
 
+    rows.forEach(function(row) {
+      var input = document.getElementById(row.id);
+      if (!input) return;
+      input.value = '';
+      input.placeholder = row.placeholder;
+    });
 
-    var fontSizeInput =
-      document.getElementById(
-        'settingFontSize'
-      );
+    setValue('settingFontSize', appSettings.fontSize || 'standard');
+    setValue('settingLineSpacing', appSettings.lineSpacing || 'standard');
 
-    if (fontSizeInput) {
-      fontSizeInput.value =
-        appSettings.fontSize ||
-        'standard';
-    }
+    var fontPreset = mirelTypographyPresetValues('font', (appSettings.fontSize || 'standard') === 'custom' ? 'standard' : (appSettings.fontSize || 'standard'));
+    var spacingPreset = mirelTypographyPresetValues('spacing', (appSettings.lineSpacing || 'standard') === 'custom' ? 'standard' : (appSettings.lineSpacing || 'standard'));
 
+    var fontScale = mirelClampNumber(appSettings.fontScale, 80, 140, fontPreset.fontScale);
+    var lineHeight = mirelClampNumber(appSettings.lineHeight, 1.10, 2.00, spacingPreset.lineHeight);
+    var itemGap = mirelClampNumber(appSettings.itemGap, 2, 24, spacingPreset.itemGap);
 
-    rows.forEach(
-      function(row) {
+    setValue('settingFontScale', fontScale);
+    setValue('settingFontScaleNumber', fontScale);
+    setValue('settingLineHeight', lineHeight);
+    setValue('settingLineHeightNumber', lineHeight);
+    setValue('settingItemGap', itemGap);
+    setValue('settingItemGapNumber', itemGap);
 
-        var input =
-          document.getElementById(
-            row.id
-          );
-
-
-        if (!input) {
-          return;
-        }
-
-
-        input.value =
-          '';
-
-        input.placeholder =
-          row.placeholder;
-
-      }
-    );
-
+    if (typeof updateFontSizePreview === 'function') updateFontSizePreview();
   };
 
 
@@ -2181,158 +2141,58 @@ fillSettingsForm =
 saveSettingsForm =
   async function() {
 
+    var fontSize = valueOf('settingFontSize') || (appSettings.fontSize || 'standard');
+    var lineSpacing = valueOf('settingLineSpacing') || (appSettings.lineSpacing || 'standard');
+
+    var fontFallback = mirelTypographyPresetValues('font', fontSize === 'custom' ? 'standard' : fontSize).fontScale;
+    var spacingFallback = mirelTypographyPresetValues('spacing', lineSpacing === 'custom' ? 'standard' : lineSpacing);
+
     var payload = {
-
-      appName:
-        valueOf(
-          'settingAppName'
-        ) ||
-        appName(),
-
-      personLabel:
-        valueOf(
-          'settingPersonLabel'
-        ) ||
-        personLabel(),
-
-      placeLabel:
-        valueOf(
-          'settingPlaceLabel'
-        ) ||
-        placeLabel(),
-
-      placeKanaLabel:
-        valueOf(
-          'settingPlaceKanaLabel'
-        ) ||
-        placeKanaLabel(),
-
-      fontSize:
-        valueOf(
-          'settingFontSize'
-        ) ||
-        (appSettings.fontSize || 'standard')
-
+      appName: valueOf('settingAppName') || appName(),
+      personLabel: valueOf('settingPersonLabel') || personLabel(),
+      placeLabel: valueOf('settingPlaceLabel') || placeLabel(),
+      placeKanaLabel: valueOf('settingPlaceKanaLabel') || placeKanaLabel(),
+      fontSize: fontSize,
+      lineSpacing: lineSpacing,
+      fontScale: mirelClampNumber(valueOf('settingFontScale'), 80, 140, fontFallback),
+      lineHeight: mirelClampNumber(valueOf('settingLineHeight'), 1.10, 2.00, spacingFallback.lineHeight),
+      itemGap: mirelClampNumber(valueOf('settingItemGap'), 2, 24, spacingFallback.itemGap)
     };
 
+    var featurePayload = {};
+    document.querySelectorAll('.mirel-feature-setting').forEach(function(input) {
+      featurePayload[input.dataset.feature] = input.checked;
+    });
 
-    var featurePayload =
-      {};
-
-
-    document
-      .querySelectorAll(
-        '.mirel-feature-setting'
-      )
-      .forEach(
-        function(input) {
-
-          featurePayload[
-            input.dataset.feature
-          ] =
-            input.checked;
-
-        }
-      );
-
-
-    setLoading(
-      true
-    );
-
+    setLoading(true);
 
     try {
+      appSettings = await runScript('saveAppSettings', [payload]);
+      var featureResult = await runScript('saveMirelFeatureSettings', [featurePayload]);
+      mirelFeatureSettings = (featureResult && featureResult.featureSettings) || mirelFeatureSettings;
 
-      appSettings =
-        await runScript(
-
-          'saveAppSettings',
-
-          [
-            payload
-          ]
-
-        );
-
-
-      var featureResult =
-        await runScript(
-
-          'saveMirelFeatureSettings',
-
-          [
-            featurePayload
-          ]
-
-        );
-
-
-      mirelFeatureSettings =
-        (
-          featureResult &&
-          featureResult.featureSettings
-        ) ||
-        mirelFeatureSettings;
-
-
-      if (
-        appSettings.appName ===
-        'Academy Map'
-      ) {
-
-        appSettings.appName =
-          'Mirel Map';
-
-      }
-
-
-      if (
-        appSettings.placeKanaLabel ===
-        '店名ふりがな'
-      ) {
-
-        appSettings.placeKanaLabel =
-          '店名読み';
-
-      }
-
+      if (appSettings.appName === 'Academy Map') appSettings.appName = 'Mirel Map';
+      if (appSettings.placeKanaLabel === '店名ふりがな') appSettings.placeKanaLabel = '店名読み';
 
       cacheUiSettings();
-
       applySettingsToUi();
-
       mirelRenderFeatureSettings();
-
       mirelApplyCurrentVisibility();
-
       renderAll();
-
       renderJapanMap();
-
+      requestAnimationFrame(function(){
+        applySettingsToUi();
+        requestAnimationFrame(applySettingsToUi);
+      });
       fillSettingsForm();
-
-
-      appToast(
-        '設定を保存しました。'
-      );
-
-
+      appToast('設定を保存しました。');
     } catch (e) {
-
-      handleError(
-        e
-      );
-
-
+      handleError(e);
     } finally {
-
-      setLoading(
-        false
-      );
-
+      setLoading(false);
     }
-
   };
+
 
 /* =========================================================
    設定候補
