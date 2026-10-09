@@ -330,6 +330,27 @@ var gradeOptions = [
   'その他'
 ];
 
+/* =========================================================
+   Mirel Map アプリバージョン
+   ========================================================= */
+var MIREL_APP_VERSION = '2026.10.09-27';
+var MIREL_APP_BUILD = '20261009-27';
+
+function mirelNotifyAppUpdated_() {
+  try {
+    var key = 'mirelLastSeenAppVersion';
+    var previous = localStorage.getItem(key) || '';
+    localStorage.setItem(key, MIREL_APP_VERSION);
+    if (previous && previous !== MIREL_APP_VERSION) {
+      setTimeout(function() {
+        if (typeof showToast === 'function') {
+          showToast('Mirel Mapを最新版に更新しました（' + MIREL_APP_VERSION + '）');
+        }
+      }, 1200);
+    }
+  } catch (e) {}
+}
+
 /* ========================================
    起動
    ======================================== */
@@ -339,6 +360,8 @@ window.addEventListener(
   function() {
 
     restoreCachedUiSettings();
+
+    mirelNotifyAppUpdated_();
 
     registerServiceWorker();
 
@@ -372,21 +395,45 @@ window.addEventListener(
 
 function registerServiceWorker() {
 
-  if ('serviceWorker' in navigator) {
-
-    navigator.serviceWorker
-      .register('./sw.js')
-      .then(
-        function(registration) {
-          registration.update();
-        }
-      )
-      .catch(
-        function() {}
-      );
-
+  if (!('serviceWorker' in navigator)) {
+    return;
   }
 
+  var swUrl = './sw.js?v=' + encodeURIComponent(MIREL_APP_BUILD);
+
+  navigator.serviceWorker
+    .register(swUrl)
+    .then(function(registration) {
+
+      /* 起動ごとに最新版のService Workerを確認 */
+      registration.update().catch(function() {});
+
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+
+      registration.addEventListener('updatefound', function() {
+        var worker = registration.installing;
+        if (!worker) return;
+
+        worker.addEventListener('statechange', function() {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            worker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
+    })
+    .catch(function() {});
+
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    try {
+      if (sessionStorage.getItem('mirelSwReloaded') === MIREL_APP_BUILD) return;
+      sessionStorage.setItem('mirelSwReloaded', MIREL_APP_BUILD);
+      window.location.reload();
+    } catch (e) {
+      window.location.reload();
+    }
+  });
 }
 
 
@@ -3195,7 +3242,7 @@ function renderTeacherDetail(
   ) {
 
     html +=
-      '<div class="empty">登録なし</div>';
+      '<div class="empty">子ども情報はまだありません。</div>';
 
   } else {
 
@@ -11633,4 +11680,175 @@ async function mirelFinishSetup() {
     '.mirel-perf-copy{justify-self:start;margin-top:2px;}';
   document.head.appendChild(style);
 })();
+
+
+/* =========================================================
+   2026-10-09-26
+   ワークスペース切替 / 別Googleアカウント切替
+   ========================================================= */
+
+var mirelWorkspaceState = null;
+var mirelWorkspaceLoading = false;
+
+function mirelClearUserLocalCache() {
+  try { localStorage.removeItem(STORAGE_APP_SNAPSHOT); } catch (e) {}
+  try { localStorage.removeItem('academyUiSettings'); } catch (e) {}
+}
+
+function mirelLogoutAndSwitchAccount() {
+  clearAccessToken();
+  try { localStorage.removeItem(STORAGE_AUTHORIZED); } catch (e) {}
+  mirelClearUserLocalCache();
+
+  teachers = [];
+  mirelAffiliations = [];
+  mirelTeacherAffiliations = {};
+  mirelProfiles = {};
+  mirelFeatureSettings = {};
+
+  showLoginScreen();
+
+  var message = document.getElementById('authMessage');
+  if (message) {
+    message.textContent = '別のGoogleアカウントで使う場合は「Googleでログイン」を押してください。';
+  }
+}
+
+function mirelEnsureWorkspacePanel() {
+  var page = document.getElementById('pageSettings');
+  if (!page) return;
+  var card = page.querySelector('.card');
+  if (!card) return;
+
+  var panel = document.getElementById('mirelWorkspaceSection');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'mirelWorkspaceSection';
+    panel.className = 'mirel-extra-section mirel-workspace-section';
+    panel.innerHTML =
+      '<div class="section-title">データの使い分け</div>' +
+      '<div class="form-note">用途ごとに人物・所属ラベル・設定を完全に分けられます。</div>' +
+      '<div id="mirelWorkspacePanel"><div class="small-note">読み込み中…</div></div>';
+
+    var extra = document.getElementById('mirelExtraSettings');
+    if (extra && extra.parentNode === card) {
+      card.insertBefore(panel, extra);
+    } else {
+      card.appendChild(panel);
+    }
+  }
+
+  mirelLoadWorkspacePanel();
+}
+
+async function mirelLoadWorkspacePanel(force) {
+  var host = document.getElementById('mirelWorkspacePanel');
+  if (!host || mirelWorkspaceLoading) return;
+  if (mirelWorkspaceState && !force) {
+    mirelRenderWorkspacePanel();
+    return;
+  }
+
+  mirelWorkspaceLoading = true;
+  try {
+    mirelWorkspaceState = await runScript('getMyWorkspaces', []);
+    mirelRenderWorkspacePanel();
+  } catch (e) {
+    host.innerHTML = '<div class="small-note">ワークスペース情報を取得できませんでした。</div>';
+  } finally {
+    mirelWorkspaceLoading = false;
+  }
+}
+
+function mirelRenderWorkspacePanel() {
+  var host = document.getElementById('mirelWorkspacePanel');
+  if (!host) return;
+
+  var state = mirelWorkspaceState || {};
+  var list = Array.isArray(state.workspaces) ? state.workspaces : [];
+  var activeId = String(state.activeWorkspaceId || '');
+
+  var options = list.map(function(ws) {
+    var selected = String(ws.id) === activeId ? ' selected' : '';
+    return '<option value="' + escapeHtml(String(ws.id || '')) + '"' + selected + '>' +
+      escapeHtml(String(ws.name || 'メイン')) + '</option>';
+  }).join('');
+
+  host.innerHTML =
+    '<div class="field">' +
+      '<label>現在のワークスペース</label>' +
+      '<div class="mirel-workspace-switch-row">' +
+        '<select id="mirelWorkspaceSelect">' + options + '</select>' +
+        '<button type="button" class="secondary" onclick="mirelSwitchWorkspaceFromUi()">切り替え</button>' +
+      '</div>' +
+      '<div class="small-note">切り替えると、このワークスペース専用の人物・設定・所属ラベルが表示されます。</div>' +
+    '</div>' +
+    '<div class="mirel-workspace-create-box">' +
+      '<div class="mirel-workspace-create-title">新しいワークスペースを作成</div>' +
+      '<div class="mirel-workspace-create-row">' +
+        '<input id="mirelNewWorkspaceName" placeholder="例：サロン用 / プライベート用">' +
+        '<button type="button" class="primary" onclick="mirelCreateWorkspaceFromUi()">作成して切り替え</button>' +
+      '</div>' +
+      '<div class="small-note">作成すると別のデータファイルになり、現在のデータとは混ざりません。</div>' +
+    '</div>' +
+    '<div class="mirel-account-actions">' +
+      '<button type="button" class="secondary" onclick="mirelLogoutAndSwitchAccount()">ログアウト／別のGoogleアカウントでログイン</button>' +
+    '</div>';
+}
+
+async function mirelSwitchWorkspaceFromUi() {
+  var select = document.getElementById('mirelWorkspaceSelect');
+  if (!select || !select.value) return;
+  if (mirelWorkspaceState && String(mirelWorkspaceState.activeWorkspaceId || '') === String(select.value)) {
+    appToast('すでにこのワークスペースを使用しています。');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await runScript('switchMyWorkspace', [select.value]);
+    mirelClearUserLocalCache();
+    location.reload();
+  } catch (e) {
+    handleError(e);
+    setLoading(false);
+  }
+}
+
+async function mirelCreateWorkspaceFromUi() {
+  var input = document.getElementById('mirelNewWorkspaceName');
+  var name = input ? String(input.value || '').trim() : '';
+  if (!name) {
+    appToast('ワークスペース名を入力してください。');
+    if (input) input.focus();
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await runScript('createMyWorkspace', [name]);
+    mirelClearUserLocalCache();
+    location.reload();
+  } catch (e) {
+    handleError(e);
+    setLoading(false);
+  }
+}
+
+var mirelBaseInstallSettingsUiForWorkspace = mirelInstallSettingsUi;
+mirelInstallSettingsUi = function() {
+  mirelBaseInstallSettingsUiForWorkspace();
+  mirelEnsureWorkspacePanel();
+};
+
+/* 設定ページを開いた時にも最新のワークスペース一覧を確認する */
+var mirelBaseShowPageForWorkspace = showPage;
+showPage = function(pageName) {
+  var result = mirelBaseShowPageForWorkspace.apply(this, arguments);
+  if (pageName === 'settings') {
+    mirelEnsureWorkspacePanel();
+  }
+  return result;
+};
+
 
