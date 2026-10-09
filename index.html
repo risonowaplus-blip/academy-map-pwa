@@ -10,7 +10,7 @@
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
-  <meta name="mirel-app-version" content="2026.10.09-34">
+  <meta name="mirel-app-version" content="2026.10.09-35">
 
   <meta
     name="theme-color"
@@ -36,7 +36,7 @@
   <link
     id="appManifest"
     rel="manifest"
-    href="./manifest.webmanifest?v=20261009-34"
+    href="./manifest.webmanifest?v=20261009-35"
   >
 
   <link
@@ -46,7 +46,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261009-34"
+    href="./style.css?v=20261009-35"
   >
 
   <title>
@@ -1164,7 +1164,7 @@
             <label>文字倍率 <span id="settingFontScaleLabel"></span></label>
             <div class="mirel-range-row">
               <input id="settingFontScale" type="range" min="80" max="140" step="1" value="100" oninput="mirelTypographyCustomChanged('font')">
-              <input id="settingFontScaleNumber" class="mirel-range-number" type="number" min="80" max="140" step="1" value="100" oninput="mirelSyncTypographyRange('settingFontScaleNumber','settingFontScale','settingFontSize')">
+              <input id="settingFontScaleNumber" class="mirel-range-number" type="number" min="80" max="140" step="1" value="100" oninput="mirelTypographyNumberTyping('settingFontScaleNumber','settingFontScale','settingFontSize')" onchange="mirelSyncTypographyRange('settingFontScaleNumber','settingFontScale','settingFontSize')">
               <span>%</span>
             </div>
           </div>
@@ -1200,12 +1200,12 @@
             <label>行間</label>
             <div class="mirel-range-row">
               <input id="settingLineHeight" type="range" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelTypographyCustomChanged('spacing')">
-              <input id="settingLineHeightNumber" class="mirel-range-number" type="number" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelSyncTypographyRange('settingLineHeightNumber','settingLineHeight','settingLineSpacing')">
+              <input id="settingLineHeightNumber" class="mirel-range-number" type="number" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelTypographyNumberTyping('settingLineHeightNumber','settingLineHeight','settingLineSpacing')" onchange="mirelSyncTypographyRange('settingLineHeightNumber','settingLineHeight','settingLineSpacing')">
             </div>
             <label style="margin-top:10px;">項目間の余白</label>
             <div class="mirel-range-row">
               <input id="settingItemGap" type="range" min="2" max="24" step="1" value="9" oninput="mirelTypographyCustomChanged('spacing')">
-              <input id="settingItemGapNumber" class="mirel-range-number" type="number" min="2" max="24" step="1" value="9" oninput="mirelSyncTypographyRange('settingItemGapNumber','settingItemGap','settingLineSpacing')">
+              <input id="settingItemGapNumber" class="mirel-range-number" type="number" min="2" max="24" step="1" value="9" oninput="mirelTypographyNumberTyping('settingItemGapNumber','settingItemGap','settingLineSpacing')" onchange="mirelSyncTypographyRange('settingItemGapNumber','settingItemGap','settingLineSpacing')">
               <span>px</span>
             </div>
           </div>
@@ -2152,11 +2152,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261009-34"></script>
+<script src="./config.js?v=20261009-35"></script>
 
-<script src="./app.js?v=20261009-34"></script>
+<script src="./app.js?v=20261009-35"></script>
 
-<script src="./app-enhancements.js?v=20261009-34"></script>
+<script src="./app-enhancements.js?v=20261009-35"></script>
 
 </body>
 
