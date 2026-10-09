@@ -10,7 +10,7 @@
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
-  <meta name="mirel-app-version" content="2026.10.09-33">
+  <meta name="mirel-app-version" content="2026.10.09-34">
 
   <meta
     name="theme-color"
@@ -36,7 +36,7 @@
   <link
     id="appManifest"
     rel="manifest"
-    href="./manifest.webmanifest?v=20261009-33"
+    href="./manifest.webmanifest?v=20261009-34"
   >
 
   <link
@@ -46,7 +46,7 @@
 
   <link
     rel="stylesheet"
-    href="./style.css?v=20261009-33"
+    href="./style.css?v=20261009-34"
   >
 
   <title>
@@ -628,6 +628,100 @@
     padding:var(--mirel-accordion-pad-y, 10px) var(--mirel-card-pad-x, 13px) !important;
   }
   #pageMap, #pageSettings, #pageList, #pageAdd { font-size:var(--mirel-ui-body-size) !important; }
+
+
+  /* 2026-10-09-34: 実画面への文字・余白設定を実際のDOMに確実に反映 */
+  #fullTeacherList .teacher,
+  #searchResults .teacher,
+  #nearbyList .teacher,
+  .teacher-list .teacher {
+    min-height: 0 !important;
+    padding: var(--mirel-card-pad-y, 11px) var(--mirel-card-pad-x, 13px) !important;
+    margin-bottom: var(--mirel-list-card-gap, 7px) !important;
+    line-height: var(--mirel-content-line-height, 1.5) !important;
+    font-size: var(--mirel-ui-body-size, 15px) !important;
+  }
+  .teacher-list .teacher .teacher-name {
+    font-size: var(--mirel-ui-title-size, 18px) !important;
+    line-height: calc(var(--mirel-content-line-height, 1.5) * .88) !important;
+    margin-bottom: var(--mirel-inner-gap, 5px) !important;
+  }
+  .teacher-list .teacher .meta,
+  .teacher-list .teacher .mirel-list-line,
+  .teacher-list .teacher .mirel-list-address,
+  .teacher-list .teacher .mirel-aff-tag {
+    font-size: var(--mirel-ui-body-size, 15px) !important;
+    line-height: var(--mirel-content-line-height, 1.5) !important;
+  }
+  .teacher-list .teacher > * + * {
+    margin-top: var(--mirel-inner-gap, 5px) !important;
+  }
+
+  #detailContent {
+    font-size: var(--mirel-ui-body-size, 15px) !important;
+    line-height: var(--mirel-content-line-height, 1.5) !important;
+  }
+  #detailContent .card {
+    padding: var(--mirel-detail-card-pad, 14px) !important;
+    margin-bottom: var(--mirel-section-gap, 10px) !important;
+  }
+  #detailContent .detail-name,
+  #detailContent .section-title,
+  #detailContent .interaction-date,
+  #detailContent .child-name-text {
+    font-size: var(--mirel-ui-title-size, 18px) !important;
+  }
+  #detailContent .detail-row,
+  #detailContent .detail-row .value,
+  #detailContent .link-list,
+  #detailContent .mirel-child-detail-info,
+  #detailContent .mirel-interaction-row,
+  #detailContent .child {
+    font-size: var(--mirel-ui-body-size, 15px) !important;
+    line-height: var(--mirel-content-line-height, 1.5) !important;
+  }
+  #detailContent .detail-row {
+    margin-bottom: var(--mirel-content-row-gap, 9px) !important;
+  }
+  #detailContent .detail-row .label,
+  #detailContent .meta,
+  #detailContent .small-note,
+  #detailContent .mirel-child-detail-label {
+    font-size: var(--mirel-ui-small-size, 13px) !important;
+  }
+
+  #teacherModal .modal {
+    font-size: var(--mirel-ui-body-size, 15px) !important;
+    line-height: var(--mirel-content-line-height, 1.5) !important;
+  }
+  #teacherModal .modal-title { font-size: var(--mirel-ui-title-size, 18px) !important; }
+  #teacherModal .form-note, #teacherModal .small-note, #teacherModal .field label {
+    font-size: var(--mirel-ui-small-size, 13px) !important;
+  }
+  #teacherModal .field { margin-bottom: var(--mirel-ui-gap, 9px) !important; }
+  #teacherModal .grid2, #teacherModal .grid3, #teacherModal .form-grid { gap: var(--mirel-ui-gap, 9px) !important; }
+  #teacherModal input, #teacherModal select, #teacherModal textarea, #teacherModal button {
+    font-size: var(--mirel-ui-body-size, 15px) !important;
+    line-height: var(--mirel-content-line-height, 1.5) !important;
+  }
+  #teacherModal input, #teacherModal select, #teacherModal textarea {
+    padding-top: max(7px, calc(var(--mirel-ui-gap, 9px) * .8)) !important;
+    padding-bottom: max(7px, calc(var(--mirel-ui-gap, 9px) * .8)) !important;
+  }
+
+  #pageSettings, #pageMap, #pageList, #pageAdd {
+    font-size: var(--mirel-ui-body-size, 15px) !important;
+    line-height: var(--mirel-content-line-height, 1.5) !important;
+  }
+  #pageSettings .section-title, #pageList .section-title, #pageMap .section-title, #pageAdd .section-title {
+    font-size: var(--mirel-ui-title-size, 18px) !important;
+  }
+  #pageSettings .field, #pageAdd .field { margin-bottom: var(--mirel-ui-gap, 9px) !important; }
+
+  .mirel-font-preview-compact { margin-top: 8px; }
+  .mirel-font-preview-compact .mirel-font-preview-card { padding: 10px 12px; }
+  .mirel-font-preview-compact .mirel-font-preview-body,
+  .mirel-font-preview-compact .mirel-font-preview-small { margin-top: 4px; }
 </style>
 
 </head>
@@ -1075,6 +1169,18 @@
             </div>
           </div>
 
+          <div id="settingFontSizePreview" class="mirel-font-preview mirel-font-preview-compact" data-preview-font-size="standard">
+            <div class="mirel-font-preview-head">
+              文字サイズのプレビュー
+              <span id="settingFontSizePreviewLabel">標準</span>
+            </div>
+            <div class="mirel-font-preview-card">
+              <div class="mirel-font-preview-name">山田 花子</div>
+              <div class="mirel-font-preview-body">東京都千代田区丸の内1-9-1</div>
+              <div class="mirel-font-preview-small">友人・仕事関係</div>
+            </div>
+          </div>
+
           <label style="margin-top:16px;display:block;">
             行間・余白
           </label>
@@ -1104,12 +1210,12 @@
             </div>
           </div>
 
-          <div id="settingFontSizePreview" class="mirel-font-preview" data-preview-font-size="standard" data-preview-line-spacing="standard">
+          <div id="settingSpacingPreview" class="mirel-font-preview" data-preview-line-spacing="standard">
             <div class="mirel-font-preview-head">
-              プレビュー
-              <span><span id="settingFontSizePreviewLabel">標準</span>・<span id="settingLineSpacingPreviewLabel">標準</span></span>
+              行間・余白のプレビュー
+              <span id="settingLineSpacingPreviewLabel">標準</span>
             </div>
-            <div id="settingTypographyPreviewDetail" class="mirel-font-preview-detail">100% / 行間 1.50 / 余白 9px</div>
+            <div id="settingTypographyPreviewDetail" class="mirel-font-preview-detail">行間 1.50 / 余白 9px</div>
             <div class="mirel-font-preview-card">
               <div class="mirel-preview-section-label">項目間の余白</div>
               <div class="mirel-preview-field-stack">
@@ -1117,8 +1223,8 @@
                 <div class="mirel-preview-field"><span>住所</span><strong>東京都千代田区丸の内1-9-1</strong></div>
                 <div class="mirel-preview-field"><span>所属</span><strong>友人・仕事関係</strong></div>
               </div>
-              <div class="mirel-preview-section-label mirel-preview-line-label">行間</div>
-              <div class="mirel-preview-longtext">先日の交流では、今後の予定についてゆっくり話しました。次回は資料を持参して、具体的な内容を確認する予定です。</div>
+              <div class="mirel-preview-section-label mirel-preview-line-label">交流履歴メモの行間</div>
+              <div class="mirel-preview-longtext">先日の交流では、今後の予定についてゆっくり話しました。次回は資料を持参して、具体的な内容を確認する予定です。長文になった場合の行と行の間隔をここで確認できます。</div>
             </div>
           </div>
 
@@ -2046,11 +2152,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261009-33"></script>
+<script src="./config.js?v=20261009-34"></script>
 
-<script src="./app.js?v=20261009-33"></script>
+<script src="./app.js?v=20261009-34"></script>
 
-<script src="./app-enhancements.js?v=20261009-33"></script>
+<script src="./app-enhancements.js?v=20261009-34"></script>
 
 </body>
 
