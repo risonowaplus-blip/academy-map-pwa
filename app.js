@@ -10388,15 +10388,15 @@ function mirelFeatureDefinitions() {
 
   return [
 
+    ['map', '地図表示'],
     ['gender', '性別'],
-    ['phone', '電話番号'],
+    ['grade', '学年'],
     ['birthday', '誕生日'],
     ['age', '年齢'],
-    ['grade', '学年'],
     ['affiliation', '所属'],
     ['place', '店名'],
-    ['map', '地図表示'],
     ['address', '住所'],
+    ['phone', '電話番号'],
     ['sns', 'SNSリンク'],
     ['interactions', '交流履歴'],
     ['children', '子ども情報']
