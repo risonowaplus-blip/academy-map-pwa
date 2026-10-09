@@ -334,7 +334,7 @@ var gradeOptions = [
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.09-32';
+var MIREL_APP_VERSION = '2026.10.09-33';
 var MIREL_APP_BUILD = '20261009-27';
 
 function mirelNotifyAppUpdated_() {
@@ -7190,7 +7190,10 @@ function applyFontSizeSetting() {
   document.body.style.setProperty('--mirel-detail-primary-size', (18 * ratio).toFixed(2) + 'px');
   document.body.style.setProperty('--mirel-detail-body-size', (15 * ratio).toFixed(2) + 'px');
   document.body.style.setProperty('--mirel-detail-small-size', (13 * ratio).toFixed(2) + 'px');
+  document.body.style.setProperty('--mirel-card-pad-x', Math.max(9, Math.round(13 * ratio)) + 'px');
+  document.body.style.setProperty('--mirel-inner-gap', Math.max(3, Math.round(5 * ratio)) + 'px');
 }
+
 
 function applyLineSpacingSetting() {
 
@@ -7206,9 +7209,15 @@ function applyLineSpacingSetting() {
   document.body.setAttribute('data-mirel-line-spacing', spacing);
   document.body.style.setProperty('--mirel-content-line-height', String(lineHeight));
   document.body.style.setProperty('--mirel-content-row-gap', itemGap + 'px');
-  document.body.style.setProperty('--mirel-content-card-pad-y', Math.max(7, itemGap + 4) + 'px');
+  document.body.style.setProperty('--mirel-content-card-pad-y', Math.max(5, itemGap + 2) + 'px');
   document.body.style.setProperty('--mirel-ui-gap', itemGap + 'px');
+  document.body.style.setProperty('--mirel-card-pad-y', Math.max(5, itemGap + 2) + 'px');
+  document.body.style.setProperty('--mirel-detail-card-pad', Math.max(8, itemGap + 5) + 'px');
+  document.body.style.setProperty('--mirel-list-card-gap', Math.max(4, Math.round(itemGap * 0.7)) + 'px');
+  document.body.style.setProperty('--mirel-section-gap', Math.max(7, itemGap + 1) + 'px');
+  document.body.style.setProperty('--mirel-accordion-pad-y', Math.max(7, itemGap + 2) + 'px');
 }
+
 
 
 function applySettingsToUi() {
