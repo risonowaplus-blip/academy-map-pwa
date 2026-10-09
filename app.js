@@ -334,7 +334,7 @@ var gradeOptions = [
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.09-30';
+var MIREL_APP_VERSION = '2026.10.09-32';
 var MIREL_APP_BUILD = '20261009-27';
 
 function mirelNotifyAppUpdated_() {
@@ -6924,33 +6924,104 @@ function appName() {
 }
 
 
+function mirelClampNumber(value, min, max, fallback) {
+  var n = Number(value);
+  if (!isFinite(n)) n = Number(fallback);
+  return Math.min(max, Math.max(min, n));
+}
+
+function mirelTypographyPresetValues(kind, preset) {
+  if (kind === 'font') {
+    if (preset === 'small') return { fontScale: 85 };
+    if (preset === 'large') return { fontScale: 120 };
+    return { fontScale: 100 };
+  }
+  if (preset === 'compact') return { lineHeight: 1.30, itemGap: 5 };
+  if (preset === 'spacious') return { lineHeight: 1.80, itemGap: 16 };
+  return { lineHeight: 1.50, itemGap: 9 };
+}
+
+function mirelSyncTypographyNumber(rangeId, numberId) {
+  var range = document.getElementById(rangeId);
+  var number = document.getElementById(numberId);
+  if (!range || !number) return;
+  number.value = range.value;
+}
+
+function mirelSyncTypographyRange(numberId, rangeId, presetId) {
+  var range = document.getElementById(rangeId);
+  var number = document.getElementById(numberId);
+  if (!range || !number) return;
+  var min = Number(range.min || 0);
+  var max = Number(range.max || 999);
+  var val = mirelClampNumber(number.value, min, max, range.value);
+  number.value = val;
+  range.value = val;
+  var preset = document.getElementById(presetId);
+  if (preset) preset.value = 'custom';
+  updateFontSizePreview();
+}
+
+function mirelTypographyCustomChanged(kind) {
+  var preset = document.getElementById(kind === 'font' ? 'settingFontSize' : 'settingLineSpacing');
+  if (preset) preset.value = 'custom';
+  if (kind === 'font') {
+    mirelSyncTypographyNumber('settingFontScale', 'settingFontScaleNumber');
+  } else {
+    mirelSyncTypographyNumber('settingLineHeight', 'settingLineHeightNumber');
+    mirelSyncTypographyNumber('settingItemGap', 'settingItemGapNumber');
+  }
+  updateFontSizePreview();
+}
+
+function applyTypographyPreset(kind) {
+  if (kind === 'font') {
+    var fontPreset = valueOf('settingFontSize') || 'standard';
+    if (fontPreset !== 'custom') {
+      var fv = mirelTypographyPresetValues('font', fontPreset);
+      setValue('settingFontScale', fv.fontScale);
+      setValue('settingFontScaleNumber', fv.fontScale);
+    }
+  } else {
+    var spacingPreset = valueOf('settingLineSpacing') || 'standard';
+    if (spacingPreset !== 'custom') {
+      var sv = mirelTypographyPresetValues('spacing', spacingPreset);
+      setValue('settingLineHeight', sv.lineHeight);
+      setValue('settingLineHeightNumber', sv.lineHeight);
+      setValue('settingItemGap', sv.itemGap);
+      setValue('settingItemGapNumber', sv.itemGap);
+    }
+  }
+  updateFontSizePreview();
+}
+
 function updateFontSizePreview() {
 
   var preview = document.getElementById('settingFontSizePreview');
-  if (!preview) {
-    return;
-  }
+  if (!preview) return;
 
   var size = valueOf('settingFontSize') || 'standard';
-
-  if (['small', 'standard', 'large'].indexOf(size) === -1) {
-    size = 'standard';
-  }
-
-  preview.setAttribute('data-preview-font-size', size);
+  if (['small', 'standard', 'large', 'custom'].indexOf(size) === -1) size = 'standard';
 
   var spacing = valueOf('settingLineSpacing') || 'standard';
-  if (['compact', 'standard', 'spacious'].indexOf(spacing) === -1) {
-    spacing = 'standard';
-  }
+  if (['compact', 'standard', 'spacious', 'custom'].indexOf(spacing) === -1) spacing = 'standard';
+
+  var fontScale = mirelClampNumber(valueOf('settingFontScale'), 80, 140, 100);
+  var lineHeight = mirelClampNumber(valueOf('settingLineHeight'), 1.10, 2.00, 1.50);
+  var itemGap = mirelClampNumber(valueOf('settingItemGap'), 2, 24, 9);
+
+  preview.setAttribute('data-preview-font-size', size);
   preview.setAttribute('data-preview-line-spacing', spacing);
+  preview.style.setProperty('--preview-scale', String(fontScale / 100));
+  preview.style.setProperty('--preview-line-height', String(lineHeight));
+  preview.style.setProperty('--preview-gap', itemGap + 'px');
 
   var spacingLabel = document.getElementById('settingLineSpacingPreviewLabel');
   if (spacingLabel) {
     spacingLabel.textContent =
       spacing === 'compact' ? '狭め' :
       spacing === 'spacious' ? '広め' :
-      '標準';
+      spacing === 'custom' ? '詳細設定' : '標準';
   }
 
   var label = document.getElementById('settingFontSizePreviewLabel');
@@ -6958,9 +7029,11 @@ function updateFontSizePreview() {
     label.textContent =
       size === 'small' ? '小さめ' :
       size === 'large' ? '大きめ' :
-      '標準';
+      size === 'custom' ? '詳細設定' : '標準';
   }
 
+  var detail = document.getElementById('settingTypographyPreviewDetail');
+  if (detail) detail.textContent = fontScale + '% / 行間 ' + lineHeight.toFixed(2) + ' / 余白 ' + itemGap + 'px';
 }
 
 
@@ -7001,6 +7074,13 @@ function fillSettingsForm() {
       'standard'
     )
   );
+
+  setValue('settingFontScale', appSettings.fontScale || 100);
+  setValue('settingFontScaleNumber', appSettings.fontScale || 100);
+  setValue('settingLineHeight', appSettings.lineHeight || 1.5);
+  setValue('settingLineHeightNumber', appSettings.lineHeight || 1.5);
+  setValue('settingItemGap', appSettings.itemGap || 9);
+  setValue('settingItemGapNumber', appSettings.itemGap || 9);
 
   updateFontSizePreview();
 
@@ -7045,7 +7125,11 @@ async function saveSettingsForm() {
       valueOf(
         'settingLineSpacing'
       ) ||
-      'standard'
+      'standard',
+
+    fontScale: mirelClampNumber(valueOf('settingFontScale'), 80, 140, 100),
+    lineHeight: mirelClampNumber(valueOf('settingLineHeight'), 1.10, 2.00, 1.50),
+    itemGap: mirelClampNumber(valueOf('settingItemGap'), 2, 24, 9)
 
   };
 
@@ -7088,67 +7172,42 @@ async function saveSettingsForm() {
 
 function applyFontSizeSetting() {
 
-  if (!document.body) {
-    return;
-  }
+  if (!document.body) return;
 
-  var size =
-    String(
-      appSettings.fontSize ||
-      'standard'
-    );
+  var size = String(appSettings.fontSize || 'standard');
+  if (['small','standard','large','custom'].indexOf(size) === -1) size = 'standard';
 
-  if (
-    [
-      'small',
-      'standard',
-      'large'
-    ].indexOf(
-      size
-    ) === -1
-  ) {
-    size =
-      'standard';
-  }
+  var fallback = mirelTypographyPresetValues('font', size === 'custom' ? 'standard' : size).fontScale;
+  var scale = mirelClampNumber(appSettings.fontScale, 80, 140, fallback);
+  var ratio = scale / 100;
 
-  document.body.setAttribute(
-    'data-mirel-font-size',
-    size
-  );
-
+  document.body.setAttribute('data-mirel-font-size', size);
+  document.body.style.setProperty('--mirel-ui-scale', String(ratio));
+  document.body.style.setProperty('--mirel-ui-title-size', (18 * ratio).toFixed(2) + 'px');
+  document.body.style.setProperty('--mirel-ui-body-size', (15 * ratio).toFixed(2) + 'px');
+  document.body.style.setProperty('--mirel-ui-small-size', (13 * ratio).toFixed(2) + 'px');
+  document.body.style.setProperty('--mirel-ui-micro-size', (11 * ratio).toFixed(2) + 'px');
+  document.body.style.setProperty('--mirel-detail-primary-size', (18 * ratio).toFixed(2) + 'px');
+  document.body.style.setProperty('--mirel-detail-body-size', (15 * ratio).toFixed(2) + 'px');
+  document.body.style.setProperty('--mirel-detail-small-size', (13 * ratio).toFixed(2) + 'px');
 }
-
 
 function applyLineSpacingSetting() {
 
-  if (!document.body) {
-    return;
-  }
+  if (!document.body) return;
 
-  var spacing =
-    String(
-      appSettings.lineSpacing ||
-      'standard'
-    );
+  var spacing = String(appSettings.lineSpacing || 'standard');
+  if (['compact','standard','spacious','custom'].indexOf(spacing) === -1) spacing = 'standard';
 
-  if (
-    [
-      'compact',
-      'standard',
-      'spacious'
-    ].indexOf(
-      spacing
-    ) === -1
-  ) {
-    spacing =
-      'standard';
-  }
+  var preset = mirelTypographyPresetValues('spacing', spacing === 'custom' ? 'standard' : spacing);
+  var lineHeight = mirelClampNumber(appSettings.lineHeight, 1.10, 2.00, preset.lineHeight);
+  var itemGap = mirelClampNumber(appSettings.itemGap, 2, 24, preset.itemGap);
 
-  document.body.setAttribute(
-    'data-mirel-line-spacing',
-    spacing
-  );
-
+  document.body.setAttribute('data-mirel-line-spacing', spacing);
+  document.body.style.setProperty('--mirel-content-line-height', String(lineHeight));
+  document.body.style.setProperty('--mirel-content-row-gap', itemGap + 'px');
+  document.body.style.setProperty('--mirel-content-card-pad-y', Math.max(7, itemGap + 4) + 'px');
+  document.body.style.setProperty('--mirel-ui-gap', itemGap + 'px');
 }
 
 
