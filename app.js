@@ -337,7 +337,7 @@ var gradeOptions = [
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.09-34';
+var MIREL_APP_VERSION = '2026.10.09-38';
 var MIREL_APP_BUILD = '20261009-27';
 
 function mirelNotifyAppUpdated_() {
