@@ -8237,30 +8237,59 @@ function mirelArrangeSettingsForRelease() {
   var affSection = affHost ? affHost.closest('.mirel-extra-section') : null;
   var workspace = document.getElementById('mirelWorkspaceSection');
 
-  /* 表示名・文字サイズを専用セクションにまとめる */
-  var displaySection = document.getElementById('mirelDisplaySettingsSection');
-  if (!displaySection) {
-    displaySection = document.createElement('div');
-    displaySection.id = 'mirelDisplaySettingsSection';
-    displaySection.className = 'mirel-extra-section mirel-display-settings-section';
-    displaySection.innerHTML = '<div class="section-title">表示名・文字サイズの変更</div>';
+  /* 基本表示設定／文字サイズを、それぞれ折り畳み内にまとめる */
+  function ensureSettingsAccordion(id, titleText) {
+    var section = document.getElementById(id);
+    if (!section) {
+      section = document.createElement('details');
+      section.id = id;
+      section.className = 'mirel-edit-accordion mirel-extra-section mirel-settings-accordion';
+      section.innerHTML =
+        '<summary><span class="mirel-edit-summary-main"><span>' +
+        titleText +
+        '</span></span></summary>' +
+        '<div class="children-area mirel-settings-accordion-body"></div>';
+    }
+    return section;
   }
 
-  ['settingAppName','settingPersonLabel','settingPlaceLabel','settingPlaceKanaLabel','settingFontSize']
+  var basicSection = ensureSettingsAccordion(
+    'mirelBasicDisplaySettingsSection',
+    '基本表示設定'
+  );
+  var typographySection = ensureSettingsAccordion(
+    'mirelTypographySettingsSection',
+    '文字サイズ'
+  );
+
+  var basicBody = basicSection.querySelector('.mirel-settings-accordion-body');
+  var typographyBody = typographySection.querySelector('.mirel-settings-accordion-body');
+
+  ['settingAppName','settingPersonLabel','settingPlaceLabel','settingPlaceKanaLabel']
     .forEach(function(id) {
       var el = document.getElementById(id);
       var field = el ? el.closest('.field') : null;
-      if (field && field.parentNode !== displaySection) displaySection.appendChild(field);
+      if (field && basicBody && field.parentNode !== basicBody) basicBody.appendChild(field);
     });
+
+  var fontEl = document.getElementById('settingFontSize');
+  var fontField = fontEl ? fontEl.closest('.field') : null;
+  if (fontField && typographyBody && fontField.parentNode !== typographyBody) {
+    typographyBody.appendChild(fontField);
+  }
 
   var directNotes = Array.prototype.slice.call(card.children).filter(function(node) {
     return node.classList && node.classList.contains('form-note');
   });
   directNotes.forEach(function(note) {
-    if (note.textContent.indexOf('表示名') !== -1) {
-      displaySection.insertBefore(note, displaySection.children[1] || null);
+    if (note.textContent.indexOf('表示名') !== -1 && basicBody) {
+      basicBody.insertBefore(note, basicBody.firstChild || null);
     }
   });
+
+  /* 旧版で作られた展開済みセクションが残っていたら撤去 */
+  var oldDisplaySection = document.getElementById('mirelDisplaySettingsSection');
+  if (oldDisplaySection) oldDisplaySection.remove();
 
   /* 使用項目内の通常保存ボタンは固定ボタンへ一本化 */
   if (extra) {
@@ -8269,10 +8298,11 @@ function mirelArrangeSettingsForRelease() {
     });
   }
 
-  /* desired: 所属ラベル → 使用する項目 → 表示名/文字サイズ → データの使い分け */
+  /* desired: 所属ラベル → 使用する項目 → 基本表示設定 → 文字サイズ → データの使い分け */
   if (affSection) card.appendChild(affSection);
   if (extra) card.appendChild(extra);
-  card.appendChild(displaySection);
+  card.appendChild(basicSection);
+  card.appendChild(typographySection);
   if (workspace) card.appendChild(workspace);
 
   var fixed = document.getElementById('mirelFixedSettingsSave');
