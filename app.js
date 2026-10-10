@@ -7599,29 +7599,55 @@ function updateDynamicManifest() {
         'standalone',
 
       background_color:
-        '#faf7f6',
+        '#eaf8ff',
 
       theme_color:
-        '#d95b72',
+        '#eaf8ff',
 
       icons: [
 
         {
           src:
-            './icon-192.png',
+            './icon-192.png?v=20261010-42',
           sizes:
             '192x192',
           type:
-            'image/png'
+            'image/png',
+          purpose:
+            'any'
         },
 
         {
           src:
-            './icon-512.png',
+            './icon-512.png?v=20261010-42',
           sizes:
             '512x512',
           type:
-            'image/png'
+            'image/png',
+          purpose:
+            'any'
+        },
+
+        {
+          src:
+            './icon-192-maskable.png?v=20261010-42',
+          sizes:
+            '192x192',
+          type:
+            'image/png',
+          purpose:
+            'maskable'
+        },
+
+        {
+          src:
+            './icon-512-maskable.png?v=20261010-42',
+          sizes:
+            '512x512',
+          type:
+            'image/png',
+          purpose:
+            'maskable'
         }
 
       ]
