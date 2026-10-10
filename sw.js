@@ -1,20 +1,20 @@
-/* Mirel Map Service Worker - 2026.10.10-43 */
-const MIREL_SW_VERSION = '2026.10.10-43';
+/* Mirel Map Service Worker - 2026.10.10-44 */
+const MIREL_SW_VERSION = '2026.10.10-44';
 const MIREL_CACHE = 'mirel-map-' + MIREL_SW_VERSION;
 const CORE = [
   './',
   './index.html',
-  './manifest.webmanifest?v=20261010-43',
-  './icon-192.png?v=20261010-43',
-  './icon-192-maskable.png?v=20261010-43',
-  './icon-512.png?v=20261010-43',
-  './icon-512-maskable.png?v=20261010-43',
-  './apple-touch-icon.png?v=20261010-43',
+  './manifest.webmanifest?v=20261010-44',
+  './icon-192.png?v=20261010-44',
+  './icon-192-maskable.png?v=20261010-44',
+  './icon-512.png?v=20261010-44',
+  './icon-512-maskable.png?v=20261010-44',
+  './apple-touch-icon.png?v=20261010-44',
   './splash-828x1792.png',
   './loading-screen.png',
   './style.css?v=20261009-39',
   './config.js?v=20261009-39',
-  './app.js?v=20261010-43',
+  './app.js?v=20261010-44',
   './app-enhancements.js?v=20261009-39'
 ];
 
