@@ -339,8 +339,8 @@ var gradeOptions = [
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.10-46';
-var MIREL_APP_BUILD = '20261010-46';
+var MIREL_APP_VERSION = '2026.10.10-47';
+var MIREL_APP_BUILD = '20261010-47';
 
 function mirelNotifyAppUpdated_() {
   try {
@@ -847,31 +847,27 @@ async function runScript(
   ) {
 
     /*
-     * Googleログイン直後の最初のAPI呼び出しが401になるケース対策。
-     * ユーザーがログインボタンを押している最中だけ、
-     * 1度だけトークンを再取得して同じAPIを再試行する。
-     * 起動時のバックグラウンド認証は行わない。
+     * Googleログイン直後に401が返った場合でも、
+     * ここでGoogle認証画面をもう一度出さない。
+     * 同じアクセストークンのまま1度だけ再試行する。
+     * これにより「Googleでログイン」が二重に表示されるのを防ぐ。
      */
     if (
       !retried &&
       mirelInteractiveLoginActive &&
-      !mirelInteractiveAuthRetryUsed &&
-      tokenClient
+      accessToken
     ) {
 
-      mirelInteractiveAuthRetryUsed = true;
-
       try {
-        clearAccessToken();
-        await requestGoogleToken('');
+        await new Promise(function(resolve) {
+          setTimeout(resolve, 350);
+        });
 
-        if (accessToken) {
-          return await runScript(
-            functionName,
-            parameters,
-            true
-          );
-        }
+        return await runScript(
+          functionName,
+          parameters,
+          true
+        );
       } catch (retryError) {
         /* 下の通常401処理へ */
       }
