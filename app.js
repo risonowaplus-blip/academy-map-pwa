@@ -7566,123 +7566,12 @@ function applySettingsToUi() {
 
   }
 
-  updateDynamicManifest();
 
 }
 
 
-function updateDynamicManifest() {
-
-  var manifestLink =
-    document.getElementById(
-      'appManifest'
-    );
-
-  if (!manifestLink) {
-    return;
-  }
-
-  try {
-
-    var manifest = {
-
-      name:
-        appName(),
-
-      short_name:
-        appName(),
-
-      start_url:
-        './',
-
-      display:
-        'standalone',
-
-      background_color:
-        '#eaf8ff',
-
-      theme_color:
-        '#eaf8ff',
-
-      icons: [
-
-        {
-          src:
-            './icon-192.png?v=20261010-42',
-          sizes:
-            '192x192',
-          type:
-            'image/png',
-          purpose:
-            'any'
-        },
-
-        {
-          src:
-            './icon-512.png?v=20261010-42',
-          sizes:
-            '512x512',
-          type:
-            'image/png',
-          purpose:
-            'any'
-        },
-
-        {
-          src:
-            './icon-192-maskable.png?v=20261010-42',
-          sizes:
-            '192x192',
-          type:
-            'image/png',
-          purpose:
-            'maskable'
-        },
-
-        {
-          src:
-            './icon-512-maskable.png?v=20261010-42',
-          sizes:
-            '512x512',
-          type:
-            'image/png',
-          purpose:
-            'maskable'
-        }
-
-      ]
-
-    };
-
-    var blob =
-      new Blob(
-
-        [
-          JSON.stringify(
-            manifest
-          )
-        ],
-
-        {
-          type:
-            'application/manifest+json'
-        }
-
-      );
-
-    var url =
-      URL.createObjectURL(
-        blob
-      );
-
-    manifestLink.setAttribute(
-      'href',
-      url
-    );
-
-  } catch (e) {}
-
-}
+/* PWA manifest は index.html から静的 manifest.webmanifest のみを参照する。
+   Blob による動的上書きは行わない。 */
 
 
 /* ========================================
