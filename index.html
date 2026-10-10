@@ -74,49 +74,7 @@
       object-fit: cover !important;
       object-position: center center !important;
     }
-  
-  /* Mirel Map 設定アコーディオン 2026.10.10-46 */
-  #pageSettings .mirel-settings-accordion {
-    border: 1px solid rgba(80, 110, 140, .18);
-    border-radius: 14px;
-    background: rgba(255,255,255,.86);
-    margin: 10px 0;
-    overflow: hidden;
-  }
-  #pageSettings .mirel-settings-accordion > summary {
-    list-style: none;
-    cursor: pointer;
-    padding: 15px 16px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    user-select: none;
-  }
-  #pageSettings .mirel-settings-accordion > summary::-webkit-details-marker { display:none; }
-  #pageSettings .mirel-settings-accordion > summary::after {
-    content: '＋';
-    font-size: 20px;
-    line-height: 1;
-    font-weight: 500;
-    opacity: .7;
-  }
-  #pageSettings .mirel-settings-accordion[open] > summary::after { content:'−'; }
-  #pageSettings .mirel-settings-accordion[open] > summary {
-    border-bottom: 1px solid rgba(80, 110, 140, .12);
-  }
-  #pageSettings .mirel-settings-accordion-body { padding: 15px 16px 16px; }
-  #pageSettings .mirel-settings-save-sticky {
-    position: sticky;
-    bottom: 74px;
-    z-index: 8;
-    padding-top: 10px;
-    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.96) 30%);
-  }
-  #pageSettings .mirel-settings-save-sticky .primary { width:100%; }
-
-</style>
+  </style>
 
   <title>
     Mirel Map
@@ -837,31 +795,6 @@
 
 
 <div
-  id="licenseScreen"
-  class="auth-screen hidden"
->
-  <div class="auth-card">
-    <div class="app-mark">M</div>
-    <h1>Mirel Map</h1>
-    <p id="licenseMessage">
-      Mirel Mapの利用ライセンスを確認しています。
-    </p>
-    <button
-      id="licensePurchaseButton"
-      class="primary big"
-      type="button"
-      onclick="mirelStartPurchase()"
-    >
-      Mirel Mapを購入する
-    </button>
-    <div class="small-note">
-      購入済みの場合は、購入後に利用するGoogleアカウントでログインしてください。
-    </div>
-  </div>
-</div>
-
-
-<div
   id="loading"
   class="loading mirel-loading-screen show"
   aria-label="読み込み中"
@@ -1108,144 +1041,268 @@
 
       <div class="card">
 
-        <div class="section-title">設定</div>
-
-        <div class="form-note">
-          必要な項目だけ開いて設定できます。閉じた項目はそのまま保持されます。
+        <div class="section-title">
+          設定
         </div>
 
-        <details class="mirel-settings-accordion">
-          <summary>基本表示設定</summary>
-          <div class="mirel-settings-accordion-body">
-            <div class="form-note">表示名は候補から選んでも、自由に入力しても構いません。</div>
+        <div class="form-note">
+          表示名は候補から選んでも、自由に入力しても構いません。
+        </div>
 
-            <div class="field setting-combo">
-              <label>アプリ名</label>
-              <input id="settingAppName" autocomplete="off"
-                onfocus="showSettingSuggestions('settingAppName','settingAppNameResults','appName',true)"
-                oninput="showSettingSuggestions('settingAppName','settingAppNameResults','appName',false)">
-              <div id="settingAppNameResults" class="setting-results"></div>
-            </div>
 
-            <div class="field setting-combo">
-              <label>人物名称</label>
-              <input id="settingPersonLabel" autocomplete="off"
-                onfocus="showSettingSuggestions('settingPersonLabel','settingPersonLabelResults','personLabel',true)"
-                oninput="showSettingSuggestions('settingPersonLabel','settingPersonLabelResults','personLabel',false)">
-              <div id="settingPersonLabelResults" class="setting-results"></div>
-            </div>
+        <div class="field setting-combo">
 
-            <div class="field setting-combo">
-              <label>店名の表示名</label>
-              <input id="settingPlaceLabel" autocomplete="off"
-                onfocus="showSettingSuggestions('settingPlaceLabel','settingPlaceLabelResults','placeLabel',true)"
-                oninput="showSettingSuggestions('settingPlaceLabel','settingPlaceLabelResults','placeLabel',false)">
-              <div id="settingPlaceLabelResults" class="setting-results"></div>
-            </div>
+          <label>
+            アプリ名
+          </label>
 
-            <div class="field setting-combo">
-              <label>店名ふりがなの表示名</label>
-              <input id="settingPlaceKanaLabel" autocomplete="off"
-                onfocus="showSettingSuggestions('settingPlaceKanaLabel','settingPlaceKanaLabelResults','placeKanaLabel',true)"
-                oninput="showSettingSuggestions('settingPlaceKanaLabel','settingPlaceKanaLabelResults','placeKanaLabel',false)">
-              <div id="settingPlaceKanaLabelResults" class="setting-results"></div>
+          <input
+            id="settingAppName"
+            autocomplete="off"
+            onfocus="showSettingSuggestions(
+              'settingAppName',
+              'settingAppNameResults',
+              'appName',
+              true
+            )"
+            oninput="showSettingSuggestions(
+              'settingAppName',
+              'settingAppNameResults',
+              'appName',
+              false
+            )"
+          >
+
+          <div
+            id="settingAppNameResults"
+            class="setting-results"
+          ></div>
+
+        </div>
+
+
+        <div class="field setting-combo">
+
+          <label>
+            人物名称
+          </label>
+
+          <input
+            id="settingPersonLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions(
+              'settingPersonLabel',
+              'settingPersonLabelResults',
+              'personLabel',
+              true
+            )"
+            oninput="showSettingSuggestions(
+              'settingPersonLabel',
+              'settingPersonLabelResults',
+              'personLabel',
+              false
+            )"
+          >
+
+          <div
+            id="settingPersonLabelResults"
+            class="setting-results"
+          ></div>
+
+        </div>
+
+
+        <div class="field setting-combo">
+
+          <label>
+            店名の表示名
+          </label>
+
+          <input
+            id="settingPlaceLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions(
+              'settingPlaceLabel',
+              'settingPlaceLabelResults',
+              'placeLabel',
+              true
+            )"
+            oninput="showSettingSuggestions(
+              'settingPlaceLabel',
+              'settingPlaceLabelResults',
+              'placeLabel',
+              false
+            )"
+          >
+
+          <div
+            id="settingPlaceLabelResults"
+            class="setting-results"
+          ></div>
+
+        </div>
+
+
+        <div class="field setting-combo">
+
+          <label>
+            店名ふりがなの表示名
+          </label>
+
+          <input
+            id="settingPlaceKanaLabel"
+            autocomplete="off"
+            onfocus="showSettingSuggestions(
+              'settingPlaceKanaLabel',
+              'settingPlaceKanaLabelResults',
+              'placeKanaLabel',
+              true
+            )"
+            oninput="showSettingSuggestions(
+              'settingPlaceKanaLabel',
+              'settingPlaceKanaLabelResults',
+              'placeKanaLabel',
+              false
+            )"
+          >
+
+          <div
+            id="settingPlaceKanaLabelResults"
+            class="setting-results"
+          ></div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            文字サイズ
+          </label>
+
+          <select id="settingFontSize" onchange="applyTypographyPreset('font')">
+            <option value="small">小さめ</option>
+            <option value="standard">標準</option>
+            <option value="large">大きめ</option>
+            <option value="custom">詳細設定</option>
+          </select>
+
+          <div class="small-note">
+            アプリ全体の文字サイズを調整します。プリセット選択後に、下の詳細設定で自由に微調整できます。
+          </div>
+
+          <div class="mirel-typography-detail">
+            <label>文字倍率 <span id="settingFontScaleLabel"></span></label>
+            <div class="mirel-range-row">
+              <input id="settingFontScale" type="range" min="80" max="140" step="1" value="100" oninput="mirelTypographyCustomChanged('font')">
+              <input id="settingFontScaleNumber" class="mirel-range-number" type="number" min="80" max="140" step="1" value="100" oninput="mirelTypographyNumberTyping('settingFontScaleNumber','settingFontScale','settingFontSize')" onchange="mirelSyncTypographyRange('settingFontScaleNumber','settingFontScale','settingFontSize')">
+              <span>%</span>
             </div>
           </div>
-        </details>
 
-        <details class="mirel-settings-accordion">
-          <summary>文字サイズ</summary>
-          <div class="mirel-settings-accordion-body">
-            <div class="field">
-              <select id="settingFontSize" onchange="applyTypographyPreset('font')">
-                <option value="small">小さめ</option>
-                <option value="standard">標準</option>
-                <option value="large">大きめ</option>
-                <option value="custom">詳細設定</option>
-              </select>
-              <div class="small-note">アプリ全体の文字サイズを調整します。プリセット選択後に、下の詳細設定で自由に微調整できます。</div>
-              <div class="mirel-typography-detail">
-                <label>文字倍率 <span id="settingFontScaleLabel"></span></label>
-                <div class="mirel-range-row">
-                  <input id="settingFontScale" type="range" min="80" max="140" step="1" value="100" oninput="mirelTypographyCustomChanged('font')">
-                  <input id="settingFontScaleNumber" class="mirel-range-number" type="number" min="80" max="140" step="1" value="100" oninput="mirelTypographyNumberTyping('settingFontScaleNumber','settingFontScale','settingFontSize')" onchange="mirelSyncTypographyRange('settingFontScaleNumber','settingFontScale','settingFontSize')">
-                  <span>%</span>
-                </div>
-              </div>
-              <div id="settingFontSizePreview" class="mirel-font-preview mirel-font-preview-compact" data-preview-font-size="standard">
-                <div class="mirel-font-preview-head">文字サイズのプレビュー <span id="settingFontSizePreviewLabel">標準</span></div>
-                <div class="mirel-font-preview-card">
-                  <div class="mirel-font-preview-name">山田 花子</div>
-                  <div class="mirel-font-preview-body">東京都千代田区丸の内1-9-1</div>
-                  <div class="mirel-font-preview-small">友人・仕事関係</div>
-                </div>
-              </div>
+          <div id="settingFontSizePreview" class="mirel-font-preview mirel-font-preview-compact" data-preview-font-size="standard">
+            <div class="mirel-font-preview-head">
+              文字サイズのプレビュー
+              <span id="settingFontSizePreviewLabel">標準</span>
+            </div>
+            <div class="mirel-font-preview-card">
+              <div class="mirel-font-preview-name">山田 花子</div>
+              <div class="mirel-font-preview-body">東京都千代田区丸の内1-9-1</div>
+              <div class="mirel-font-preview-small">友人・仕事関係</div>
             </div>
           </div>
-        </details>
 
-        <details class="mirel-settings-accordion">
-          <summary>行間・余白</summary>
-          <div class="mirel-settings-accordion-body">
-            <div class="field">
-              <select id="settingLineSpacing" onchange="applyTypographyPreset('spacing')">
-                <option value="compact">狭め</option>
-                <option value="standard">標準</option>
-                <option value="spacious">広め</option>
-                <option value="custom">詳細設定</option>
-              </select>
-              <div class="small-note">アプリ全体の行間と項目間隔を調整します。必要に応じて数値で細かく設定できます。</div>
-              <div class="mirel-typography-detail">
-                <label>行間</label>
-                <div class="mirel-range-row">
-                  <input id="settingLineHeight" type="range" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelTypographyCustomChanged('spacing')">
-                  <input id="settingLineHeightNumber" class="mirel-range-number" type="number" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelTypographyNumberTyping('settingLineHeightNumber','settingLineHeight','settingLineSpacing')" onchange="mirelSyncTypographyRange('settingLineHeightNumber','settingLineHeight','settingLineSpacing')">
-                </div>
-                <label style="margin-top:10px;">項目間の余白</label>
-                <div class="mirel-range-row">
-                  <input id="settingItemGap" type="range" min="2" max="24" step="1" value="9" oninput="mirelTypographyCustomChanged('spacing')">
-                  <input id="settingItemGapNumber" class="mirel-range-number" type="number" min="2" max="24" step="1" value="9" oninput="mirelTypographyNumberTyping('settingItemGapNumber','settingItemGap','settingLineSpacing')" onchange="mirelSyncTypographyRange('settingItemGapNumber','settingItemGap','settingLineSpacing')">
-                  <span>px</span>
-                </div>
-              </div>
-              <div id="settingSpacingPreview" class="mirel-font-preview" data-preview-line-spacing="standard">
-                <div class="mirel-font-preview-head">行間・余白のプレビュー <span id="settingLineSpacingPreviewLabel">標準</span></div>
-                <div id="settingTypographyPreviewDetail" class="mirel-font-preview-detail">行間 1.50 / 余白 9px</div>
-                <div class="mirel-font-preview-card">
-                  <div class="mirel-preview-section-label">項目間の余白</div>
-                  <div class="mirel-preview-field-stack">
-                    <div class="mirel-preview-field"><span>名前</span><strong>山田 花子</strong></div>
-                    <div class="mirel-preview-field"><span>住所</span><strong>東京都千代田区丸の内1-9-1</strong></div>
-                    <div class="mirel-preview-field"><span>所属</span><strong>友人・仕事関係</strong></div>
-                  </div>
-                  <div class="mirel-preview-section-label mirel-preview-line-label">交流履歴メモの行間</div>
-                  <div class="mirel-preview-longtext">先日の交流では、今後の予定についてゆっくり話しました。次回は資料を持参して、具体的な内容を確認する予定です。長文になった場合の行と行の間隔をここで確認できます。</div>
-                </div>
-              </div>
+          <label style="margin-top:16px;display:block;">
+            行間・余白
+          </label>
+
+          <select id="settingLineSpacing" onchange="applyTypographyPreset('spacing')">
+            <option value="compact">狭め</option>
+            <option value="standard">標準</option>
+            <option value="spacious">広め</option>
+            <option value="custom">詳細設定</option>
+          </select>
+
+          <div class="small-note">
+            アプリ全体の行間と項目間隔を調整します。必要に応じて数値で細かく設定できます。
+          </div>
+
+          <div class="mirel-typography-detail">
+            <label>行間</label>
+            <div class="mirel-range-row">
+              <input id="settingLineHeight" type="range" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelTypographyCustomChanged('spacing')">
+              <input id="settingLineHeightNumber" class="mirel-range-number" type="number" min="1.10" max="2.00" step="0.05" value="1.50" oninput="mirelTypographyNumberTyping('settingLineHeightNumber','settingLineHeight','settingLineSpacing')" onchange="mirelSyncTypographyRange('settingLineHeightNumber','settingLineHeight','settingLineSpacing')">
+            </div>
+            <label style="margin-top:10px;">項目間の余白</label>
+            <div class="mirel-range-row">
+              <input id="settingItemGap" type="range" min="2" max="24" step="1" value="9" oninput="mirelTypographyCustomChanged('spacing')">
+              <input id="settingItemGapNumber" class="mirel-range-number" type="number" min="2" max="24" step="1" value="9" oninput="mirelTypographyNumberTyping('settingItemGapNumber','settingItemGap','settingLineSpacing')" onchange="mirelSyncTypographyRange('settingItemGapNumber','settingItemGap','settingLineSpacing')">
+              <span>px</span>
             </div>
           </div>
-        </details>
 
-        <div id="mirelExtraSettings" class="mirel-extra-section">
-          <details class="mirel-settings-accordion">
-            <summary>使用する項目</summary>
-            <div class="mirel-settings-accordion-body">
-              <div class="form-note">OFFにしても登録済みデータは削除されません。再度ONにすると元のデータが表示されます。</div>
-              <div id="mirelFeatureGrid" class="mirel-feature-grid"></div>
+          <div id="settingSpacingPreview" class="mirel-font-preview" data-preview-line-spacing="standard">
+            <div class="mirel-font-preview-head">
+              行間・余白のプレビュー
+              <span id="settingLineSpacingPreviewLabel">標準</span>
             </div>
-          </details>
-
-          <details class="mirel-settings-accordion">
-            <summary>所属ラベル</summary>
-            <div class="mirel-settings-accordion-body">
-              <div class="form-note">所属ラベルは「追加」または「保存」を押した時点で反映されます。下の「設定を保存」は不要です。色はパステル候補またはカスタム色から選べます。</div>
-              <div id="mirelAffiliationMaster"></div>
+            <div id="settingTypographyPreviewDetail" class="mirel-font-preview-detail">行間 1.50 / 余白 9px</div>
+            <div class="mirel-font-preview-card">
+              <div class="mirel-preview-section-label">項目間の余白</div>
+              <div class="mirel-preview-field-stack">
+                <div class="mirel-preview-field"><span>名前</span><strong>山田 花子</strong></div>
+                <div class="mirel-preview-field"><span>住所</span><strong>東京都千代田区丸の内1-9-1</strong></div>
+                <div class="mirel-preview-field"><span>所属</span><strong>友人・仕事関係</strong></div>
+              </div>
+              <div class="mirel-preview-section-label mirel-preview-line-label">交流履歴メモの行間</div>
+              <div class="mirel-preview-longtext">先日の交流では、今後の予定についてゆっくり話しました。次回は資料を持参して、具体的な内容を確認する予定です。長文になった場合の行と行の間隔をここで確認できます。</div>
             </div>
-          </details>
-
-          <div class="mirel-feature-save-actions mirel-settings-save-sticky">
-            <button class="primary" type="button" onclick="saveSettingsForm()">設定を保存</button>
           </div>
+
+        </div>
+
+
+        <div
+          id="mirelExtraSettings"
+          class="mirel-extra-section"
+        >
+
+          <div class="section-title">
+            使用する項目
+          </div>
+
+          <div class="form-note">
+            OFFにしても登録済みデータは削除されません。再度ONにすると元のデータが表示されます。
+          </div>
+
+          <div
+            id="mirelFeatureGrid"
+            class="mirel-feature-grid"
+          ></div>
+
+          <div class="mirel-feature-save-actions">
+            <button
+              class="primary"
+              type="button"
+              onclick="saveSettingsForm()"
+            >
+              設定を保存
+            </button>
+          </div>
+<div class="mirel-extra-section">
+
+            <div class="section-title">
+              所属ラベル
+            </div>
+
+            <div class="form-note">
+              所属ラベルは「追加」または「保存」を押した時点で反映されます。上の「設定を保存」は不要です。色はパステル候補またはカスタム色から選べます。
+            </div>
+
+            <div id="mirelAffiliationMaster"></div>
+
+          </div>
+
         </div>
 
       </div>
@@ -2126,11 +2183,11 @@
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
-<script src="./config.js?v=20261010-45"></script>
+<script src="./config.js?v=20261009-39"></script>
 
-<script src="./app.js?v=20261010-46"></script>
+<script src="./app.js?v=20261010-44"></script>
 
-<script src="./app-enhancements.js?v=20261009-39"></script>
+<script src="./app-enhancements.js?v=20261010-45"></script>
 
 </body>
 
