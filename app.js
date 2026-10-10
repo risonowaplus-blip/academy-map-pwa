@@ -9,6 +9,8 @@ var accessToken = '';
 var accessTokenExpiresAt = 0;
 var pendingTokenResolve = null;
 var pendingTokenReject = null;
+var mirelInteractiveLoginActive = false;
+var mirelInteractiveAuthRetryUsed = false;
 
 var mapInstance = null;
 
@@ -338,7 +340,7 @@ var gradeOptions = [
    Mirel Map アプリバージョン
    ========================================================= */
 var MIREL_APP_VERSION = '2026.10.10-46';
-var MIREL_APP_BUILD = '20261010-45';
+var MIREL_APP_BUILD = '20261010-46';
 
 function mirelNotifyAppUpdated_() {
   try {
@@ -354,144 +356,6 @@ function mirelNotifyAppUpdated_() {
     }
   } catch (e) {}
 }
-
-
-
-/* =========================================================
-   Mirel Map 販売ライセンス
-   2026-10-10-45
-   - 現在は CONFIG.LICENSE_ENFORCEMENT_CLIENT=false なら完全スキップ
-   - 本番販売開始時に true へ切替
-   - 購入完了後の mirel_activation を自動消化
-   ========================================================= */
-
-var mirelLicenseState = null;
-
-function mirelLicenseClientEnabled() {
-  return !!(
-    window.CONFIG &&
-    CONFIG.LICENSE_ENFORCEMENT_CLIENT === true
-  );
-}
-
-function mirelReadActivationTokenFromUrl() {
-  try {
-    var params = new URLSearchParams(window.location.search || '');
-    return String(params.get('mirel_activation') || '').trim();
-  } catch (e) {
-    return '';
-  }
-}
-
-function mirelClearActivationTokenFromUrl() {
-  try {
-    var url = new URL(window.location.href);
-    url.searchParams.delete('mirel_activation');
-    url.searchParams.delete('purchase');
-    window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
-  } catch (e) {}
-}
-
-function mirelShowLicenseScreen(state) {
-  mirelLicenseState = state || {};
-  setLoading(false);
-
-  var auth = document.getElementById('authScreen');
-  var shell = document.getElementById('appShell');
-  var screen = document.getElementById('licenseScreen');
-  if (auth) auth.classList.add('hidden');
-  if (shell) shell.classList.add('hidden');
-  if (screen) screen.classList.remove('hidden');
-
-  var msg = document.getElementById('licenseMessage');
-  if (msg) {
-    msg.textContent =
-      (state && state.message) ||
-      'このGoogleアカウントではMirel Mapの利用ライセンスが確認できません。';
-  }
-
-  var buy = document.getElementById('licensePurchaseButton');
-  if (buy) {
-    var url = String((state && state.purchaseUrl) || '').trim();
-    buy.style.display = url ? '' : 'none';
-  }
-}
-
-function mirelHideLicenseScreen() {
-  var screen = document.getElementById('licenseScreen');
-  if (screen) screen.classList.add('hidden');
-}
-
-function mirelStartPurchase() {
-  var url = String(
-    mirelLicenseState && mirelLicenseState.purchaseUrl
-      ? mirelLicenseState.purchaseUrl
-      : ''
-  ).trim();
-
-  if (!url) {
-    if (typeof appToast === 'function') {
-      appToast('購入ページがまだ設定されていません。');
-    }
-    return;
-  }
-
-  window.location.href = url;
-}
-
-async function mirelCheckLicenseBeforeAppStart() {
-  if (!mirelLicenseClientEnabled()) {
-    return true;
-  }
-
-  setLoading(true);
-
-  var activationToken = mirelReadActivationTokenFromUrl();
-  if (activationToken) {
-    try {
-      var redeemed = await runScript(
-        'mirelRedeemActivationToken',
-        [activationToken]
-      );
-      mirelClearActivationTokenFromUrl();
-      if (redeemed && redeemed.allowed) {
-        mirelLicenseState = redeemed;
-        return true;
-      }
-    } catch (e) {
-      mirelClearActivationTokenFromUrl();
-      mirelShowLicenseScreen({
-        allowed: false,
-        purchaseUrl: '',
-        message: e && e.message
-          ? e.message
-          : 'ライセンスの有効化に失敗しました。'
-      });
-      return false;
-    }
-  }
-
-  try {
-    var state = await runScript('mirelGetMyLicenseState');
-    mirelLicenseState = state || {};
-    if (state && state.allowed) {
-      mirelHideLicenseScreen();
-      return true;
-    }
-    mirelShowLicenseScreen(state || {});
-    return false;
-  } catch (e) {
-    mirelShowLicenseScreen({
-      allowed: false,
-      purchaseUrl: '',
-      message: e && e.message
-        ? e.message
-        : 'ライセンス確認に失敗しました。'
-    });
-    return false;
-  }
-}
-
 
 /* ========================================
    起動
@@ -820,6 +684,8 @@ function requestGoogleToken(promptMode) {
 async function login() {
 
   setLoading(true);
+  mirelInteractiveLoginActive = true;
+  mirelInteractiveAuthRetryUsed = false;
 
   try {
 
@@ -827,14 +693,28 @@ async function login() {
       'select_account'
     );
 
+    /*
+     * ここで取得したトークンを使ってそのまま初期化する。
+     * 初回API呼び出しだけ401になった場合は runScript() 側で
+     * 1度だけ無表示再取得して再試行する。
+     */
     await startApp();
+
+    if (accessToken) {
+      showAppScreen();
+    }
 
   } catch (e) {
 
-    showLoginScreen();
+    if (!accessToken) {
+      showLoginScreen();
+    } else {
+      handleError(e);
+    }
 
   } finally {
 
+    mirelInteractiveLoginActive = false;
     setLoading(false);
 
   }
@@ -864,8 +744,6 @@ function showLoginScreen() {
 
 
 function showAppScreen() {
-
-  mirelHideLicenseScreen();
 
   document.getElementById(
     'authScreen'
@@ -968,6 +846,37 @@ async function runScript(
     response.status === 401
   ) {
 
+    /*
+     * Googleログイン直後の最初のAPI呼び出しが401になるケース対策。
+     * ユーザーがログインボタンを押している最中だけ、
+     * 1度だけトークンを再取得して同じAPIを再試行する。
+     * 起動時のバックグラウンド認証は行わない。
+     */
+    if (
+      !retried &&
+      mirelInteractiveLoginActive &&
+      !mirelInteractiveAuthRetryUsed &&
+      tokenClient
+    ) {
+
+      mirelInteractiveAuthRetryUsed = true;
+
+      try {
+        clearAccessToken();
+        await requestGoogleToken('');
+
+        if (accessToken) {
+          return await runScript(
+            functionName,
+            parameters,
+            true
+          );
+        }
+      } catch (retryError) {
+        /* 下の通常401処理へ */
+      }
+    }
+
     clearAccessToken();
     showLoginScreen();
 
@@ -1054,13 +963,6 @@ async function runScript(
    ======================================== */
 
 async function startApp() {
-
-  var mirelLicenseAllowed =
-    await mirelCheckLicenseBeforeAppStart();
-
-  if (!mirelLicenseAllowed) {
-    return;
-  }
 
   var mirelStartupStartedAt =
     mirelPerfNow();
@@ -12075,15 +11977,13 @@ function mirelEnsureWorkspacePanel() {
 
   var panel = document.getElementById('mirelWorkspaceSection');
   if (!panel) {
-    panel = document.createElement('details');
+    panel = document.createElement('div');
     panel.id = 'mirelWorkspaceSection';
-    panel.className = 'mirel-settings-accordion mirel-workspace-section';
+    panel.className = 'mirel-extra-section mirel-workspace-section';
     panel.innerHTML =
-      '<summary>データの使い分け</summary>' +
-      '<div class="mirel-settings-accordion-body">' +
-        '<div class="form-note">用途ごとに人物・所属ラベル・設定を完全に分けられます。</div>' +
-        '<div id="mirelWorkspacePanel"><div class="small-note">読み込み中…</div></div>' +
-      '</div>';
+      '<div class="section-title">データの使い分け</div>' +
+      '<div class="form-note">用途ごとに人物・所属ラベル・設定を完全に分けられます。</div>' +
+      '<div id="mirelWorkspacePanel"><div class="small-note">読み込み中…</div></div>';
 
     var extra = document.getElementById('mirelExtraSettings');
     if (extra && extra.parentNode === card) {
