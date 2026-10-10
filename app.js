@@ -337,8 +337,8 @@ var gradeOptions = [
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.09-39';
-var MIREL_APP_BUILD = '20261009-27';
+var MIREL_APP_VERSION = '2026.10.10-44';
+var MIREL_APP_BUILD = '20261010-44';
 
 function mirelNotifyAppUpdated_() {
   try {
@@ -705,6 +705,10 @@ async function login() {
 
 
 function showLoginScreen() {
+
+  /* 認証判定が終わるまではログイン画面を見せず、
+     本当にログインが必要な場合だけここで表示する */
+  setLoading(false);
 
   document.getElementById(
     'appShell'
