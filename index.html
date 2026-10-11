@@ -22,7 +22,7 @@
 
 
 
-  <meta name="mirel-app-version" content="2026.10.11-51">
+  <meta name="mirel-app-version" content="2026.10.11-52">
 
 
 
@@ -3721,14 +3721,14 @@
 
 
 
-<script src="./app-enhancements.js?v=20261011-50"></script>
+<script src="./app-enhancements.js?v=20261011-52"></script>
 
 
 
 
 
 <style id="mirel-update-style">
-#mirelUpdateButton{position:fixed;right:14px;top:max(12px,env(safe-area-inset-top));z-index:9000;width:40px;height:40px;border-radius:50%;border:1px solid #e3c2cb;background:#fff;color:#a94865;box-shadow:0 2px 10px #0002;font-size:21px;cursor:pointer}
+#mirelUpdateButton{position:static!important;inset:auto!important;z-index:auto!important;flex:0 0 auto;width:44px;height:44px;border-radius:15px;border:1px solid #e7b9c4;background:#d95b72;color:#fff;box-shadow:0 2px 8px #0001;font-size:25px;font-weight:400;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;line-height:1} .mirel-topbar-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
 #mirelUpdateNotice{position:fixed;left:12px;right:12px;bottom:max(75px,env(safe-area-inset-bottom));z-index:9900;background:#fff;border:1px solid #e4cad2;box-shadow:0 5px 22px #0002;border-radius:14px;padding:15px;color:#303030;font:14px/1.6 system-ui,sans-serif}
 #mirelUpdateNotice[hidden]{display:none!important}
 #mirelUpdateNotice .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
@@ -3754,6 +3754,15 @@
   const later = document.getElementById('mirelUpdateLater');
   const now = document.getElementById('mirelUpdateNow');
   const manual = document.getElementById('mirelUpdateButton');
+  const topbar = document.querySelector('#appShell header.topbar');
+  const addButton = topbar && topbar.querySelector('button.round-add');
+  if (topbar && addButton && manual) {
+    let actions = topbar.querySelector('.mirel-topbar-actions');
+    if (!actions) { actions = document.createElement('div'); actions.className = 'mirel-topbar-actions'; addButton.parentNode.insertBefore(actions, addButton); }
+    actions.appendChild(manual);
+    actions.appendChild(addButton);
+    manual.textContent = '↻';
+  }
   let latest = CURRENT;
   let busy = false;
   let formDirty = false;
