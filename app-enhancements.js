@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    Mirel Map
    UI / UX Enhancements
    2026-10-07
@@ -997,8 +997,7 @@ function mirelAttachSearchSelect(
           function() {
             search.focus();
           },
-          0
-        );
+          0        );
 
 
 
@@ -1997,8 +1996,7 @@ function mirelRenderCityResults(
 
 
             setValue(
-              'city',
-              row.city
+              'city',              row.city
             );
 
 
@@ -2990,7 +2988,6 @@ renderFullTeacherList =
         grouped[region] = [];
       }
     );
-
 
 
 
@@ -3990,7 +3987,6 @@ renderTeacherDetail =
             row.querySelector(
               '.label'
             );
-
 
 
 
@@ -5001,7 +4997,6 @@ function initializeMirelEnhancements() {
 
 
 
-
   mirelEnhanceSettings();
 
 
@@ -5990,7 +5985,6 @@ function mirelInstallInteractionTypeSelect() {
 
   input.dataset.mirelInteractionReady =
     '1';
-
 
 
 
@@ -6997,8 +6991,7 @@ renderMapTeacherPreview =
       if (
         selectedPrefecture &&
         selectedPrefecture !==
-          '__UNKNOWN__' &&
-        teacher.prefecture !==
+          '__UNKNOWN__' &&        teacher.prefecture !==
           selectedPrefecture
       ) {
 
@@ -7997,8 +7990,7 @@ mirelRenderCityResults =
 
 
 
-                  delete address1.dataset
-                    .mirelAutoTown;
+                  delete address1.dataset                    .mirelAutoTown;
 
 
 
@@ -8996,7 +8988,6 @@ saveTeacherForm =
 
       instagram:
         firstInstagramAccountFromPendingLinks(),
-
 
 
 
@@ -10000,7 +9991,6 @@ saveTeacherForm =
 
 
 
-
     host.style.top =
       '-10000px';
 
@@ -10990,7 +10980,6 @@ saveTeacherForm =
 
         multiTouch =
           false;
-
 
 
 
@@ -12001,7 +11990,6 @@ openTeacherForm =
 
 
 
-
           document.getElementById(
             'ageManual'
           ),
@@ -12990,7 +12978,6 @@ function mirelEnsureChildEditModal() {
 
 
 }
-
 
 
 
@@ -14003,7 +13990,6 @@ function mirelInstallChildDetailActions(
 
 
 
-
     var head =
       document.createElement(
         'div'
@@ -14997,8 +14983,7 @@ function mirelEnhanceInteractionHistory(
 
 
 
-    toggle.type =
-      'button';
+    toggle.type =      'button';
 
 
 
@@ -15999,7 +15984,6 @@ mirelInstallSettingsUi = function() {
 
 
 
-
 var mirelPrevShowPageForRelease = showPage;
 showPage = function(pageName) {
   var result = mirelPrevShowPageForRelease.apply(this, arguments);
@@ -16338,7 +16322,7 @@ setTimeout(mirelArrangeSettingsForRelease, 0);
    2. 文字サイズ
    3. 使用する項目
    4. 基本表示設定
-   5. ワークスペース切替（データの使い分け）
+   5. ワークスペース切替
    6. データ一括削除
    ========================================================= */
 
@@ -16434,41 +16418,27 @@ function mirelWrapSettingsNode_(node, id, titleText) {
 
 
 function mirelEnsureBulkDeleteSection_() {
-  var section =
-    mirelSettingsAccordion_(
-      'mirelBulkDeleteSection',
-      'データ一括削除'
-    );
-
-
-  var body =
-    section.querySelector(
-      '.mirel-settings-accordion-body'
-    );
-
-
-  if (
-    body &&
-    !body.querySelector(
-      '.mirel-bulk-delete-button'
-    )
-  ) {
-    body.innerHTML =
-      '<div class="form-note mirel-bulk-delete-note">' +
-      '現在選択中のワークスペースに登録されている人物・子ども・交流履歴・リンク・分類ラベルを一括削除します。' +
-      '<br>基本表示設定・使用項目設定・ワークスペース自体は残ります。' +
-      '<br><strong>削除したデータは元に戻せません。</strong>' +
-      '</div>' +
-      '<button type="button" class="detail-delete-button mirel-bulk-delete-button" ' +
-      'onclick="mirelDeleteAllWorkspaceData()">現在のワークスペースのデータを一括削除</button>';
+  var section = mirelSettingsAccordion_('mirelBulkDeleteSection', 'データ一括削除');
+  var body = section.querySelector('.mirel-settings-accordion-body');
+  if (!body) return section;
+  if (!document.getElementById('mirel-delete-buttons-css')) {
+    var st = document.createElement('style');
+    st.id = 'mirel-delete-buttons-css';
+    st.textContent = '#mirelBulkDeleteSection .detail-delete-button{display:block!important;width:100%!important;min-height:54px!important;padding:14px 16px!important;background:#f6e5e9!important;border:1px solid #eac7d1!important;border-radius:12px!important;color:#a54360!important;font-size:16px!important;font-weight:700!important;text-align:left!important;cursor:pointer!important;box-shadow:0 2px 5px rgba(0,0,0,.05)!important}#mirelBulkDeleteSection .detail-delete-button:before{content:"🗑  ";font-size:16px}#mirelBulkDeleteSection .detail-delete-button:active{transform:scale(.99)}#mirelBulkDeleteSection .small-note{margin:10px 0 4px;line-height:1.65}';
+    document.head.appendChild(st);
   }
-
-
+  body.innerHTML =
+    '<div style="display:grid;gap:16px;padding:8px 0">' +
+      '<div><button type="button" class="detail-delete-button" onclick="mirelExecuteBulkDelete(\'persons\')">人物データを一括削除</button>' +
+      '<div class="small-note">人物・子ども・SNS・交流履歴・関連情報を削除。分類ラベルは残ります。</div></div>' +
+      '<div><button type="button" class="detail-delete-button" onclick="mirelExecuteBulkDelete(\'labels\')">分類ラベルを一括削除</button>' +
+      '<div class="small-note">分類ラベルと人物への紐づけを削除。人物情報は残ります。</div></div>' +
+      '<div style="border-top:1px solid #ddd;padding-top:14px">' +
+      '<button type="button" class="detail-delete-button" onclick="mirelConfirmWorkspaceDeletion()">ワークスペースごと削除</button>' +
+      '<div class="small-note">このワークスペースの登録データと保存ファイルを削除。他のワークスペースは残ります。</div></div>' +
+    '</div>';
   return section;
 }
-
-
-
 
 async function mirelDeleteAllWorkspaceData() {
 
@@ -16827,7 +16797,7 @@ mirelArrangeSettingsForRelease = function() {
     mirelWrapSettingsNode_(
       workspace,
       'mirelWorkspaceSettingsSection',
-      'ワークスペース切替（データの使い分け）'
+      'ワークスペース切替'
     );
 
 
@@ -16974,22 +16944,6 @@ mirelArrangeSettingsForRelease = function() {
    既存の「データ一括削除」表示関数を後置で再定義する。
    本番で実行する前にテスト用ワークスペースで検証すること。
 */
-mirelEnsureBulkDeleteSection_ = function() {
-  var section = mirelSettingsAccordion_('mirelBulkDeleteSection', 'データ一括削除');
-  var body = section.querySelector('.mirel-settings-accordion-body');
-  if (!body) return section;
-  body.innerHTML =
-    '<div style="display:grid;gap:12px;padding:8px 0">' +
-      '<div><button type="button" class="detail-delete-button" onclick="mirelExecuteBulkDelete(\'persons\')">人物データを一括削除</button>' +
-      '<div class="small-note">人物・子ども・SNS・交流履歴・関連情報を削除。分類ラベルは残ります。</div></div>' +
-      '<div><button type="button" class="detail-delete-button" onclick="mirelExecuteBulkDelete(\'labels\')">分類ラベルを一括削除</button>' +
-      '<div class="small-note">分類ラベルと人物への紐づけを削除。人物情報は残ります。</div></div>' +
-      '<div style="border-top:1px solid #ddd;padding-top:14px">' +
-      '<button type="button" class="detail-delete-button" onclick="mirelConfirmWorkspaceDeletion()">ワークスペースごと削除</button>' +
-      '<div class="small-note">このワークスペースの登録データと保存ファイルを削除。他のワークスペースは残ります。</div></div>' +
-    '</div>';
-  return section;
-};
 async function mirelExecuteBulkDelete(type) {
   var isPersons = type === 'persons';
   if (!isPersons && type !== 'labels') throw new Error('削除区分が不正です。');
@@ -17027,8 +16981,7 @@ async function mirelConfirmWorkspaceDeletion() {
   });
   if (!active) { appToast('削除対象を確認できません。'); return; }
   var old = document.getElementById('mirelWorkspaceDeleteOverlay');
-  if (old) old.remove();
-  var overlay = document.createElement('div');
+  if (old) old.remove();  var overlay = document.createElement('div');
   overlay.id = 'mirelWorkspaceDeleteOverlay';
   overlay.style.cssText =
     'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);' +
@@ -17105,4 +17058,3 @@ async function mirelConfirmWorkspaceDeletion() {
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
 };
-
