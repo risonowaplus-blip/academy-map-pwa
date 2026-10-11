@@ -22,7 +22,7 @@
 
 
 
-  <meta name="mirel-app-version" content="2026.10.11-50">
+  <meta name="mirel-app-version" content="2026.10.11-51">
 
 
 
@@ -3725,6 +3725,93 @@
 
 
 
+
+
+<style id="mirel-update-style">
+#mirelUpdateButton{position:fixed;right:14px;top:max(12px,env(safe-area-inset-top));z-index:9000;width:40px;height:40px;border-radius:50%;border:1px solid #e3c2cb;background:#fff;color:#a94865;box-shadow:0 2px 10px #0002;font-size:21px;cursor:pointer}
+#mirelUpdateNotice{position:fixed;left:12px;right:12px;bottom:max(75px,env(safe-area-inset-bottom));z-index:9900;background:#fff;border:1px solid #e4cad2;box-shadow:0 5px 22px #0002;border-radius:14px;padding:15px;color:#303030;font:14px/1.6 system-ui,sans-serif}
+#mirelUpdateNotice[hidden]{display:none!important}
+#mirelUpdateNotice .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
+#mirelUpdateNotice button{border-radius:9px;padding:9px 15px;border:1px solid #d9b5c1;background:#fff;color:#88465a}
+#mirelUpdateNotice button.primary{background:#b34f70;color:#fff;border-color:#b34f70}
+</style>
+<button id="mirelUpdateButton" type="button" title="更新を確認" aria-label="更新を確認">⟳</button>
+<div id="mirelUpdateNotice" role="status" aria-live="polite" hidden>
+  <strong id="mirelUpdateTitle">更新のお知らせ</strong>
+  <div id="mirelUpdateMessage">新しいバージョンが利用できます。</div>
+  <div class="actions">
+    <button type="button" id="mirelUpdateLater">あとで</button>
+    <button type="button" class="primary" id="mirelUpdateNow">更新する</button>
+  </div>
+</div>
+<script id="mirel-auto-update-20261011-51">
+(function(){
+  'use strict';
+  const CURRENT = document.querySelector('meta[name="mirel-app-version"]')?.content || '';
+  const notice = document.getElementById('mirelUpdateNotice');
+  const title = document.getElementById('mirelUpdateTitle');
+  const message = document.getElementById('mirelUpdateMessage');
+  const later = document.getElementById('mirelUpdateLater');
+  const now = document.getElementById('mirelUpdateNow');
+  const manual = document.getElementById('mirelUpdateButton');
+  let latest = CURRENT;
+  let busy = false;
+  let formDirty = false;
+  let lastCheck = 0;
+  document.addEventListener('input', e => {
+    if(e.target && e.target.closest('input,textarea,select,[contenteditable]')) formDirty=true;
+  },true);
+  document.addEventListener('submit',()=>{formDirty=false;},true);
+  function show(t,m,canUpdate){
+    title.textContent=t; message.textContent=m;
+    now.hidden=!canUpdate;
+    notice.hidden=false;
+  }
+  async function check(silent){
+    if(busy || !navigator.onLine)return;
+    busy=true;
+    if(!silent){manual.disabled=true;manual.textContent='…';}
+    try {
+      const u=new URL(location.href);
+      u.searchParams.set('_mirel_update_check',String(Date.now()));
+      const r=await fetch(u.toString(),{cache:'no-store',credentials:'same-origin',redirect:'follow'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const html=await r.text();
+      const doc=new DOMParser().parseFromString(html,'text/html');
+      const v=doc.querySelector('meta[name="mirel-app-version"]')?.content || '';
+      if(!v)throw new Error('バージョン情報なし');
+      latest=v;
+      if(v!==CURRENT)show('アプリの更新があります','新しいバージョン '+v+' を利用できます。保存していない入力がある場合は、先に保存してください。',true);
+      else if(!silent)show('更新確認が完了しました','現在のバージョン '+CURRENT+' は最新です。',false);
+      lastCheck=Date.now();
+    }catch(e){if(!silent)show('更新を確認できませんでした','通信状態を確認して、もう一度お試しください。',false);}
+    finally{busy=false;manual.disabled=false;manual.textContent='⟳';}
+  }
+  async function applyUpdate(){
+    if(formDirty && !confirm('入力途中の内容が消える可能性があります。保存済みですか？'))return;
+    now.disabled=true;
+    try{
+      if('serviceWorker' in navigator){
+        const registration=await navigator.serviceWorker.getRegistration();
+        if(registration){
+          await registration.update();
+          if(registration.waiting)registration.waiting.postMessage({type:'SKIP_WAITING'});
+        }
+      }
+    }catch(e){/* SW非対応でも通常の再読み込みは可能 */}
+    const u=new URL(location.href);
+    u.searchParams.delete('_mirel_update_check');
+    u.searchParams.set('_mirel_app_version',latest||String(Date.now()));
+    location.replace(u.toString());
+  }
+  manual.addEventListener('click',()=>check(false));
+  later.addEventListener('click',()=>{notice.hidden=true;});
+  now.addEventListener('click',applyUpdate);
+  window.addEventListener('pageshow',()=>check(true));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden && Date.now()-lastCheck>3600000)check(true);});
+  window.addEventListener('online',()=>check(true));
+})();
+</script>
 
 </body>
 
