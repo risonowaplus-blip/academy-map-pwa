@@ -16338,7 +16338,7 @@ setTimeout(mirelArrangeSettingsForRelease, 0);
    2. 文字サイズ
    3. 使用する項目
    4. 基本表示設定
-   5. ワークスペース切替
+   5. ワークスペース切替（データの使い分け）
    6. データ一括削除
    ========================================================= */
 
@@ -16827,7 +16827,7 @@ mirelArrangeSettingsForRelease = function() {
     mirelWrapSettingsNode_(
       workspace,
       'mirelWorkspaceSettingsSection',
-      'ワークスペース切替'
+      'ワークスペース切替（データの使い分け）'
     );
 
 
@@ -16978,14 +16978,8 @@ mirelEnsureBulkDeleteSection_ = function() {
   var section = mirelSettingsAccordion_('mirelBulkDeleteSection', 'データ一括削除');
   var body = section.querySelector('.mirel-settings-accordion-body');
   if (!body) return section;
-  if (!document.getElementById('mirel-delete-buttons-css')) {
-    var st = document.createElement('style');
-    st.id = 'mirel-delete-buttons-css';
-    st.textContent = '#mirelBulkDeleteSection .detail-delete-button{display:block!important;width:100%!important;min-height:54px!important;padding:14px 16px!important;background:#f6e5e9!important;border:1px solid #eac7d1!important;border-radius:12px!important;color:#a54360!important;font-size:16px!important;font-weight:700!important;text-align:left!important;cursor:pointer!important;box-shadow:0 2px 5px rgba(0,0,0,.05)!important}#mirelBulkDeleteSection .detail-delete-button:before{content:"🗑  ";font-size:16px}#mirelBulkDeleteSection .detail-delete-button:active{transform:scale(.99)}#mirelBulkDeleteSection .small-note{margin:10px 0 4px;line-height:1.65}';
-    document.head.appendChild(st);
-  }
   body.innerHTML =
-    '<div style="display:grid;gap:16px;padding:8px 0">' +
+    '<div style="display:grid;gap:12px;padding:8px 0">' +
       '<div><button type="button" class="detail-delete-button" onclick="mirelExecuteBulkDelete(\'persons\')">人物データを一括削除</button>' +
       '<div class="small-note">人物・子ども・SNS・交流履歴・関連情報を削除。分類ラベルは残ります。</div></div>' +
       '<div><button type="button" class="detail-delete-button" onclick="mirelExecuteBulkDelete(\'labels\')">分類ラベルを一括削除</button>' +
