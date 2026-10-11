@@ -1,8 +1,9 @@
-var teachers = [];
+﻿var teachers = [];
 var addressMaster = {};
 var selectedPrefecture = '';
 var selectedTeacherId = '';
 var prefMode = 'active';
+
 
 var tokenClient = null;
 var accessToken = '';
@@ -12,16 +13,20 @@ var pendingTokenReject = null;
 var mirelInteractiveLoginActive = false;
 var mirelInteractiveAuthRetryUsed = false;
 
+
 var mapInstance = null;
+
 
 var interactionFormSource = 'detail';
 var pendingInteractions = [];
 var deletedInteractionIds = [];
 var editingPendingInteractionIndex = -1;
 
+
 var pendingLinks = [];
 var deletedLinkIds = [];
 var editingPendingLinkIndex = -1;
+
 
 var appSettings = {
   appName: 'Mirel Map',
@@ -35,18 +40,22 @@ var appSettings = {
   itemGap: 9
 };
 
+
 var STORAGE_TOKEN = 'academyAccessToken';
 var STORAGE_EXPIRES = 'academyAccessTokenExpiresAt';
 var STORAGE_AUTHORIZED = 'academyGoogleAuthorized';
 var STORAGE_APP_SNAPSHOT = 'mirelAppSnapshotV2';
 var APP_SNAPSHOT_VERSION = 2;
 
+
 /* ========================================
    速度診断
    ======================================== */
 
+
 var MIREL_PERF_STORAGE = 'mirelPerformanceHistoryV1';
 var mirelLastApiTimings = {};
+
 
 function mirelPerfNow() {
   if (
@@ -58,6 +67,7 @@ function mirelPerfNow() {
   return Date.now();
 }
 
+
 function mirelPerfMs(value) {
   var n = Number(value || 0);
   if (!isFinite(n)) {
@@ -65,6 +75,7 @@ function mirelPerfMs(value) {
   }
   return Math.round(n);
 }
+
 
 function mirelSavePerformance(type, values) {
   var entry = Object.assign(
@@ -74,6 +85,7 @@ function mirelSavePerformance(type, values) {
     },
     values || {}
   );
+
 
   try {
     var history = JSON.parse(
@@ -92,13 +104,16 @@ function mirelSavePerformance(type, values) {
     );
   } catch (e) {}
 
+
   try {
     console.log('[Mirel速度診断]', entry);
   } catch (e) {}
 
+
   mirelRenderPerformancePanel();
   return entry;
 }
+
 
 function mirelPerformanceHistory() {
   try {
@@ -111,6 +126,7 @@ function mirelPerformanceHistory() {
   }
 }
 
+
 function mirelLastPerformance(type) {
   var history = mirelPerformanceHistory();
   for (var i = history.length - 1; i >= 0; i--) {
@@ -121,6 +137,7 @@ function mirelLastPerformance(type) {
   return null;
 }
 
+
 function mirelFormatPerfMs(ms) {
   var n = mirelPerfMs(ms);
   if (n >= 1000) {
@@ -128,6 +145,7 @@ function mirelFormatPerfMs(ms) {
   }
   return n + 'ms';
 }
+
 
 function mirelPerformanceServerLines(server) {
   if (!server || typeof server !== 'object') {
@@ -157,6 +175,7 @@ function mirelPerformanceServerLines(server) {
   return parts.join(' / ');
 }
 
+
 function mirelPerfEntryHtml(title, entry) {
   if (!entry) {
     return (
@@ -166,6 +185,7 @@ function mirelPerfEntryHtml(title, entry) {
       '</div>'
     );
   }
+
 
   var main = [];
   if (entry.totalMs !== undefined) {
@@ -181,7 +201,9 @@ function mirelPerfEntryHtml(title, entry) {
     main.push('画面更新 ' + mirelFormatPerfMs(entry.uiMs));
   }
 
+
   var serverLine = mirelPerformanceServerLines(entry.server);
+
 
   return (
     '<div class="mirel-perf-row">' +
@@ -193,6 +215,7 @@ function mirelPerfEntryHtml(title, entry) {
     '</div>'
   );
 }
+
 
 function mirelRenderPerformancePanel() {
   var el = document.getElementById('mirelPerformancePanel');
@@ -206,6 +229,7 @@ function mirelRenderPerformancePanel() {
     mirelPerfEntryHtml('直近の保存', save) +
     '<button type="button" class="secondary mirel-perf-copy" onclick="mirelCopyPerformanceReport()">計測結果をコピー</button>';
 }
+
 
 function mirelBuildPerformanceReport() {
   var startup = mirelLastPerformance('startup');
@@ -229,6 +253,7 @@ function mirelBuildPerformanceReport() {
   ].join('\n');
 }
 
+
 async function mirelCopyPerformanceReport() {
   var text = mirelBuildPerformanceReport();
   try {
@@ -242,6 +267,8 @@ async function mirelCopyPerformanceReport() {
     }
   }
 }
+
+
 
 
 var prefectures = [
@@ -295,6 +322,8 @@ var prefectures = [
 ];
 
 
+
+
 var gradeOptions = [
   '',
   '年少',
@@ -336,11 +365,13 @@ var gradeOptions = [
   'その他'
 ];
 
+
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.10-47';
-var MIREL_APP_BUILD = '20261010-47';
+var MIREL_APP_VERSION = '2026.10.11-48';
+var MIREL_APP_BUILD = '20261011-48';
+
 
 function mirelNotifyAppUpdated_() {
   try {
@@ -357,70 +388,93 @@ function mirelNotifyAppUpdated_() {
   } catch (e) {}
 }
 
+
 /* ========================================
    起動
    ======================================== */
+
 
 window.addEventListener(
   'load',
   function() {
 
+
     restoreCachedUiSettings();
+
 
     mirelNotifyAppUpdated_();
 
+
     registerServiceWorker();
+
 
     waitForGoogleIdentity(
       function() {
 
+
         if (!configReady()) {
+
 
           document.getElementById(
             'authMessage'
           ).textContent =
             'config.js の設定が完了していません。';
 
+
           document.getElementById(
             'loginButton'
           ).disabled = true;
 
+
           return;
         }
 
+
         initializeGoogleTokenClient();
+
 
         restoreOrLogin();
 
+
       }
     );
+
 
   }
 );
 
 
+
+
 function registerServiceWorker() {
+
 
   if (!('serviceWorker' in navigator)) {
     return;
   }
 
+
   var swUrl = './sw.js?v=' + encodeURIComponent(MIREL_APP_BUILD);
+
 
   navigator.serviceWorker
     .register(swUrl)
     .then(function(registration) {
 
+
       /* 起動ごとに最新版のService Workerを確認 */
       registration.update().catch(function() {});
+
 
       if (registration.waiting) {
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
 
+
       registration.addEventListener('updatefound', function() {
         var worker = registration.installing;
         if (!worker) return;
+
 
         worker.addEventListener('statechange', function() {
           if (worker.state === 'installed' && navigator.serviceWorker.controller) {
@@ -430,6 +484,7 @@ function registerServiceWorker() {
       });
     })
     .catch(function() {});
+
 
   navigator.serviceWorker.addEventListener('controllerchange', function() {
     try {
@@ -443,14 +498,20 @@ function registerServiceWorker() {
 }
 
 
+
+
 function waitForGoogleIdentity(callback) {
 
+
   var attempts = 0;
+
 
   var timer = setInterval(
     function() {
 
+
       attempts++;
+
 
       if (
         window.google &&
@@ -458,46 +519,64 @@ function waitForGoogleIdentity(callback) {
         google.accounts.oauth2
       ) {
 
+
         clearInterval(timer);
 
+
         callback();
+
 
         return;
       }
 
+
       if (attempts > 100) {
 
+
         clearInterval(timer);
+
 
         document.getElementById(
           'authMessage'
         ).textContent =
           'Googleログインを読み込めませんでした。画面を再読み込みしてください。';
 
+
       }
+
 
     },
     100
   );
 
+
 }
+
+
 
 
 function initializeGoogleTokenClient() {
 
+
   tokenClient =
     google.accounts.oauth2.initTokenClient({
 
+
       client_id: CONFIG.GOOGLE_CLIENT_ID,
 
+
       scope: CONFIG.SCOPES,
+
 
       callback:
         function(resp) {
 
+
           if (resp.error) {
 
+
             if (pendingTokenReject) {
+
 
               pendingTokenReject(
                 new Error(
@@ -506,16 +585,21 @@ function initializeGoogleTokenClient() {
                 )
               );
 
+
             }
 
+
             clearPendingTokenPromise();
+
 
             return;
           }
 
+
           accessToken =
             resp.access_token ||
             '';
+
 
           var expiresIn =
             Number(
@@ -523,17 +607,21 @@ function initializeGoogleTokenClient() {
               3600
             );
 
+
           accessTokenExpiresAt =
             Date.now() +
             expiresIn * 1000 -
             60000;
 
+
           try {
+
 
             localStorage.setItem(
               STORAGE_TOKEN,
               accessToken
             );
+
 
             localStorage.setItem(
               STORAGE_EXPIRES,
@@ -542,39 +630,55 @@ function initializeGoogleTokenClient() {
               )
             );
 
+
             localStorage.setItem(
               STORAGE_AUTHORIZED,
               '1'
             );
 
+
           } catch (e) {}
 
+
           if (pendingTokenResolve) {
+
 
             pendingTokenResolve(
               accessToken
             );
 
+
           }
+
 
           clearPendingTokenPromise();
 
+
         }
+
 
     });
 
+
 }
+
+
 
 
 function clearPendingTokenPromise() {
 
+
   pendingTokenResolve = null;
   pendingTokenReject = null;
+
 
 }
 
 
+
+
 function configReady() {
+
 
   return (
     CONFIG.GOOGLE_CLIENT_ID &&
@@ -587,20 +691,27 @@ function configReady() {
     ) === -1
   );
 
+
 }
+
+
 
 
 async function restoreOrLogin() {
 
+
   var savedToken = '';
   var savedExpiresAt = 0;
 
+
   try {
+
 
     savedToken =
       localStorage.getItem(
         STORAGE_TOKEN
       ) || '';
+
 
     savedExpiresAt =
       Number(
@@ -609,24 +720,32 @@ async function restoreOrLogin() {
         ) || 0
       );
 
+
   } catch (e) {}
+
 
   if (
     savedToken &&
     savedExpiresAt > Date.now()
   ) {
 
+
     accessToken =
       savedToken;
+
 
     accessTokenExpiresAt =
       savedExpiresAt;
 
+
     await startApp();
+
 
     return;
 
+
   }
+
 
   /*
    * 起動時の無操作トークン再取得は行わない。
@@ -639,15 +758,21 @@ async function restoreOrLogin() {
   clearAccessToken();
   showLoginScreen();
 
+
 }
+
+
 
 
 function requestGoogleToken(promptMode) {
 
+
   return new Promise(
     function(resolve, reject) {
 
+
       if (!tokenClient) {
+
 
         reject(
           new Error(
@@ -655,43 +780,59 @@ function requestGoogleToken(promptMode) {
           )
         );
 
+
         return;
       }
+
 
       pendingTokenResolve = resolve;
       pendingTokenReject = reject;
 
+
       try {
+
 
         tokenClient.requestAccessToken({
           prompt: promptMode
         });
 
+
       } catch (e) {
+
 
         clearPendingTokenPromise();
 
+
         reject(e);
 
+
       }
+
 
     }
   );
 
+
 }
 
 
+
+
 async function login() {
+
 
   setLoading(true);
   mirelInteractiveLoginActive = true;
   mirelInteractiveAuthRetryUsed = false;
 
+
   try {
+
 
     await requestGoogleToken(
       'select_account'
     );
+
 
     /*
      * ここで取得したトークンを使ってそのまま初期化する。
@@ -700,11 +841,14 @@ async function login() {
      */
     await startApp();
 
+
     if (accessToken) {
       showAppScreen();
     }
 
+
   } catch (e) {
+
 
     if (!accessToken) {
       showLoginScreen();
@@ -712,27 +856,36 @@ async function login() {
       handleError(e);
     }
 
+
   } finally {
+
 
     mirelInteractiveLoginActive = false;
     setLoading(false);
 
+
   }
+
 
 }
 
 
+
+
 function showLoginScreen() {
+
 
   /* 認証判定が終わるまではログイン画面を見せず、
      本当にログインが必要な場合だけここで表示する */
   setLoading(false);
 
+
   document.getElementById(
     'appShell'
   ).classList.add(
     'hidden'
   );
+
 
   document.getElementById(
     'authScreen'
@@ -740,16 +893,21 @@ function showLoginScreen() {
     'hidden'
   );
 
+
 }
+
+
 
 
 function showAppScreen() {
 
+
   document.getElementById(
     'authScreen'
   ).classList.add(
     'hidden'
   );
+
 
   document.getElementById(
     'appShell'
@@ -757,32 +915,44 @@ function showAppScreen() {
     'hidden'
   );
 
+
 }
+
+
 
 
 function clearAccessToken() {
 
+
   accessToken = '';
   accessTokenExpiresAt = 0;
 
+
   try {
+
 
     localStorage.removeItem(
       STORAGE_TOKEN
     );
 
+
     localStorage.removeItem(
       STORAGE_EXPIRES
     );
 
+
   } catch (e) {}
 
+
 }
+
+
 
 
 /* ========================================
    Apps Script API
    ======================================== */
+
 
 async function runScript(
   functionName,
@@ -790,61 +960,83 @@ async function runScript(
   retried
 ) {
 
+
   var mirelApiStartedAt =
     mirelPerfNow();
 
+
   if (!accessToken) {
+
 
     throw new Error(
       'Googleログインが必要です。'
     );
 
+
   }
+
 
   var response =
     await fetch(
 
+
       'https://script.googleapis.com/v1/scripts/' +
+
 
       encodeURIComponent(
         CONFIG.SCRIPT_DEPLOYMENT_ID
       ) +
 
+
       ':run',
+
 
       {
 
+
         method: 'POST',
 
+
         headers: {
+
 
           'Authorization':
             'Bearer ' +
             accessToken,
 
+
           'Content-Type':
             'application/json'
 
+
         },
+
 
         body:
           JSON.stringify({
 
+
             function: functionName,
+
 
             parameters:
               parameters ||
               []
 
+
           })
+
 
       }
 
+
     );
+
 
   if (
     response.status === 401
   ) {
+
 
     /*
      * Googleログイン直後に401が返った場合でも、
@@ -858,10 +1050,12 @@ async function runScript(
       accessToken
     ) {
 
+
       try {
         await new Promise(function(resolve) {
           setTimeout(resolve, 350);
         });
+
 
         return await runScript(
           functionName,
@@ -873,41 +1067,53 @@ async function runScript(
       }
     }
 
+
     clearAccessToken();
     showLoginScreen();
+
 
     throw new Error(
       'Googleログインの有効期限が切れました。Googleでログインを押してください。'
     );
 
+
   }
+
 
   var mirelFetchFinishedAt =
     mirelPerfNow();
 
+
   var data =
     await response.json();
 
+
   var mirelApiFinishedAt =
     mirelPerfNow();
+
 
   if (
     !response.ok ||
     data.error
   ) {
 
+
     var msg =
       'Apps Scriptの実行に失敗しました。';
+
 
     if (
       data.error &&
       data.error.message
     ) {
 
+
       msg =
         data.error.message;
 
+
     }
+
 
     if (
       data.error &&
@@ -916,21 +1122,27 @@ async function runScript(
       data.error.details[0].errorMessage
     ) {
 
+
       msg =
         data.error
           .details[0]
           .errorMessage;
 
+
     }
+
 
     throw new Error(msg);
 
+
   }
+
 
   var mirelResult =
     data.response
       ? data.response.result
       : null;
+
 
   mirelLastApiTimings[functionName] = {
     totalMs:
@@ -949,27 +1161,37 @@ async function runScript(
         : null
   };
 
+
   return mirelResult;
 
+
 }
+
+
 
 
 /* ========================================
    初期読込
    ======================================== */
 
+
 async function startApp() {
+
 
   var mirelStartupStartedAt =
     mirelPerfNow();
 
+
   var mirelCacheVisibleMs =
     null;
+
 
   var restoredFromCache =
     restoreCachedAppSnapshot();
 
+
   if (restoredFromCache) {
+
 
     /*
      * 前回表示できたデータを先に描画する。
@@ -987,25 +1209,33 @@ async function startApp() {
     renderJapanMap();
     setLoading(false);
 
+
     mirelCacheVisibleMs =
       mirelPerfNow() -
       mirelStartupStartedAt;
 
+
   } else {
+
 
     setLoading(true);
 
+
   }
+
 
   /* 住所マスターはアプリ本体の表示を待たせず並行読込 */
   loadAddressMaster();
 
+
   try {
+
 
     var data =
       await runScript(
         'getInitialData'
       );
+
 
     teachers =
       (
@@ -1013,6 +1243,7 @@ async function startApp() {
         data.teachers
       ) ||
       [];
+
 
     appSettings =
       Object.assign(
@@ -1025,6 +1256,7 @@ async function startApp() {
         {}
       );
 
+
     var extraData =
       (
         data &&
@@ -1032,21 +1264,26 @@ async function startApp() {
       ) ||
       {};
 
+
     mirelAffiliations =
       extraData.affiliations ||
       [];
+
 
     mirelTeacherAffiliations =
       extraData.teacherAffiliations ||
       {};
 
+
     mirelProfiles =
       extraData.profiles ||
       {};
 
+
     mirelFeatureSettings =
       extraData.featureSettings ||
       {};
+
 
     mirelApplyProfileDerivedValues();
     cacheUiSettings();
@@ -1061,12 +1298,15 @@ async function startApp() {
     renderAll();
     renderJapanMap();
 
+
     var mirelStartupFinishedAt =
       mirelPerfNow();
+
 
     var mirelInitialApi =
       mirelLastApiTimings.getInitialData ||
       {};
+
 
     mirelSavePerformance(
       'startup',
@@ -1088,7 +1328,9 @@ async function startApp() {
       }
     );
 
+
   } catch (e) {
+
 
     if (restoredFromCache) {
       if (typeof appToast === 'function') {
@@ -1100,30 +1342,41 @@ async function startApp() {
       handleError(e);
     }
 
+
   } finally {
+
 
     setLoading(false);
 
+
   }
+
 
 }
 
 
+
+
 function restoreCachedAppSnapshot() {
 
+
   try {
+
 
     var raw =
       localStorage.getItem(
         STORAGE_APP_SNAPSHOT
       );
 
+
     if (!raw) {
       return false;
     }
 
+
     var snapshot =
       JSON.parse(raw);
+
 
     if (
       !snapshot ||
@@ -1136,9 +1389,11 @@ function restoreCachedAppSnapshot() {
       return false;
     }
 
+
     teachers =
       snapshot.teachers ||
       [];
+
 
     appSettings =
       Object.assign(
@@ -1148,40 +1403,54 @@ function restoreCachedAppSnapshot() {
         {}
       );
 
+
     var extra =
       snapshot.extra ||
       {};
+
 
     mirelAffiliations =
       extra.affiliations ||
       [];
 
+
     mirelTeacherAffiliations =
       extra.teacherAffiliations ||
       {};
+
 
     mirelProfiles =
       extra.profiles ||
       {};
 
+
     mirelFeatureSettings =
       extra.featureSettings ||
       {};
 
+
     return true;
+
 
   } catch (e) {
 
+
     return false;
 
+
   }
+
 
 }
 
 
+
+
 function cacheAppSnapshot() {
 
+
   try {
+
 
     var snapshot = {
       version:
@@ -1204,36 +1473,47 @@ function cacheAppSnapshot() {
       }
     };
 
+
     var raw =
       JSON.stringify(
         snapshot
       );
+
 
     /* localStorage上限に近づいた場合は無理に保存しない */
     if (raw.length > 4000000) {
       return;
     }
 
+
     localStorage.setItem(
       STORAGE_APP_SNAPSHOT,
       raw
     );
 
+
   } catch (e) {}
+
 
 }
 
 
+
+
 function restoreCachedUiSettings() {
 
+
   try {
+
 
     var cached =
       localStorage.getItem(
         'academyUiSettings'
       );
 
+
     if (cached) {
+
 
       appSettings =
         Object.assign(
@@ -1242,18 +1522,26 @@ function restoreCachedUiSettings() {
           JSON.parse(cached)
         );
 
+
       applySettingsToUi();
+
 
     }
 
+
   } catch (e) {}
+
 
 }
 
 
+
+
 function cacheUiSettings() {
 
+
   try {
+
 
     localStorage.setItem(
       'academyUiSettings',
@@ -1262,20 +1550,27 @@ function cacheUiSettings() {
       )
     );
 
+
   } catch (e) {}
 
+
 }
+
+
 
 
 /* ========================================
    地方
    ======================================== */
 
+
 function getRegionName(pref) {
+
 
   if (pref === '北海道') {
     return '北海道';
   }
+
 
   if (
     [
@@ -1290,6 +1585,7 @@ function getRegionName(pref) {
     return '東北';
   }
 
+
   if (
     [
       '茨城県',
@@ -1303,6 +1599,7 @@ function getRegionName(pref) {
   ) {
     return '関東';
   }
+
 
   if (
     [
@@ -1320,6 +1617,7 @@ function getRegionName(pref) {
     return '中部';
   }
 
+
   if (
     [
       '三重県',
@@ -1334,6 +1632,7 @@ function getRegionName(pref) {
     return '近畿';
   }
 
+
   if (
     [
       '鳥取県',
@@ -1346,6 +1645,7 @@ function getRegionName(pref) {
     return '中国';
   }
 
+
   if (
     [
       '徳島県',
@@ -1356,6 +1656,7 @@ function getRegionName(pref) {
   ) {
     return '四国';
   }
+
 
   if (
     [
@@ -1371,18 +1672,25 @@ function getRegionName(pref) {
     return '九州';
   }
 
+
   if (pref === '沖縄県') {
     return '沖縄';
   }
 
+
   return '';
+
 
 }
 
 
+
+
 function getRegionBaseColor(region) {
 
+
   var colors = {
+
 
     '北海道': '#D9ECF8',
     '東北': '#D8EFF4',
@@ -1394,17 +1702,24 @@ function getRegionBaseColor(region) {
     '九州': '#E9DDF3',
     '沖縄': '#E5D8F0'
 
+
   };
+
 
   return colors[region] ||
     '#EEF1F3';
 
+
 }
+
+
 
 
 function getRegionTeacherColor(region) {
 
+
   var colors = {
+
 
     '北海道': '#8DC8EB',
     '東北': '#8FD0DB',
@@ -1416,36 +1731,47 @@ function getRegionTeacherColor(region) {
     '九州': '#B697D2',
     '沖縄': '#AE8BCB'
 
+
   };
+
 
   return colors[region] ||
     '#FF9A8B';
 
+
 }
+
+
 
 
 /* ========================================
    地図表示モード
    ======================================== */
 
+
 function mirelMapEnabled() {
   return mirelFeatureOn('map');
 }
+
 
 function mirelMapUsesPeople() {
   return mirelMapEnabled() && mirelFeatureOn('address');
 }
 
+
 function mirelApplyMapVisibility() {
   var enabled = mirelMapEnabled();
   var usesPeople = mirelMapUsesPeople();
 
+
   var navMap = document.getElementById('navMap');
   var pageMap = document.getElementById('pageMap');
+
 
   if (navMap) {
     navMap.style.display = enabled ? '' : 'none';
   }
+
 
   if (!enabled) {
     if (pageMap && pageMap.classList.contains('active')) {
@@ -1453,6 +1779,7 @@ function mirelApplyMapVisibility() {
     }
     return;
   }
+
 
   var search = document.getElementById('mapSearch');
   var stats = document.getElementById('stats');
@@ -1463,9 +1790,11 @@ function mirelApplyMapVisibility() {
   var activeLegend = document.getElementById('mapLegendActive');
   var activeLegendItem = activeLegend ? activeLegend.closest('.legend-item') : null;
 
+
   if (search) search.style.display = usesPeople ? '' : 'none';
   if (segmented) segmented.style.display = usesPeople ? '' : 'none';
   if (activeLegendItem) activeLegendItem.style.display = usesPeople ? '' : 'none';
+
 
   if (!usesPeople) {
     prefMode = 'all';
@@ -1480,34 +1809,44 @@ function mirelApplyMapVisibility() {
   }
 }
 
+
 /* ========================================
    日本地図
    ======================================== */
 
+
 function renderJapanMap() {
+
 
   var el =
     document.getElementById(
       'japanMap'
     );
 
+
   if (
     !window.jpmap ||
     !window.jpmap.japanMap
   ) {
 
+
     el.innerHTML =
       '<div class="empty">日本地図を読み込めませんでした。</div>';
+
 
     return;
   }
 
+
   el.innerHTML = '';
+
 
   var counts =
     getPrefCounts();
 
+
   var areas = [];
+
 
   for (
     var i = 0;
@@ -1515,159 +1854,215 @@ function renderJapanMap() {
     i++
   ) {
 
+
     var pref =
       prefectures[i];
+
 
     var count =
       counts[pref] ||
       0;
 
+
     var region =
       getRegionName(pref);
+
 
     var color =
       getRegionBaseColor(
         region
       );
 
+
     var hoverColor =
       getRegionTeacherColor(
         region
       );
 
+
     if (count > 0) {
+
 
       color =
         getRegionTeacherColor(
           region
         );
 
+
     }
+
 
     if (
       selectedPrefecture ===
       pref
     ) {
 
+
       color =
         '#D95770';
+
 
       hoverColor =
         '#C84660';
 
+
     }
 
+
     areas.push({
+
 
       code:
         i + 1,
 
+
       color:
         color,
+
 
       hoverColor:
         hoverColor
 
+
     });
 
+
   }
+
 
   var containerWidth =
     Math.floor(
 
+
       el.getBoundingClientRect()
         .width ||
 
+
       el.clientWidth ||
+
 
       620
 
+
     );
 
+
   var mapWidth;
+
 
   if (
     window.innerWidth <=
     560
   ) {
 
+
     mapWidth =
       Math.max(
 
+
         420,
+
 
         Math.min(
 
+
           620,
+
 
           containerWidth *
           1.28
 
+
         )
+
 
       );
 
+
   } else {
+
 
     mapWidth =
       Math.max(
 
+
         620,
+
 
         Math.min(
 
+
           1000,
+
 
           containerWidth *
           1.22
 
+
         )
+
 
       );
 
+
   }
+
 
   mapInstance =
     new jpmap.japanMap(
 
+
       el,
 
+
       {
+
 
         areas:
           areas,
 
+
         width:
           mapWidth,
+
 
         showsPrefectureName:
           false,
 
+
         movesIslands:
           true,
+
 
         backgroundColor:
           '#FFFFFF',
 
+
         lineColor:
           '#FFFFFF',
+
 
         lineWidth:
           1,
 
+
         borderLineColor:
           '#FFFFFF',
+
 
         borderLineWidth:
           1.4,
 
+
         onSelect:
           function(data) {
+
 
             var code =
               Number(
                 data.code
               );
+
 
             var pref =
               prefectures[
@@ -1675,27 +2070,37 @@ function renderJapanMap() {
               ] ||
               data.name;
 
+
             selectPrefecture(
               pref
             );
 
+
           }
+
 
       }
 
+
     );
+
 
   enableMobileMapTouch();
 
+
 updateSelectedPrefHeading();
 
+
 }
+
 
 /* ========================================
    スマホ地図タップ対応
    ======================================== */
 
+
 function enableMobileMapTouch() {
+
 
   if (
     window.innerWidth > 560
@@ -1703,23 +2108,28 @@ function enableMobileMapTouch() {
     return;
   }
 
+
   var map =
     document.getElementById(
       'japanMap'
     );
 
+
   if (!map) {
     return;
   }
+
 
   var canvas =
     map.querySelector(
       'canvas'
     );
 
+
   if (!canvas) {
     return;
   }
+
 
   if (
     canvas.dataset.mobileTouchReady ===
@@ -1728,80 +2138,102 @@ function enableMobileMapTouch() {
     return;
   }
 
+
   canvas.dataset.mobileTouchReady =
     '1';
+
 
   var startX = 0;
   var startY = 0;
   var moved = false;
 
+
   var TAP_MOVE_LIMIT = 24;
+
+
 
 
   canvas.addEventListener(
     'touchstart',
     function(event) {
 
+
       if (
         event.touches.length !== 1
       ) {
+
 
         moved = true;
         return;
       }
 
+
       var touch =
         event.touches[0];
+
 
       startX =
         touch.clientX;
 
+
       startY =
         touch.clientY;
 
+
       moved =
         false;
+
 
     },
     {
       passive: true
     }
   );
+
+
 
 
   canvas.addEventListener(
     'touchmove',
     function(event) {
 
+
       if (
         event.touches.length !== 1
       ) {
+
 
         moved = true;
         return;
       }
 
+
       var touch =
         event.touches[0];
+
 
       var diffX =
         Math.abs(
           touch.clientX - startX
         );
 
+
       var diffY =
         Math.abs(
           touch.clientY - startY
         );
+
 
       if (
         diffX > TAP_MOVE_LIMIT ||
         diffY > TAP_MOVE_LIMIT
       ) {
 
+
         moved =
           true;
       }
+
 
     },
     {
@@ -1810,13 +2242,17 @@ function enableMobileMapTouch() {
   );
 
 
+
+
   canvas.addEventListener(
     'touchend',
     function(event) {
 
+
       if (moved) {
         return;
       }
+
 
       if (
         !event.changedTouches ||
@@ -1825,10 +2261,14 @@ function enableMobileMapTouch() {
         return;
       }
 
+
       var touch =
         event.changedTouches[0];
 
+
       event.preventDefault();
+
+
 
 
       canvas.dispatchEvent(
@@ -1839,20 +2279,26 @@ function enableMobileMapTouch() {
             cancelable: true,
             view: window,
 
+
             clientX:
               touch.clientX,
+
 
             clientY:
               touch.clientY,
 
+
             screenX:
               touch.screenX,
+
 
             screenY:
               touch.screenY
           }
         )
       );
+
+
 
 
       canvas.dispatchEvent(
@@ -1863,22 +2309,28 @@ function enableMobileMapTouch() {
             cancelable: true,
             view: window,
 
+
             clientX:
               touch.clientX,
+
 
             clientY:
               touch.clientY,
 
+
             screenX:
               touch.screenX,
 
+
             screenY:
               touch.screenY,
+
 
             button: 0
           }
         )
       );
+
 
     },
     {
@@ -1886,50 +2338,69 @@ function enableMobileMapTouch() {
     }
   );
 
+
 }
+
+
 
 
 /* ========================================
    住所
    ======================================== */
 
+
 async function loadAddressMaster() {
 
+
   try {
+
 
     var cached =
       localStorage.getItem(
         'academyAddressMasterV1'
       );
 
+
     if (cached) {
+
 
       addressMaster =
         JSON.parse(cached);
 
+
     }
+
 
   } catch (e) {}
 
+
   try {
+
 
     var response =
       await fetch(
 
+
         'https://geolonia.github.io/japanese-addresses/api/ja.json',
+
 
         {
           cache: 'force-cache'
         }
 
+
       );
 
+
     if (response.ok) {
+
 
       addressMaster =
         await response.json();
 
+
       try {
+
 
         localStorage.setItem(
           'academyAddressMasterV1',
@@ -1938,20 +2409,28 @@ async function loadAddressMaster() {
           )
         );
 
+
       } catch (e) {}
+
 
     }
 
+
   } catch (e) {}
 
+
 }
+
+
 
 
 /* ========================================
    描画
    ======================================== */
 
+
 function renderAll() {
+
 
   mirelApplyMapVisibility();
   renderStats();
@@ -1961,42 +2440,57 @@ function renderAll() {
   renderSearchResults();
   updateSelectedPrefHeading();
 
+
 }
+
+
 
 
 function renderStats() {
 
+
   var statsEl = document.getElementById('stats');
   if (!statsEl) return;
+
 
   if (!mirelMapUsesPeople()) {
     statsEl.innerHTML = '<div class="stat">全都道府県</div>';
     return;
   }
 
+
   var unknown =
     getUnknownCount();
 
+
   statsEl.innerHTML =
+
 
     '<div class="stat">全国 ' +
     teachers.length +
     '名</div>' +
 
+
     '<div class="stat">所在地不明 ' +
     unknown +
     '名</div>';
 
+
 }
+
+
 
 
 function getPrefCounts() {
 
+
   var result = {};
+
 
   if (!mirelMapUsesPeople()) {
     return result;
   }
+
 
   for (
     var i = 0;
@@ -2004,12 +2498,15 @@ function getPrefCounts() {
     i++
   ) {
 
+
     var pref =
       teachers[i].prefecture;
+
 
     if (!pref) {
       continue;
     }
+
 
     result[pref] =
       (
@@ -2018,20 +2515,28 @@ function getPrefCounts() {
       ) +
       1;
 
+
   }
 
+
   return result;
+
 
 }
 
 
+
+
 function getUnknownCount() {
+
 
   if (!mirelMapUsesPeople()) {
     return 0;
   }
 
+
   var count = 0;
+
 
   for (
     var i = 0;
@@ -2039,30 +2544,41 @@ function getUnknownCount() {
     i++
   ) {
 
+
     if (
       !teachers[i].prefecture
     ) {
 
+
       count++;
+
 
     }
 
+
   }
 
+
   return count;
+
 
 }
 
 
+
+
 function updateSelectedPrefHeading() {
+
 
   var el =
     document.getElementById(
       'selectedPrefName'
     );
 
+
   var person =
     personLabel();
+
 
   if (!mirelMapUsesPeople()) {
     el.textContent = selectedPrefecture && selectedPrefecture !== '__UNKNOWN__'
@@ -2071,28 +2587,39 @@ function updateSelectedPrefHeading() {
     return;
   }
 
+
   if (
     selectedPrefecture ===
     '__UNKNOWN__'
   ) {
 
+
     el.textContent =
+
 
       '所在地不明｜' +
 
+
       person +
+
 
       ' ' +
 
+
       getUnknownCount() +
+
 
       '名';
 
+
     return;
+
 
   }
 
+
   if (selectedPrefecture) {
+
 
     var count =
       getPrefCounts()[
@@ -2100,33 +2627,48 @@ function updateSelectedPrefHeading() {
       ] ||
       0;
 
+
     el.textContent =
+
 
       selectedPrefecture +
 
+
       '｜' +
+
 
       person +
 
+
       ' ' +
+
 
       count +
 
+
       '名';
+
 
     return;
 
+
   }
+
 
   el.textContent =
     '都道府県を選択';
 
+
 }
+
+
 
 
 function setPrefMode(mode) {
 
+
   prefMode = mode;
+
 
   document.getElementById(
     'activePrefBtn'
@@ -2135,6 +2677,7 @@ function setPrefMode(mode) {
     mode === 'active'
   );
 
+
   document.getElementById(
     'allPrefBtn'
   ).classList.toggle(
@@ -2142,19 +2685,26 @@ function setPrefMode(mode) {
     mode === 'all'
   );
 
+
   renderPrefList();
 
+
 }
+
+
 
 
 /* ========================================
    都道府県一覧
    ======================================== */
 
+
 function renderPrefList() {
+
 
   var counts =
     getPrefCounts();
+
 
   var regionOrder = [
     '北海道',
@@ -2168,7 +2718,9 @@ function renderPrefList() {
     '沖縄'
   ];
 
+
   var grouped = {};
+
 
   for (
     var r = 0;
@@ -2176,11 +2728,14 @@ function renderPrefList() {
     r++
   ) {
 
+
     grouped[
       regionOrder[r]
     ] = [];
 
+
   }
+
 
   for (
     var i = 0;
@@ -2188,12 +2743,15 @@ function renderPrefList() {
     i++
   ) {
 
+
     var pref =
       prefectures[i];
+
 
     var count =
       counts[pref] ||
       0;
+
 
     if (
       mirelMapUsesPeople() &&
@@ -2203,26 +2761,35 @@ function renderPrefList() {
       continue;
     }
 
+
     var region =
       getRegionName(pref);
+
 
     if (!grouped[region]) {
       grouped[region] = [];
     }
 
+
     grouped[region].push({
+
 
       prefecture:
         pref,
 
+
       count:
         count
 
+
     });
+
 
   }
 
+
   var html = '';
+
 
   for (
     var regionIndex = 0;
@@ -2230,10 +2797,12 @@ function renderPrefList() {
     regionIndex++
   ) {
 
+
     var regionName =
       regionOrder[
         regionIndex
       ];
+
 
     var regionPrefs =
       grouped[
@@ -2241,16 +2810,20 @@ function renderPrefList() {
       ] ||
       [];
 
+
     if (
       regionPrefs.length === 0
     ) {
       continue;
     }
 
+
     html +=
       '<div class="pref-region-group"' +
 
+
       ' style="' +
+
 
       '--region-base:' +
       getRegionBaseColor(
@@ -2258,23 +2831,30 @@ function renderPrefList() {
       ) +
       ';' +
 
+
       '--region-active:' +
       getRegionTeacherColor(
         regionName
       ) +
       ';">';
 
+
     html +=
 
+
       '<div class="pref-region-title">' +
+
 
       escapeHtml(
         regionName
       ) +
 
+
       '</div>' +
 
+
       '<div class="pref-region-chips">';
+
 
     for (
       var prefIndex = 0;
@@ -2282,51 +2862,67 @@ function renderPrefList() {
       prefIndex++
     ) {
 
+
       var row =
         regionPrefs[
           prefIndex
         ];
 
+
       var cls =
         'chip';
+
 
       if (
         mirelMapUsesPeople() &&
         row.count > 0
       ) {
 
+
         cls +=
           ' has';
 
+
       }
+
 
       if (
         selectedPrefecture ===
         row.prefecture
       ) {
 
+
         cls +=
           ' selected';
 
+
       }
+
 
       html +=
 
+
         '<button class="' +
+
 
         cls +
 
+
         '" onclick="selectPrefecture(\'' +
+
 
         escapeJs(
           row.prefecture
         ) +
 
+
         '\')">' +
+
 
         escapeHtml(
           row.prefecture
         ) +
+
 
         (
           mirelMapUsesPeople() && row.count
@@ -2336,32 +2932,46 @@ function renderPrefList() {
             : ''
         ) +
 
+
         '</button>';
+
 
     }
 
+
     html +=
+
 
       '</div>' +
 
+
       '</div>';
 
+
   }
+
 
   var unknown =
     getUnknownCount();
 
+
   if (mirelMapUsesPeople() && unknown > 0) {
+
 
     html +=
 
+
       '<div class="pref-region-group unknown-region">' +
+
 
       '<div class="pref-region-title">所在地不明</div>' +
 
+
       '<div class="pref-region-chips">' +
 
+
       '<button class="chip' +
+
 
       (
         selectedPrefecture ===
@@ -2370,77 +2980,105 @@ function renderPrefList() {
           : ''
       ) +
 
+
       '" onclick="selectUnknown()">' +
+
 
       '所在地不明 ' +
 
+
       unknown +
+
 
       '名' +
 
+
       '</button>' +
+
 
       '</div>' +
 
+
       '</div>';
 
+
   }
+
 
   document.getElementById(
     'prefList'
   ).innerHTML =
     html;
 
+
 }
+
+
 
 
 function selectPrefecture(pref) {
 
+
   selectedPrefecture = pref;
   selectedTeacherId = '';
+
 
   updateSelectedPrefHeading();
   renderPrefList();
   renderMapTeacherPreview();
   renderJapanMap();
 
+
 }
+
+
 
 
 function selectUnknown() {
 
+
   selectedPrefecture =
     '__UNKNOWN__';
 
+
   selectedTeacherId =
     '';
+
 
   updateSelectedPrefHeading();
   renderPrefList();
   renderMapTeacherPreview();
   renderJapanMap();
 
+
 }
+
+
 
 
 /* ========================================
    検索
    ======================================== */
 
+
 function teacherMatches(
   teacher,
   query
 ) {
 
+
   if (!query) {
     return true;
   }
 
+
   var linkText = '';
+
 
   var links =
     teacher.links ||
     [];
+
 
   for (
     var i = 0;
@@ -2448,32 +3086,42 @@ function teacherMatches(
     i++
   ) {
 
+
     linkText +=
 
+
       ' ' +
+
 
       (
         links[i].type ||
         ''
       ) +
 
+
       ' ' +
+
 
       (
         links[i].displayName ||
         ''
       ) +
 
+
       ' ' +
+
 
       (
         links[i].value ||
         ''
       );
 
+
   }
 
+
   var text = [
+
 
     teacher.name,
     teacher.kana,
@@ -2489,48 +3137,65 @@ function teacherMatches(
     teacher.memo,
     linkText
 
+
   ]
     .join(' ')
     .toLowerCase();
+
 
   return text.indexOf(
     query.toLowerCase()
   ) !== -1;
 
+
 }
+
+
 
 
 function teacherCard(teacher) {
 
+
   var location =
+
 
     [
       teacher.prefecture,
       teacher.city
     ]
 
+
       .filter(Boolean)
+
 
       .join(' ');
 
+
   return (
 
+
     '<div class="teacher" onclick="openTeacherDetail(\'' +
+
 
     escapeJs(
       teacher.teacherId
     ) +
 
+
     '\')">' +
 
+
     '<div class="teacher-name">' +
+
 
     escapeHtml(
       teacher.name ||
       '名前未登録'
     ) +
 
+
     '</div>' +
+
 
     (
       teacher.nickname
@@ -2542,6 +3207,7 @@ function teacherCard(teacher) {
         : ''
     ) +
 
+
     (
       teacher.salonName
         ? '<div class="meta">' +
@@ -2551,6 +3217,7 @@ function teacherCard(teacher) {
           '</div>'
         : ''
     ) +
+
 
     (
       location
@@ -2562,31 +3229,42 @@ function teacherCard(teacher) {
         : '<div class="meta">所在地不明</div>'
     ) +
 
+
     mirelAffiliationTagsHtml(
       teacher.teacherId
     ) +
 
+
     '</div>'
 
+
   );
+
 
 }
 
 
+
+
 function renderMapTeacherPreview() {
+
 
   var mapSide =
     document.getElementById(
       'mapSide'
     );
 
+
   if (
     !mapSide
   ) {
 
+
     return;
 
+
   }
+
 
   if (!mirelMapUsesPeople()) {
     mapSide.innerHTML = selectedPrefecture && selectedPrefecture !== '__UNKNOWN__'
@@ -2594,6 +3272,7 @@ function renderMapTeacherPreview() {
       : '<div class="empty">日本地図または都道府県名を選択してください。</div>';
     return;
   }
+
 
   var query =
     (
@@ -2604,20 +3283,28 @@ function renderMapTeacherPreview() {
     ).trim();
 
 
+
+
   if (
     !selectedPrefecture &&
     !query
   ) {
 
+
     mapSide.innerHTML =
       '';
 
+
     return;
+
 
   }
 
 
+
+
   var list = [];
+
 
   for (
     var i = 0;
@@ -2625,8 +3312,10 @@ function renderMapTeacherPreview() {
     i++
   ) {
 
+
     var teacher =
       teachers[i];
+
 
     if (
       selectedPrefecture ===
@@ -2635,6 +3324,7 @@ function renderMapTeacherPreview() {
     ) {
       continue;
     }
+
 
     if (
       selectedPrefecture &&
@@ -2646,6 +3336,7 @@ function renderMapTeacherPreview() {
       continue;
     }
 
+
     if (
       !teacherMatches(
         teacher,
@@ -2655,72 +3346,96 @@ function renderMapTeacherPreview() {
       continue;
     }
 
+
     list.push(
       teacher
     );
 
+
   }
+
 
   var title =
     personLabel() +
     '一覧';
+
 
   if (
     selectedPrefecture ===
     '__UNKNOWN__'
   ) {
 
+
     title =
       '所在地不明';
+
 
   } else if (
     selectedPrefecture
   ) {
 
+
     title =
       selectedPrefecture;
+
 
   } else if (
     query
   ) {
 
+
     title =
       '検索結果';
 
+
   }
+
 
   var html =
 
+
     '<div class="section-title">' +
+
 
     escapeHtml(
       title
     ) +
 
-    '　' +
+
+    ' ' +
+
 
     list.length +
 
+
     '名</div>';
+
 
   if (
     list.length === 0
   ) {
 
+
     html +=
 
+
       '<div class="empty">該当する' +
+
 
       escapeHtml(
         personLabel()
       ) +
 
+
       'はいません。</div>';
+
 
   } else {
 
+
     html +=
       '<div class="teacher-list">';
+
 
     for (
       var j = 0;
@@ -2728,25 +3443,34 @@ function renderMapTeacherPreview() {
       j++
     ) {
 
+
       html +=
         teacherCard(
           list[j]
         );
 
+
     }
+
 
     html +=
       '</div>';
 
+
   }
+
 
   mapSide.innerHTML =
     html;
 
+
 }
 
 
+
+
 function renderFullTeacherList() {
+
 
   var query =
     (
@@ -2756,13 +3480,16 @@ function renderFullTeacherList() {
       ''
     ).trim();
 
+
   var html = '';
+
 
   for (
     var i = 0;
     i < teachers.length;
     i++
   ) {
+
 
     if (
       teacherMatches(
@@ -2771,35 +3498,47 @@ function renderFullTeacherList() {
       )
     ) {
 
+
       html +=
         teacherCard(
           teachers[i]
         );
 
+
     }
 
+
   }
+
 
   document.getElementById(
     'fullTeacherList'
   ).innerHTML =
 
+
     html ||
+
 
     (
       '<div class="empty">該当する' +
+
 
       escapeHtml(
         personLabel()
       ) +
 
+
       'はいません。</div>'
     );
+
 
 }
 
 
+
+
 function renderSearchResults() {
+
 
   var query =
     (
@@ -2809,23 +3548,29 @@ function renderSearchResults() {
       ''
     ).trim();
 
+
   if (!query) {
+
 
     document.getElementById(
       'searchResults'
     ).innerHTML =
       '<div class="empty">検索語を入力してください。</div>';
 
+
     return;
   }
 
+
   var html = '';
+
 
   for (
     var i = 0;
     i < teachers.length;
     i++
   ) {
+
 
     if (
       teacherMatches(
@@ -2834,78 +3579,105 @@ function renderSearchResults() {
       )
     ) {
 
+
       html +=
         teacherCard(
           teachers[i]
         );
 
+
     }
 
+
   }
+
 
   document.getElementById(
     'searchResults'
   ).innerHTML =
 
+
     html ||
+
 
     (
       '<div class="empty">該当する' +
+
 
       escapeHtml(
         personLabel()
       ) +
 
+
       'はいません。</div>'
     );
 
+
 }
+
+
 
 
 /* ========================================
    ページ
    ======================================== */
 
+
 function showPage(name) {
+
 
   if (name === 'map' && !mirelMapEnabled()) {
     name = 'list';
   }
 
+
   var pages = {
+
 
     map:
       'pageMap',
 
+
     list:
       'pageList',
+
 
     search:
       'pageSearch',
 
+
     detail:
       'pageDetail',
+
 
     settings:
       'pageSettings'
 
+
   };
+
 
   for (
     var key in pages
   ) {
 
+
     document.getElementById(
       pages[key]
     ).classList.toggle(
 
+
       'active',
+
 
       key === name
 
+
     );
 
+
   }
+
 
   document.getElementById(
     'navMap'
@@ -2914,6 +3686,7 @@ function showPage(name) {
     name === 'map'
   );
 
+
   document.getElementById(
     'navList'
   ).classList.toggle(
@@ -2921,10 +3694,12 @@ function showPage(name) {
     name === 'list'
   );
 
+
   var navSearch =
     document.getElementById(
       'navSearch'
     );
+
 
   if (navSearch) {
     navSearch.classList.toggle(
@@ -2933,6 +3708,7 @@ function showPage(name) {
     );
   }
 
+
   document.getElementById(
     'navSettings'
   ).classList.toggle(
@@ -2940,31 +3716,40 @@ function showPage(name) {
     name === 'settings'
   );
 
+
   if (name === 'list') {
     renderFullTeacherList();
   }
+
 
   if (name === 'search') {
     renderSearchResults();
   }
 
+
   if (name === 'settings') {
     fillSettingsForm();
   }
+
 
   window.scrollTo(
     0,
     0
   );
 
+
 }
+
+
 
 
 /* ========================================
    先生 Detail
    ======================================== */
 
+
 function findTeacher(id) {
+
 
   for (
     var i = 0;
@@ -2972,89 +3757,124 @@ function findTeacher(id) {
     i++
   ) {
 
+
     if (
       teachers[i].teacherId ===
       id
     ) {
 
+
       return teachers[i];
+
 
     }
 
+
   }
 
+
   return null;
+
 
 }
 
 
+
+
 function openTeacherDetail(id) {
+
 
   var teacher =
     findTeacher(id);
+
 
   if (!teacher) {
     return;
   }
 
+
   selectedTeacherId =
     id;
+
 
   if (
     teacher.prefecture
   ) {
 
+
     selectedPrefecture =
       teacher.prefecture;
 
+
   }
+
 
   renderPrefList();
 
+
   renderJapanMap();
+
 
   renderTeacherDetail(
     teacher
   );
 
+
   showPage(
     'detail'
   );
 
+
 }
+
+
 
 
 function birthdayText(obj) {
 
+
   var result = '';
 
+
   if (obj.birthYear) {
+
 
     result +=
       obj.birthYear +
       '年';
 
+
   }
 
+
   if (obj.birthMonth) {
+
 
     result +=
       obj.birthMonth +
       '月';
 
+
   }
 
+
   if (obj.birthDay) {
+
 
     result +=
       obj.birthDay +
       '日';
 
+
   }
+
 
   return result;
 
+
 }
+
+
 
 
 function detailRow(
@@ -3062,47 +3882,64 @@ function detailRow(
   value
 ) {
 
+
   if (
     value === '' ||
     value === null ||
     value === undefined
   ) {
 
+
     return '';
   }
 
+
   return (
+
 
     '<div class="detail-row">' +
 
+
     '<div class="label">' +
+
 
     escapeHtml(label) +
 
+
     '</div>' +
 
+
     '<div class="value">' +
+
 
     escapeHtml(
       String(value)
     ) +
 
+
     '</div>' +
+
 
     '</div>'
 
+
   );
 
+
 }
+
+
 
 
 function phoneDetailRow(
   phone
 ) {
 
+
   if (!phone) {
     return '';
   }
+
 
   return (
     '<div class="detail-row">' +
@@ -3119,29 +3956,40 @@ function phoneDetailRow(
     '</div>'
   );
 
+
 }
+
+
 
 
 function renderTeacherDetail(
   teacher
 ) {
 
+
   var html =
+
 
     '<div class="card">' +
 
+
     '<div class="detail-head">' +
+
 
     '<div>' +
 
+
     '<div class="detail-name">' +
+
 
     escapeHtml(
       teacher.name ||
       '名前未登録'
     ) +
 
+
     '</div>' +
+
 
     (
       teacher.kana
@@ -3153,29 +4001,40 @@ function renderTeacherDetail(
         : ''
     ) +
 
+
     '</div>' +
+
 
     '<div class="detail-head-actions">' +
 
+
     '<button class="secondary" onclick="openTeacherForm(\'' +
+
 
     escapeJs(
       teacher.teacherId
     ) +
+
 
     '\')">編集</button>' +
 
+
     '<button class="detail-delete-button" onclick="deleteTeacherAction(\'' +
+
 
     escapeJs(
       teacher.teacherId
     ) +
 
+
     '\')">削除</button>' +
+
 
     '</div>' +
 
+
     '</div>';
+
 
   html +=
     detailRow(
@@ -3183,11 +4042,13 @@ function renderTeacherDetail(
       teacher.nickname
     );
 
+
   html +=
     detailRow(
       '性別',
       teacher.gender
     );
+
 
   html +=
     detailRow(
@@ -3197,11 +4058,13 @@ function renderTeacherDetail(
       )
     );
 
+
   html +=
     detailRow(
       '年齢',
       teacher.ageDisplay
     );
+
 
   html +=
     detailRow(
@@ -3209,11 +4072,13 @@ function renderTeacherDetail(
       teacher.salonName
     );
 
+
   html +=
     detailRow(
       placeKanaLabel(),
       teacher.salonKana
     );
+
 
   html +=
     detailRow(
@@ -3223,16 +4088,19 @@ function renderTeacherDetail(
         : ''
     );
 
+
   html +=
     detailRow(
       '住所',
       teacher.fullAddress
     );
 
+
   html +=
     phoneDetailRow(
       teacher.phone
     );
+
 
   html +=
     detailRow(
@@ -3240,27 +4108,35 @@ function renderTeacherDetail(
       teacher.memo
     );
 
+
   var links =
     teacher.links ||
     [];
+
 
   if (
     links.length
   ) {
 
+
     html +=
+
 
       '<div class="detail-row">' +
 
+
       '<div class="label">リンク・SNS</div>' +
 
+
       '<div class="link-list">';
+
 
     for (
       var linkIndex = 0;
       linkIndex < links.length;
       linkIndex++
     ) {
+
 
       html +=
         renderDetailLink(
@@ -3269,74 +4145,103 @@ function renderTeacherDetail(
           ]
         );
 
+
     }
+
 
     html +=
 
+
       '</div>' +
+
 
       '</div>';
 
+
   }
+
 
   if (
     teacher.fullAddress
   ) {
 
+
     html +=
+
 
       '<div class="actions">' +
 
+
       '<button class="secondary" onclick="openGoogleMap(\'' +
+
 
       escapeJs(
         teacher.fullAddress
       ) +
 
+
       '\')">Google Maps</button>' +
+
 
       '</div>';
 
+
   }
+
 
   html +=
     '</div>';
+
+
 
 
   var interactions =
     teacher.interactions ||
     [];
 
+
   html +=
+
 
     '<div class="card">' +
 
+
     '<div class="detail-head">' +
+
 
     '<div class="section-title">交流履歴 ' +
 
+
     interactions.length +
+
 
     '件</div>' +
 
+
     '<button class="primary" onclick="openInteractionForm()">＋ 追加</button>' +
 
+
     '</div>';
+
 
   if (
     interactions.length === 0
   ) {
 
+
     html +=
       '<div class="empty">交流記録はまだありません。</div>';
 
+
   } else {
+
 
     for (
       var interactionIndex = 0;
       interactionIndex < interactions.length;
       interactionIndex++
     ) {
+
 
       html +=
         renderInteractionCard(
@@ -3345,50 +4250,70 @@ function renderTeacherDetail(
           ]
         );
 
+
     }
+
 
   }
 
+
   html +=
     '</div>';
+
+
 
 
   var children =
     teacher.children ||
     [];
 
+
   html +=
+
 
     '<div class="card">' +
 
+
     '<div class="detail-head">' +
+
 
     '<div class="section-title">' +
 
+
     '子ども情報 ' +
+
 
     children.length +
 
+
     '人</div>' +
 
+
     '<button class="primary" onclick="openTeacherFormForNewChild(\'' +
+
 
     escapeJs(
       teacher.teacherId
     ) +
 
+
     '\')">＋ 追加</button>' +
 
+
     '</div>';
+
 
   if (
     children.length === 0
   ) {
 
+
     html +=
       '<div class="empty">子ども情報はまだありません。</div>';
 
+
   } else {
+
 
     for (
       var childIndex = 0;
@@ -3396,16 +4321,21 @@ function renderTeacherDetail(
       childIndex++
     ) {
 
+
       var child =
         children[
           childIndex
         ];
 
+
       html +=
+
 
         '<div class="child">' +
 
+
         '<div class="child-name-text">' +
+
 
         escapeHtml(
           child.name ||
@@ -3413,7 +4343,9 @@ function renderTeacherDetail(
           '名前未登録'
         ) +
 
+
         '</div>';
+
 
       if (
         child.nickname &&
@@ -3421,65 +4353,89 @@ function renderTeacherDetail(
           child.name
       ) {
 
+
         html +=
 
+
           '<div class="meta">' +
+
 
           escapeHtml(
             child.nickname
           ) +
 
+
           '</div>';
 
+
       }
+
 
       if (
         child.gender
       ) {
 
+
         html +=
 
+
           '<div class="meta">性別：' +
+
 
           escapeHtml(
             child.gender
           ) +
 
+
           '</div>';
 
+
       }
+
 
       if (
         child.gradeDisplay
       ) {
 
+
         html +=
 
+
           '<div class="meta">学年：' +
+
 
           escapeHtml(
             child.gradeDisplay
           ) +
 
+
           '</div>';
 
+
       }
+
 
       if (
         child.ageDisplay
       ) {
 
+
         html +=
 
+
           '<div class="meta">年齢：' +
+
 
           escapeHtml(
             child.ageDisplay
           ) +
 
+
           '</div>';
 
+
       }
+
 
       if (
         birthdayText(
@@ -3487,9 +4443,12 @@ function renderTeacherDetail(
         )
       ) {
 
+
         html +=
 
+
           '<div class="meta">誕生日：' +
+
 
           escapeHtml(
             birthdayText(
@@ -3497,148 +4456,202 @@ function renderTeacherDetail(
             )
           ) +
 
+
           '</div>';
 
+
       }
+
 
       if (
         child.memo
       ) {
 
+
         html +=
 
+
           '<div class="meta">' +
+
 
           escapeHtml(
             child.memo
           ) +
 
+
           '</div>';
 
+
       }
+
 
       html +=
         '</div>';
 
+
     }
+
 
   }
 
+
   html +=
     '</div>';
+
 
   document.getElementById(
     'detailContent'
   ).innerHTML =
     html;
 
+
 }
+
+
 
 
 /* ========================================
    交流履歴
    ======================================== */
 
+
 function renderInteractionCard(
   interaction
 ) {
+
 
   var dateText =
     interaction.date ||
     '日付未登録';
 
+
   var typeText =
     interaction.interactionType ||
     '種別未登録';
 
+
   var html =
+
 
     '<div class="child">' +
 
+
     '<div class="detail-head">' +
+
 
     '<div>' +
 
+
     '<div class="interaction-date">' +
+
 
     escapeHtml(
       dateText
     ) +
 
+
     '</div>' +
 
+
     '<span class="interaction-type-label">' +
+
 
     escapeHtml(
       typeText
     ) +
 
+
     '</span>' +
 
+
     '</div>' +
+
 
     '<div class="detail-head-actions">' +
 
+
     '<button class="secondary" onclick="openInteractionForm(\'' +
+
 
     escapeJs(
       interaction.interactionId
     ) +
+
 
     '\')">編集</button>' +
 
+
     '<button class="detail-delete-button" onclick="deleteInteractionAction(\'' +
+
 
     escapeJs(
       interaction.interactionId
     ) +
 
+
     '\')">削除</button>' +
+
 
     '</div>' +
 
+
     '</div>';
+
 
   if (
     interaction.memo
   ) {
 
+
     html +=
 
+
       '<div style="margin-top:10px;white-space:pre-wrap;line-height:1.7">' +
+
 
       escapeHtml(
         interaction.memo
       ) +
 
+
       '</div>';
 
+
   }
+
 
   html +=
     '</div>';
 
+
   return html;
 
+
 }
+
+
 
 
 function findInteraction(
   interactionId
 ) {
 
+
   var teacher =
     findTeacher(
       selectedTeacherId
     );
 
+
   if (!teacher) {
     return null;
   }
 
+
   var interactions =
     teacher.interactions ||
     [];
+
 
   for (
     var i = 0;
@@ -3646,58 +4659,75 @@ function findInteraction(
     i++
   ) {
 
+
     if (
       interactions[i].interactionId ===
       interactionId
     ) {
 
+
       return interactions[i];
+
 
     }
 
+
   }
+
 
   return null;
 
+
 }
+
+
 
 
 function openInteractionForm(
   interactionId
 ) {
 
+
   interactionFormSource =
     'detail';
 
+
   editingPendingInteractionIndex =
     -1;
+
 
   if (
     !selectedTeacherId
   ) {
 
+
     return;
   }
+
 
   setValue(
     'interactionId',
     ''
   );
 
+
   setValue(
     'interactionDate',
     todayYmd()
   );
+
 
   setValue(
     'interactionType',
     ''
   );
 
+
   setValue(
     'interactionMemo',
     ''
   );
+
 
   var interaction =
     interactionId
@@ -3706,43 +4736,53 @@ function openInteractionForm(
         )
       : null;
 
+
   if (
     interaction
   ) {
+
 
     document.getElementById(
       'interactionModalTitle'
     ).textContent =
       '交流記録を編集';
 
+
     setValue(
       'interactionId',
       interaction.interactionId
     );
+
 
     setValue(
       'interactionDate',
       interaction.date
     );
 
+
     setValue(
       'interactionType',
       interaction.interactionType
     );
+
 
     setValue(
       'interactionMemo',
       interaction.memo
     );
 
+
   } else {
+
 
     document.getElementById(
       'interactionModalTitle'
     ).textContent =
       '交流記録を追加';
 
+
   }
+
 
   document.getElementById(
     'interactionModal'
@@ -3750,10 +4790,14 @@ function openInteractionForm(
     'show'
   );
 
+
 }
 
 
+
+
 function closeInteractionForm() {
+
 
   document.getElementById(
     'interactionModal'
@@ -3761,81 +4805,106 @@ function closeInteractionForm() {
     'show'
   );
 
+
 }
+
+
 
 
 async function saveInteractionForm() {
 
+
   var payload = {
+
 
     interactionId:
       valueOf(
         'interactionId'
       ),
 
+
     date:
       valueOf(
         'interactionDate'
       ),
+
 
     interactionType:
       valueOf(
         'interactionType'
       ),
 
+
     memo:
       valueOf(
         'interactionMemo'
       )
 
+
   };
+
 
   if (
     interactionFormSource ===
     'teacherForm'
   ) {
 
+
     if (
       editingPendingInteractionIndex >=
       0
     ) {
+
 
       pendingInteractions[
         editingPendingInteractionIndex
       ] =
         payload;
 
+
     } else {
+
 
       pendingInteractions.push(
         payload
       );
 
+
     }
+
 
     closeInteractionForm();
 
+
     renderTeacherFormInteractions();
+
 
     editingPendingInteractionIndex =
       -1;
 
+
     return;
   }
+
 
   if (
     !selectedTeacherId
   ) {
 
+
     return;
   }
+
 
   payload.teacherId =
     selectedTeacherId;
 
+
   setLoading(true);
 
+
   try {
+
 
     await runScript(
       'saveInteraction',
@@ -3844,28 +4913,39 @@ async function saveInteractionForm() {
       ]
     );
 
+
     closeInteractionForm();
+
 
     await refreshTeacherData(
       selectedTeacherId
     );
 
+
   } catch (e) {
+
 
     handleError(e);
 
+
   } finally {
+
 
     setLoading(false);
 
+
   }
 
+
 }
+
+
 
 
 async function deleteInteractionAction(
   interactionId
 ) {
+
 
   if (
     !(await appConfirm(
@@ -3874,12 +4954,16 @@ async function deleteInteractionAction(
     ))
   ) {
 
+
     return;
   }
 
+
   setLoading(true);
 
+
   try {
+
 
     await runScript(
       'deleteInteraction',
@@ -3888,33 +4972,47 @@ async function deleteInteractionAction(
       ]
     );
 
+
     await refreshTeacherData(
       selectedTeacherId
     );
 
+
   } catch (e) {
+
 
     handleError(e);
 
+
   } finally {
+
 
     setLoading(false);
 
+
   }
+
 
 }
 
 
+
+
 function todayYmd() {
+
 
   var now =
     new Date();
 
+
   return (
+
 
     now.getFullYear() +
 
+
     '-' +
+
 
     String(
       now.getMonth() +
@@ -3924,7 +5022,9 @@ function todayYmd() {
       '0'
     ) +
 
+
     '-' +
+
 
     String(
       now.getDate()
@@ -3933,14 +5033,19 @@ function todayYmd() {
       '0'
     )
 
+
   );
 
+
 }
+
+
 
 
 async function refreshTeacherData(
   teacherId
 ) {
+
 
   teachers =
     (
@@ -3950,44 +5055,58 @@ async function refreshTeacherData(
     ) ||
     [];
 
+
   renderAll();
 
+
   renderJapanMap();
+
 
   var teacher =
     findTeacher(
       teacherId
     );
 
+
   if (
     teacher
   ) {
 
+
     selectedTeacherId =
       teacherId;
+
 
     renderTeacherDetail(
       teacher
     );
 
+
     showPage(
       'detail'
     );
 
+
   }
 
+
 }
+
+
 
 
 /* ========================================
    先生フォーム
    ======================================== */
 
+
 function openTeacherForm(
   id
 ) {
 
+
   clearTeacherForm();
+
 
   var teacher =
     id
@@ -3995,6 +5114,7 @@ function openTeacherForm(
           id
         )
       : null;
+
 
   pendingInteractions =
     teacher &&
@@ -4006,11 +5126,14 @@ function openTeacherForm(
         )
       : [];
 
+
   deletedInteractionIds =
     [];
 
+
   editingPendingInteractionIndex =
     -1;
+
 
   pendingLinks =
     teacher &&
@@ -4022,15 +5145,19 @@ function openTeacherForm(
         )
       : [];
 
+
   deletedLinkIds =
     [];
+
 
   editingPendingLinkIndex =
     -1;
 
+
   document.getElementById(
     'modalTitle'
   ).textContent =
+
 
     teacher
       ? personLabel() +
@@ -4038,29 +5165,35 @@ function openTeacherForm(
       : personLabel() +
         'を追加';
 
+
   if (
     teacher
   ) {
+
 
     setValue(
       'teacherId',
       teacher.teacherId
     );
 
+
     setValue(
       'name',
       teacher.name
     );
+
 
     setValue(
       'kana',
       teacher.kana
     );
 
+
     setValue(
       'nickname',
       teacher.nickname
     );
+
 
     setValue(
       'gender',
@@ -4068,11 +5201,13 @@ function openTeacherForm(
       ''
     );
 
+
     setValue(
       'phone',
       teacher.phone ||
       ''
     );
+
 
     setValue(
       'postalCode',
@@ -4080,110 +5215,138 @@ function openTeacherForm(
       ''
     );
 
+
     setValue(
       'birthYear',
       teacher.birthYear
     );
+
 
     setValue(
       'birthMonth',
       teacher.birthMonth
     );
 
+
     setValue(
       'birthDay',
       teacher.birthDay
     );
+
 
     setValue(
       'ageManual',
       teacher.ageManual
     );
 
+
     setValue(
       'salonName',
       teacher.salonName
     );
+
 
     setValue(
       'salonKana',
       teacher.salonKana
     );
 
+
     setValue(
       'prefecture',
       teacher.prefecture
     );
+
 
     setValue(
       'city',
       teacher.city
     );
 
+
     setValue(
       'address1',
       teacher.address1
     );
+
 
     setValue(
       'address2',
       teacher.address2
     );
 
+
     setValue(
       'memo',
       teacher.memo
     );
 
+
   } else {
+
 
     setValue(
       'gender',
       ''
     );
 
+
   }
+
 
   var placeNameLabelEl =
     document.getElementById(
       'placeNameLabel'
     );
 
+
   if (
     placeNameLabelEl
   ) {
 
+
     placeNameLabelEl.textContent =
       placeLabel();
 
+
   }
+
 
   var placeKanaLabelEl =
     document.getElementById(
       'placeKanaLabel'
     );
 
+
   if (
     placeKanaLabelEl
   ) {
 
+
     placeKanaLabelEl.textContent =
       placeKanaLabel();
 
+
   }
+
 
   renderLinksEditor();
 
+
   renderChildrenEditor(
+
 
     teacher
       ? teacher.children ||
         []
       : []
 
+
   );
 
+
   renderTeacherFormInteractions();
+
 
   var teacherModal =
   document.getElementById(
@@ -4191,14 +5354,19 @@ function openTeacherForm(
   );
 
 
+
+
 teacherModal.classList.add(
   'show'
 );
 
 
+
+
 /* フォームを開くたびに最上部へ戻す */
 requestAnimationFrame(
   function() {
+
 
     var modalBody =
       teacherModal.querySelector(
@@ -4206,22 +5374,31 @@ requestAnimationFrame(
       );
 
 
+
+
     if (
       modalBody
     ) {
 
+
       modalBody.scrollTop =
         0;
 
+
     }
+
 
   }
 );
 
+
 }
 
 
+
+
 function closeTeacherForm() {
+
 
   document.getElementById(
     'teacherModal'
@@ -4229,32 +5406,44 @@ function closeTeacherForm() {
     'show'
   );
 
+
   hideCombos();
+
 
   pendingInteractions =
     [];
 
+
   deletedInteractionIds =
     [];
+
 
   editingPendingInteractionIndex =
     -1;
 
+
   pendingLinks =
     [];
+
 
   deletedLinkIds =
     [];
 
+
   editingPendingLinkIndex =
     -1;
+
 
 }
 
 
+
+
 function clearTeacherForm() {
 
+
   var ids = [
+
 
     'teacherId',
     'name',
@@ -4274,7 +5463,9 @@ function clearTeacherForm() {
     'address2',
     'memo'
 
+
   ];
+
 
   for (
     var i = 0;
@@ -4282,126 +5473,157 @@ function clearTeacherForm() {
     i++
   ) {
 
+
     setValue(
       ids[i],
       ''
     );
 
+
   }
+
 
   setValue(
     'gender',
     '女'
   );
 
+
 }
+
+
 
 
 async function saveTeacherForm() {
 
+
   var instagramLegacy =
     firstInstagramAccountFromPendingLinks();
 
+
   var payload = {
+
 
     teacherId:
       valueOf(
         'teacherId'
       ),
 
+
     name:
       valueOf(
         'name'
       ),
+
 
     kana:
       valueOf(
         'kana'
       ),
 
+
     nickname:
       valueOf(
         'nickname'
       ),
+
 
     gender:
       valueOf(
         'gender'
       ),
 
+
     phone:
       valueOf(
         'phone'
       ),
+
 
     postalCode:
       valueOf(
         'postalCode'
       ),
 
+
     birthYear:
       valueOf(
         'birthYear'
       ),
+
 
     birthMonth:
       valueOf(
         'birthMonth'
       ),
 
+
     birthDay:
       valueOf(
         'birthDay'
       ),
+
 
     ageManual:
       valueOf(
         'ageManual'
       ),
 
+
     salonName:
       valueOf(
         'salonName'
       ),
+
 
     salonKana:
       valueOf(
         'salonKana'
       ),
 
+
     prefecture:
       valueOf(
         'prefecture'
       ),
+
 
     city:
       valueOf(
         'city'
       ),
 
+
     address1:
       valueOf(
         'address1'
       ),
+
 
     address2:
       valueOf(
         'address2'
       ),
 
+
     instagram:
       instagramLegacy,
+
 
     memo:
       valueOf(
         'memo'
       )
 
+
   };
+
 
   setLoading(true);
 
+
   try {
+
 
     var saved =
       await runScript(
@@ -4411,127 +5633,174 @@ async function saveTeacherForm() {
         ]
       );
 
+
     await saveChildrenAfterTeacher(
       saved
     );
+
 
     await saveLinksAfterTeacher(
       saved.teacherId
     );
 
+
     await saveInteractionsAfterTeacher(
       saved.teacherId
     );
+
 
     await refreshAfterSave(
       saved.teacherId
     );
 
+
   } catch (e) {
+
 
     handleError(e);
 
+
   } finally {
+
 
     setLoading(false);
 
+
   }
 
+
 }
+
+
 
 
 function openTeacherFormForNewChild(
   teacherId
 ) {
 
+
   openTeacherForm(
     teacherId
   );
 
+
   addChildRow();
+
 
   setTimeout(
     function() {
+
 
       var area =
         document.getElementById(
           'childrenEditArea'
         );
 
+
       if (
         area
       ) {
 
+
         area.scrollIntoView({
+
 
           behavior:
             'smooth',
 
+
           block:
             'start'
 
+
         });
 
+
       }
+
 
     },
     100
   );
 
+
 }
+
+
 
 
 /* ========================================
    先生フォーム内 交流履歴
    ======================================== */
 
+
 function renderTeacherFormInteractions() {
+
 
   var area =
     document.getElementById(
       'interactionEditArea'
     );
 
+
   if (!area) {
     return;
   }
 
+
   var html =
+
 
     '<div class="detail-head">' +
 
+
     '<div class="section-title">' +
+
 
     '交流履歴 ' +
 
+
     pendingInteractions.length +
+
 
     '件' +
 
+
     '</div>' +
+
 
     '<button type="button" class="secondary" onclick="openTeacherFormInteraction()">' +
 
+
     '＋ 交流記録' +
+
 
     '</button>' +
 
+
     '</div>';
+
 
   if (
     pendingInteractions.length ===
     0
   ) {
 
+
     html +=
+
 
       '<div class="empty">' +
 
+
       '交流記録はまだありません。' +
+
 
       '</div>';
 
+
   }
+
 
   for (
     var i = 0;
@@ -4539,130 +5808,174 @@ function renderTeacherFormInteractions() {
     i++
   ) {
 
+
     var interaction =
       pendingInteractions[i];
 
+
     html +=
+
 
       '<div class="child">' +
 
+
       '<div class="detail-head">' +
+
 
       '<div>' +
 
+
       '<div class="interaction-date">' +
+
 
       escapeHtml(
         interaction.date ||
         '日付未登録'
       ) +
 
+
       '</div>' +
 
+
       '<span class="interaction-type-label">' +
+
 
       escapeHtml(
         interaction.interactionType ||
         '種別未登録'
       ) +
 
+
       '</span>' +
 
+
       '</div>' +
+
 
       '<div class="detail-head-actions">' +
 
+
       '<button type="button" class="secondary" onclick="openTeacherFormInteraction(' +
 
+
       i +
+
 
       ')">編集</button>' +
 
+
       '<button type="button" class="detail-delete-button" onclick="removeTeacherFormInteraction(' +
+
 
       i +
 
+
       ')">削除</button>' +
+
 
       '</div>' +
 
+
       '</div>';
+
 
     if (
       interaction.memo
     ) {
 
+
       html +=
 
+
         '<div style="margin-top:8px;white-space:pre-wrap;line-height:1.7">' +
+
 
         escapeHtml(
           interaction.memo
         ) +
 
+
         '</div>';
 
+
     }
+
 
     html +=
       '</div>';
 
+
   }
+
 
   area.innerHTML =
     html;
 
+
 }
+
+
 
 
 function openTeacherFormInteraction(
   index
 ) {
 
+
   interactionFormSource =
     'teacherForm';
 
+
   editingPendingInteractionIndex =
+
 
     typeof index ===
       'number'
       ? index
       : -1;
 
+
   setValue(
     'interactionId',
     ''
   );
+
 
   setValue(
     'interactionDate',
     todayYmd()
   );
 
+
   setValue(
     'interactionType',
     ''
   );
+
 
   setValue(
     'interactionMemo',
     ''
   );
 
+
   if (
     editingPendingInteractionIndex >=
     0
   ) {
+
 
     var interaction =
       pendingInteractions[
         editingPendingInteractionIndex
       ];
 
+
     document.getElementById(
       'interactionModalTitle'
     ).textContent =
       '交流記録を編集';
+
 
     setValue(
       'interactionId',
@@ -4670,11 +5983,13 @@ function openTeacherFormInteraction(
       ''
     );
 
+
     setValue(
       'interactionDate',
       interaction.date ||
       ''
     );
+
 
     setValue(
       'interactionType',
@@ -4682,20 +5997,25 @@ function openTeacherFormInteraction(
       ''
     );
 
+
     setValue(
       'interactionMemo',
       interaction.memo ||
       ''
     );
 
+
   } else {
+
 
     document.getElementById(
       'interactionModalTitle'
     ).textContent =
       '交流記録を追加';
 
+
   }
+
 
   document.getElementById(
     'interactionModal'
@@ -4703,17 +6023,22 @@ function openTeacherFormInteraction(
     'show'
   );
 
+
 }
+
+
 
 
 async function removeTeacherFormInteraction(
   index
 ) {
 
+
   var interaction =
     pendingInteractions[
       index
     ];
+
 
   if (
     !(await appConfirm(
@@ -4722,78 +6047,107 @@ async function removeTeacherFormInteraction(
     ))
   ) {
 
+
     return;
   }
+
 
   if (
     interaction &&
     interaction.interactionId
   ) {
 
+
     deletedInteractionIds.push(
       interaction.interactionId
     );
 
+
   }
+
 
   pendingInteractions.splice(
     index,
     1
   );
 
+
   renderTeacherFormInteractions();
 
+
 }
+
+
 
 
 /* ========================================
    リンク・SNS
    ======================================== */
 
+
 function renderLinksEditor() {
+
 
   var area =
     document.getElementById(
       'linkEditArea'
     );
 
+
   if (!area) {
     return;
   }
 
+
   var html =
+
 
     '<div class="detail-head">' +
 
+
     '<div class="section-title">' +
+
 
     'リンク・SNS ' +
 
+
     pendingLinks.length +
+
 
     '件</div>' +
 
+
     '<button type="button" class="secondary" onclick="openTeacherFormLink()">' +
+
 
     '＋ リンクを追加' +
 
+
     '</button>' +
 
+
     '</div>';
+
 
   if (
     pendingLinks.length === 0
   ) {
 
+
     html +=
+
 
       '<div class="empty">' +
 
+
       'リンク・SNSはまだありません。' +
+
 
       '</div>';
 
+
   }
+
 
   for (
     var i = 0;
@@ -4801,34 +6155,48 @@ function renderLinksEditor() {
     i++
   ) {
 
+
     var link =
       pendingLinks[i];
 
+
     var label =
+
 
       link.displayName ||
 
+
       link.type ||
+
 
       'リンク';
 
+
     html +=
+
 
       '<div class="link-edit">' +
 
+
       '<div class="detail-head">' +
+
 
       '<div class="link-row-main">' +
 
+
       '<div class="link-label">' +
+
 
       escapeHtml(
         label
       ) +
 
+
       '</div>' +
 
+
       '<div class="link-value">' +
+
 
       escapeHtml(
         displayLinkValue(
@@ -4836,83 +6204,110 @@ function renderLinksEditor() {
         )
       ) +
 
-      '</div>' +
 
       '</div>' +
+
+
+      '</div>' +
+
 
       '<div class="detail-head-actions">' +
 
+
       '<button type="button" class="secondary" onclick="openTeacherFormLink(' +
 
+
       i +
+
 
       ')">編集</button>' +
 
+
       '<button type="button" class="detail-delete-button" onclick="removeTeacherFormLink(' +
+
 
       i +
 
+
       ')">削除</button>' +
 
-      '</div>' +
 
       '</div>' +
+
+
+      '</div>' +
+
 
       '</div>';
 
+
   }
+
 
   area.innerHTML =
     html;
 
+
 }
+
+
 
 
 function openTeacherFormLink(
   index
 ) {
 
+
   editingPendingLinkIndex =
+
 
     typeof index ===
       'number'
       ? index
       : -1;
 
+
   setValue(
     'linkId',
     ''
   );
+
 
   setValue(
     'linkType',
     'Instagram'
   );
 
+
   setValue(
     'linkDisplayName',
     ''
   );
+
 
   setValue(
     'linkValue',
     ''
   );
 
+
   if (
     editingPendingLinkIndex >=
     0
   ) {
+
 
     var link =
       pendingLinks[
         editingPendingLinkIndex
       ];
 
+
     document.getElementById(
       'linkModalTitle'
     ).textContent =
       'リンク・SNSを編集';
+
 
     setValue(
       'linkId',
@@ -4920,11 +6315,13 @@ function openTeacherFormLink(
       ''
     );
 
+
     setValue(
       'linkType',
       link.type ||
       ''
     );
+
 
     setValue(
       'linkDisplayName',
@@ -4932,22 +6329,28 @@ function openTeacherFormLink(
       ''
     );
 
+
     setValue(
       'linkValue',
       link.value ||
       ''
     );
 
+
   } else {
+
 
     document.getElementById(
       'linkModalTitle'
     ).textContent =
       'リンク・SNSを追加';
 
+
   }
 
+
   updateLinkInputGuide();
+
 
   document.getElementById(
     'linkModal'
@@ -4955,10 +6358,14 @@ function openTeacherFormLink(
     'show'
   );
 
+
 }
 
 
+
+
 function closeLinkForm() {
+
 
   document.getElementById(
     'linkModal'
@@ -4966,15 +6373,21 @@ function closeLinkForm() {
     'show'
   );
 
+
   editingPendingLinkIndex =
     -1;
+
 
 }
 
 
+
+
 /* SNSごとに入力案内を切り替える */
 
+
 function updateLinkInputGuide() {
+
 
   var type =
     normalizeLinkType(
@@ -4983,211 +6396,280 @@ function updateLinkInputGuide() {
       )
     );
 
+
   var label =
     document.getElementById(
       'linkValueLabel'
     );
+
 
   var input =
     document.getElementById(
       'linkValue'
     );
 
+
   var note =
     document.getElementById(
       'linkValueNote'
     );
 
+
   if (
     type === 'instagram'
   ) {
 
+
     label.textContent =
       'アカウント名またはURL';
+
 
     input.placeholder =
       '例：ユーザー名 / @ユーザー名 / Instagram URL';
 
+
     note.textContent =
       'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
+
     return;
   }
+
+
 
 
   if (
     type === 'facebook'
   ) {
 
+
     label.textContent =
       'ユーザー名・ページ名またはURL';
+
 
     input.placeholder =
       '例：ユーザー名 / Facebook URL';
 
+
     note.textContent =
       'ユーザー名・ページ名・URLのどれでも登録できます。';
 
+
     return;
   }
+
+
 
 
   if (
     type === 'x'
   ) {
 
+
     label.textContent =
       'アカウント名またはURL';
+
 
     input.placeholder =
       '例：ユーザー名 / @ユーザー名 / X URL';
 
+
     note.textContent =
       'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
+
     return;
   }
+
+
 
 
   if (
     type === 'threads'
   ) {
 
+
     label.textContent =
       'アカウント名またはURL';
+
 
     input.placeholder =
       '例：ユーザー名 / @ユーザー名 / Threads URL';
 
+
     note.textContent =
       'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
+
     return;
   }
+
+
 
 
   if (
     type === 'tiktok'
   ) {
 
+
     label.textContent =
       'アカウント名またはURL';
+
 
     input.placeholder =
       '例：ユーザー名 / @ユーザー名 / TikTok URL';
 
+
     note.textContent =
       'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
+
     return;
   }
+
+
 
 
   if (
     type === 'youtube'
   ) {
 
+
     label.textContent =
       'ハンドル名またはURL';
+
 
     input.placeholder =
       '例：@ハンドル名 / YouTube URL';
 
+
     note.textContent =
       '@ハンドル名またはチャンネルURLを登録できます。';
 
+
     return;
   }
+
+
 
 
   if (
     type === 'line'
   ) {
 
+
     label.textContent =
       'LINE公式アカウントIDまたはURL';
+
 
     input.placeholder =
       '例：@アカウントID / LINE URL';
 
+
     note.textContent =
       'LINE公式アカウントIDまたはURLを登録できます。';
+
 
     return;
   }
 
 
+
+
   label.textContent =
     'URL';
+
 
   input.placeholder =
     'https://...';
 
+
   note.textContent =
     'URLを入力してください。';
+
 
 }
 
 
+
+
 function saveLinkForm() {
 
+
   var payload = {
+
 
     linkId:
       valueOf(
         'linkId'
       ),
 
+
     type:
       valueOf(
         'linkType'
       ),
+
 
     displayName:
       valueOf(
         'linkDisplayName'
       ),
 
+
     value:
       valueOf(
         'linkValue'
       )
 
+
   };
+
 
   if (
     editingPendingLinkIndex >=
     0
   ) {
 
+
     pendingLinks[
       editingPendingLinkIndex
     ] =
       payload;
 
+
   } else {
+
 
     pendingLinks.push(
       payload
     );
 
+
   }
+
 
   closeLinkForm();
 
+
   renderLinksEditor();
 
+
 }
+
+
 
 
 async function removeTeacherFormLink(
   index
 ) {
 
+
   var link =
     pendingLinks[
       index
     ];
+
 
   if (
     !(await appConfirm(
@@ -5196,57 +6678,78 @@ async function removeTeacherFormLink(
     ))
   ) {
 
+
     return;
   }
+
 
   if (
     link &&
     link.linkId
   ) {
 
+
     deletedLinkIds.push(
       link.linkId
     );
 
+
   }
+
 
   pendingLinks.splice(
     index,
     1
   );
 
+
   renderLinksEditor();
 
+
 }
+
+
 
 
 function renderDetailLink(
   link
 ) {
 
+
   var label =
+
 
     link.displayName ||
 
+
     link.type ||
+
 
     'リンク';
 
+
   return (
+
 
     '<div class="link-row">' +
 
+
     '<div class="link-row-main">' +
 
+
     '<div class="link-label">' +
+
 
     escapeHtml(
       label
     ) +
 
+
     '</div>' +
 
+
     '<div class="link-value">' +
+
 
     escapeHtml(
       displayLinkValue(
@@ -5254,43 +6757,58 @@ function renderDetailLink(
       )
     ) +
 
-    '</div>' +
 
     '</div>' +
+
+
+    '</div>' +
+
 
     '<button class="secondary link-open" onclick="openLink(\'' +
+
 
     escapeJs(
       link.type ||
       ''
     ) +
 
+
     '\',\'' +
+
 
     escapeJs(
       link.value ||
       ''
     ) +
 
+
     '\')">開く</button>' +
+
 
     '</div>'
 
+
   );
+
 
 }
 
 
+
+
 /* 登録値を画面上で見やすく表示 */
+
 
 function displayLinkValue(
   link
 ) {
 
+
   var type =
     normalizeLinkType(
       link.type
     );
+
 
   var value =
     String(
@@ -5298,34 +6816,42 @@ function displayLinkValue(
       ''
     ).trim();
 
+
   if (!value) {
     return '';
   }
+
 
   if (
     isHttpUrl(value)
   ) {
 
+
     return value;
   }
+
 
   if (
     type === 'facebook'
   ) {
+
 
     return stripLeadingAt(
       value
     );
   }
 
+
   if (
     type === 'line'
   ) {
+
 
     return value.charAt(0) === '@'
       ? value
       : '@' + value;
   }
+
 
   if (
     isAccountBasedSocial(
@@ -5333,22 +6859,29 @@ function displayLinkValue(
     )
   ) {
 
+
     return '@' +
       stripLeadingAt(
         value
       );
   }
 
+
   return value;
+
 
 }
 
 
+
+
 /* SNS種別を統一 */
+
 
 function normalizeLinkType(
   type
 ) {
+
 
   var value =
     String(
@@ -5362,11 +6895,13 @@ function normalizeLinkType(
         ''
       );
 
+
   if (
     value === 'twitter'
   ) {
     return 'x';
   }
+
 
   if (
     value === 'tik tok'
@@ -5374,14 +6909,19 @@ function normalizeLinkType(
     return 'tiktok';
   }
 
+
   return value;
 
+
 }
+
+
 
 
 function isAccountBasedSocial(
   type
 ) {
+
 
   return [
     'instagram',
@@ -5395,12 +6935,16 @@ function isAccountBasedSocial(
     type
   ) !== -1;
 
+
 }
+
+
 
 
 function isHttpUrl(
   value
 ) {
+
 
   return /^https?:\/\//i.test(
     String(
@@ -5409,12 +6953,16 @@ function isHttpUrl(
     ).trim()
   );
 
+
 }
+
+
 
 
 function stripLeadingAt(
   value
 ) {
+
 
   return String(
     value ||
@@ -5426,15 +6974,20 @@ function stripLeadingAt(
       ''
     );
 
+
 }
 
 
+
+
 /* SNS URLからアカウント名を拾える場合は拾う */
+
 
 function extractAccountFromSocialUrl(
   type,
   value
 ) {
+
 
   var v =
     String(
@@ -5442,17 +6995,22 @@ function extractAccountFromSocialUrl(
       ''
     ).trim();
 
+
   if (
     !isHttpUrl(v)
   ) {
 
+
     return stripLeadingAt(v);
   }
 
+
   try {
+
 
     var url =
       new URL(v);
+
 
     var path =
       url.pathname
@@ -5465,9 +7023,11 @@ function extractAccountFromSocialUrl(
           ''
         );
 
+
     if (
       type === 'instagram'
     ) {
+
 
       return path
         .split('/')[0]
@@ -5476,18 +7036,23 @@ function extractAccountFromSocialUrl(
           ''
         );
 
+
     }
+
 
     if (
       type === 'facebook'
     ) {
 
+
       if (
         path === 'profile.php'
       ) {
 
+
         return v;
       }
+
 
       return path
         .split('/')[0]
@@ -5496,12 +7061,15 @@ function extractAccountFromSocialUrl(
           ''
         );
 
+
     }
+
 
     if (
       type === 'x'
     ) {
 
+
       return path
         .split('/')[0]
         .replace(
@@ -5509,12 +7077,15 @@ function extractAccountFromSocialUrl(
           ''
         );
 
+
     }
+
 
     if (
       type === 'threads'
     ) {
 
+
       return path
         .split('/')[0]
         .replace(
@@ -5522,12 +7093,15 @@ function extractAccountFromSocialUrl(
           ''
         );
 
+
     }
+
 
     if (
       type === 'tiktok'
     ) {
 
+
       return path
         .split('/')[0]
         .replace(
@@ -5535,34 +7109,44 @@ function extractAccountFromSocialUrl(
           ''
         );
 
+
     }
+
 
     if (
       type === 'youtube'
     ) {
 
+
       var first =
         path.split('/')[0];
+
 
       if (
         first &&
         first.charAt(0) === '@'
       ) {
 
+
         return first.replace(
           /^@/,
           ''
         );
 
+
       }
+
 
       return v;
 
+
     }
+
 
     if (
       type === 'line'
     ) {
+
 
       return path
         .split('/')
@@ -5572,21 +7156,29 @@ function extractAccountFromSocialUrl(
           ''
         );
 
+
     }
+
 
   } catch (e) {}
 
+
   return v;
+
 
 }
 
 
+
+
 /* SNSアカウント名 → 開けるURLへ変換 */
+
 
 function socialUrlFromValue(
   type,
   value
 ) {
+
 
   var v =
     String(
@@ -5594,27 +7186,34 @@ function socialUrlFromValue(
       ''
     ).trim();
 
+
   if (!v) {
     return '';
   }
+
 
   if (
     isHttpUrl(v)
   ) {
 
+
     return v;
   }
 
+
   var account =
     stripLeadingAt(v);
+
 
   if (!account) {
     return '';
   }
 
+
   if (
     type === 'instagram'
   ) {
+
 
     return (
       'https://www.instagram.com/' +
@@ -5624,11 +7223,14 @@ function socialUrlFromValue(
       '/'
     );
 
+
   }
+
 
   if (
     type === 'facebook'
   ) {
+
 
     return (
       'https://www.facebook.com/' +
@@ -5637,11 +7239,14 @@ function socialUrlFromValue(
       )
     );
 
+
   }
+
 
   if (
     type === 'x'
   ) {
+
 
     return (
       'https://x.com/' +
@@ -5650,11 +7255,14 @@ function socialUrlFromValue(
       )
     );
 
+
   }
+
 
   if (
     type === 'threads'
   ) {
+
 
     return (
       'https://www.threads.net/@' +
@@ -5663,11 +7271,14 @@ function socialUrlFromValue(
       )
     );
 
+
   }
+
 
   if (
     type === 'tiktok'
   ) {
+
 
     return (
       'https://www.tiktok.com/@' +
@@ -5676,11 +7287,14 @@ function socialUrlFromValue(
       )
     );
 
+
   }
+
 
   if (
     type === 'youtube'
   ) {
+
 
     return (
       'https://www.youtube.com/@' +
@@ -5689,11 +7303,14 @@ function socialUrlFromValue(
       )
     );
 
+
   }
+
 
   if (
     type === 'line'
   ) {
+
 
     return (
       'https://page.line.me/' +
@@ -5702,22 +7319,30 @@ function socialUrlFromValue(
       )
     );
 
+
   }
 
+
   return '';
+
 
 }
 
 
+
+
 /* Instagram旧列との互換 */
 
+
 function firstInstagramAccountFromPendingLinks() {
+
 
   for (
     var i = 0;
     i < pendingLinks.length;
     i++
   ) {
+
 
     if (
       normalizeLinkType(
@@ -5726,9 +7351,11 @@ function firstInstagramAccountFromPendingLinks() {
       'instagram'
     ) {
 
+
       var value =
         pendingLinks[i].value ||
         '';
+
 
       var account =
         extractAccountFromSocialUrl(
@@ -5736,42 +7363,56 @@ function firstInstagramAccountFromPendingLinks() {
           value
         );
 
+
       if (
         account &&
         !isHttpUrl(account)
       ) {
 
+
         return account;
       }
 
+
       return '';
+
 
     }
 
+
   }
 
+
   return '';
+
 
 }
 
 
+
+
 /* リンクを開く */
+
 
 function openLink(
   type,
   value
 ) {
 
+
   if (!value) {
     return;
   }
+
 
   var normalizedType =
     normalizeLinkType(
       type
     );
 
+
   var url = '';
+
 
   if (
     isAccountBasedSocial(
@@ -5779,18 +7420,22 @@ function openLink(
     )
   ) {
 
+
     url =
       socialUrlFromValue(
         normalizedType,
         value
       );
 
+
   } else {
+
 
     url =
       String(
         value
       ).trim();
+
 
     if (
       !/^https?:\/\//i.test(
@@ -5798,17 +7443,22 @@ function openLink(
       )
     ) {
 
+
       url =
         'https://' +
         url;
 
+
     }
 
+
   }
+
 
   if (!url) {
     return;
   }
+
 
   window.open(
     url,
@@ -5816,34 +7466,47 @@ function openLink(
     'noopener'
   );
 
+
 }
+
+
 
 
 /* ========================================
    子ども
    ======================================== */
 
+
 function renderChildrenEditor(
   children
 ) {
+
 
   document.getElementById(
     'childrenEditArea'
   ).innerHTML =
 
+
     '<div class="detail-head">' +
+
 
     '<div class="section-title">子ども情報</div>' +
 
+
     '<button type="button" class="secondary" onclick="addChildRow()">' +
+
 
     '＋ 子どもを追加' +
 
+
     '</button>' +
+
 
     '</div>' +
 
+
     '<div id="childRows"></div>';
+
 
   for (
     var i = 0;
@@ -5851,30 +7514,39 @@ function renderChildrenEditor(
     i++
   ) {
 
+
     addChildRow(
       children[i]
     );
 
+
   }
 
+
 }
+
+
 
 
 function addChildRow(
   child
 ) {
 
+
   child =
     child ||
     {};
+
 
   var div =
     document.createElement(
       'div'
     );
 
+
   div.className =
     'child-edit';
+
 
   div.setAttribute(
     'data-child-id',
@@ -5882,8 +7554,10 @@ function addChildRow(
     ''
   );
 
+
   var gradeSelect =
     '<select class="child-grade">';
+
 
   for (
     var i = 0;
@@ -5891,18 +7565,24 @@ function addChildRow(
     i++
   ) {
 
+
     var grade =
       gradeOptions[i];
 
+
     gradeSelect +=
 
+
       '<option value="' +
+
 
       escapeAttr(
         grade
       ) +
 
+
       '"' +
+
 
       (
         child.grade ===
@@ -5911,80 +7591,112 @@ function addChildRow(
           : ''
       ) +
 
+
       '>' +
+
 
       escapeHtml(
         grade ||
         '未設定'
       ) +
 
+
       '</option>';
 
+
   }
+
 
   gradeSelect +=
     '</select>';
 
+
   div.innerHTML =
+
 
     '<div class="grid2">' +
 
+
     '<div class="field">' +
+
 
     '<label>名前</label>' +
 
+
     '<input class="child-name" value="' +
+
 
     escapeAttr(
       child.name ||
       ''
     ) +
 
+
     '">' +
+
 
     '</div>' +
 
+
     '<div class="field">' +
+
 
     '<label>ふりがな</label>' +
 
+
     '<input class="child-kana" value="' +
+
 
     escapeAttr(
       child.kana ||
       ''
     ) +
 
+
     '">' +
 
-    '</div>' +
 
     '</div>' +
+
+
+    '</div>' +
+
 
     '<div class="grid2">' +
 
+
     '<div class="field">' +
+
 
     '<label>呼び名</label>' +
 
+
     '<input class="child-nickname" value="' +
+
 
     escapeAttr(
       child.nickname ||
       ''
     ) +
 
+
     '">' +
+
 
     '</div>' +
 
+
     '<div class="field">' +
+
 
     '<label>性別</label>' +
 
+
     '<select class="child-gender">' +
 
+
     '<option value=""' +
+
 
     (
       !child.gender
@@ -5992,9 +7704,12 @@ function addChildRow(
         : ''
     ) +
 
+
     '>未設定</option>' +
 
+
     '<option value="女"' +
+
 
     (
       child.gender ===
@@ -6003,9 +7718,12 @@ function addChildRow(
         : ''
     ) +
 
+
     '>女</option>' +
 
+
     '<option value="男"' +
+
 
     (
       child.gender ===
@@ -6014,110 +7732,156 @@ function addChildRow(
         : ''
     ) +
 
+
     '>男</option>' +
+
 
     '</select>' +
 
-    '</div>' +
 
     '</div>' +
+
+
+    '</div>' +
+
 
     '<div class="grid2">' +
 
+
     '<div class="field">' +
+
 
     '<label>学年</label>' +
 
+
     gradeSelect +
+
 
     '</div>' +
 
+
     '<div class="field">' +
+
 
     '<label>年齢</label>' +
 
+
     '<input type="number" class="child-age" value="' +
+
 
     escapeAttr(
       child.ageManual ||
       ''
     ) +
 
+
     '">' +
 
-    '</div>' +
 
     '</div>' +
+
+
+    '</div>' +
+
 
     '<div class="field">' +
 
+
     '<label>生まれ年</label>' +
 
+
     '<input type="number" class="child-year" value="' +
+
 
     escapeAttr(
       child.birthYear ||
       ''
     ) +
 
+
     '">' +
+
 
     '</div>' +
 
+
     '<div class="grid2">' +
+
 
     '<div class="field">' +
 
+
     '<label>誕生月</label>' +
 
+
     '<input type="number" min="1" max="12" class="child-month" value="' +
+
 
     escapeAttr(
       child.birthMonth ||
       ''
     ) +
 
+
     '">' +
+
 
     '</div>' +
 
+
     '<div class="field">' +
+
 
     '<label>誕生日</label>' +
 
+
     '<input type="number" min="1" max="31" class="child-day" value="' +
+
 
     escapeAttr(
       child.birthDay ||
       ''
     ) +
 
+
     '">' +
 
-    '</div>' +
 
     '</div>' +
+
+
+    '</div>' +
+
 
     '<div class="field">' +
 
+
     '<label>メモ</label>' +
 
+
     '<textarea class="child-memo">' +
+
 
     escapeHtml(
       child.memo ||
       ''
     ) +
 
+
     '</textarea>' +
+
 
     '</div>' +
 
+
     '<button type="button" class="detail-delete-button" onclick="removeChildRow(this)">' +
+
 
     'この子ども情報を削除' +
 
+
     '</button>';
+
 
   document.getElementById(
     'childRows'
@@ -6125,17 +7889,22 @@ function addChildRow(
     div
   );
 
+
 }
+
+
 
 
 async function saveChildrenAfterTeacher(
   teacher
 ) {
 
+
   var rows =
     document.querySelectorAll(
       '.child-edit'
     );
+
 
   for (
     var i = 0;
@@ -6143,10 +7912,13 @@ async function saveChildrenAfterTeacher(
     i++
   ) {
 
+
     var row =
       rows[i];
 
+
     var payload = {
+
 
       childId:
         row.getAttribute(
@@ -6154,60 +7926,73 @@ async function saveChildrenAfterTeacher(
         ) ||
         '',
 
+
       teacherId:
         teacher.teacherId,
+
 
       name:
         row.querySelector(
           '.child-name'
         ).value,
 
+
       kana:
         row.querySelector(
           '.child-kana'
         ).value,
+
 
       nickname:
         row.querySelector(
           '.child-nickname'
         ).value,
 
+
       gender:
         row.querySelector(
           '.child-gender'
         ).value,
+
 
       grade:
         row.querySelector(
           '.child-grade'
         ).value,
 
+
       birthYear:
         row.querySelector(
           '.child-year'
         ).value,
+
 
       birthMonth:
         row.querySelector(
           '.child-month'
         ).value,
 
+
       birthDay:
         row.querySelector(
           '.child-day'
         ).value,
+
 
       ageManual:
         row.querySelector(
           '.child-age'
         ).value,
 
+
       memo:
         row.querySelector(
           '.child-memo'
         ).value
 
+
     };
+
 
     await runScript(
       'saveChild',
@@ -6216,20 +8001,26 @@ async function saveChildrenAfterTeacher(
       ]
     );
 
+
   }
 
+
 }
+
+
 
 
 async function saveLinksAfterTeacher(
   teacherId
 ) {
 
+
   for (
     var deleteIndex = 0;
     deleteIndex < deletedLinkIds.length;
     deleteIndex++
   ) {
+
 
     await runScript(
       'deleteLink',
@@ -6240,7 +8031,9 @@ async function saveLinksAfterTeacher(
       ]
     );
 
+
   }
+
 
   for (
     var i = 0;
@@ -6248,54 +8041,69 @@ async function saveLinksAfterTeacher(
     i++
   ) {
 
+
     var link =
       pendingLinks[i];
+
 
     await runScript(
       'saveLink',
       [
         {
 
+
           linkId:
             link.linkId ||
             '',
 
+
           teacherId:
             teacherId,
+
 
           type:
             link.type ||
             '',
 
+
           displayName:
             link.displayName ||
             '',
+
 
           value:
             link.value ||
             '',
 
+
           sortOrder:
             i + 1
+
 
         }
       ]
     );
 
+
   }
 
+
 }
+
+
 
 
 async function saveInteractionsAfterTeacher(
   teacherId
 ) {
 
+
   for (
     var deleteIndex = 0;
     deleteIndex < deletedInteractionIds.length;
     deleteIndex++
   ) {
+
 
     await runScript(
       'deleteInteraction',
@@ -6306,7 +8114,9 @@ async function saveInteractionsAfterTeacher(
       ]
     );
 
+
   }
+
 
   for (
     var i = 0;
@@ -6314,45 +8124,58 @@ async function saveInteractionsAfterTeacher(
     i++
   ) {
 
+
     var interaction =
       pendingInteractions[i];
+
 
     await runScript(
       'saveInteraction',
       [
         {
 
+
           interactionId:
             interaction.interactionId ||
             '',
 
+
           teacherId:
             teacherId,
+
 
           date:
             interaction.date ||
             '',
 
+
           interactionType:
             interaction.interactionType ||
             '',
+
 
           memo:
             interaction.memo ||
             ''
 
+
         }
       ]
     );
 
+
   }
 
+
 }
+
+
 
 
 async function refreshAfterSave(
   teacherId
 ) {
+
 
   teachers =
     (
@@ -6362,48 +8185,64 @@ async function refreshAfterSave(
     ) ||
     [];
 
+
   closeTeacherForm();
+
 
   renderAll();
 
+
   renderJapanMap();
+
 
   var teacher =
     findTeacher(
       teacherId
     );
 
+
   if (teacher) {
+
 
     openTeacherDetail(
       teacherId
     );
 
+
   }
 
+
 }
+
+
 
 
 async function removeChildRow(
   button
 ) {
 
+
   var row =
     button.closest(
       '.child-edit'
     );
+
 
   var childId =
     row.getAttribute(
       'data-child-id'
     );
 
+
   if (!childId) {
+
 
     row.remove();
 
+
     return;
   }
+
 
   if (
     !(await appConfirm(
@@ -6412,12 +8251,16 @@ async function removeChildRow(
     ))
   ) {
 
+
     return;
   }
 
+
   setLoading(true);
 
+
   try {
+
 
     await runScript(
       'deleteChild',
@@ -6426,28 +8269,39 @@ async function removeChildRow(
       ]
     );
 
+
     row.remove();
+
 
   } catch (e) {
 
+
     handleError(e);
+
 
   } finally {
 
+
     setLoading(false);
+
 
   }
 
+
 }
+
+
 
 
 /* ========================================
    先生削除
    ======================================== */
 
+
 async function deleteTeacherAction(
   id
 ) {
+
 
   if (
     !(await appConfirm(
@@ -6457,12 +8311,16 @@ async function deleteTeacherAction(
     ))
   ) {
 
+
     return;
   }
 
+
   setLoading(true);
 
+
   try {
+
 
     await runScript(
       'deleteTeacher',
@@ -6470,6 +8328,7 @@ async function deleteTeacherAction(
         id
       ]
     );
+
 
     teachers =
       (
@@ -6479,46 +8338,63 @@ async function deleteTeacherAction(
       ) ||
       [];
 
+
     selectedTeacherId = '';
+
 
     renderAll();
 
+
     renderJapanMap();
+
 
     showPage(
       'map'
     );
 
+
   } catch (e) {
+
 
     handleError(e);
 
+
   } finally {
+
 
     setLoading(false);
 
+
   }
 
+
 }
+
+
 
 
 /* ========================================
    住所候補
    ======================================== */
 
+
 function showPrefectureResults() {
+
 
   var query =
     valueOf(
       'prefecture'
     );
 
+
   var box =
     document.getElementById(
       'prefResults'
     );
 
+
   box.innerHTML = '';
+
 
   for (
     var i = 0;
@@ -6526,59 +8402,76 @@ function showPrefectureResults() {
     i++
   ) {
 
+
     var pref =
       prefectures[i];
+
 
     if (
       query &&
       pref.indexOf(query) === -1
     ) {
 
+
       continue;
     }
+
 
     var item =
       document.createElement(
         'div'
       );
 
+
     item.className =
       'combo-option';
 
+
     item.textContent =
       pref;
+
 
     item.onclick =
       makePrefSelector(
         pref
       );
 
+
     box.appendChild(
       item
     );
 
+
   }
+
 
   box.classList.add(
     'show'
   );
 
+
 }
+
+
 
 
 function makePrefSelector(pref) {
 
+
   return function() {
+
 
     setValue(
       'prefecture',
       pref
     );
 
+
     setValue(
       'city',
       ''
     );
+
 
     document.getElementById(
       'prefResults'
@@ -6586,28 +8479,37 @@ function makePrefSelector(pref) {
       'show'
     );
 
+
   };
+
 
 }
 
 
+
+
 function showCityResults() {
+
 
   var query =
     valueOf(
       'city'
     );
 
+
   var selectedPref =
     valueOf(
       'prefecture'
     );
 
+
   var results = [];
+
 
   for (
     var pref in addressMaster
   ) {
+
 
     if (
       !addressMaster.hasOwnProperty(
@@ -6617,6 +8519,7 @@ function showCityResults() {
       continue;
     }
 
+
     if (
       selectedPref &&
       pref !== selectedPref
@@ -6624,9 +8527,11 @@ function showCityResults() {
       continue;
     }
 
+
     var cities =
       addressMaster[pref] ||
       [];
+
 
     for (
       var i = 0;
@@ -6634,8 +8539,10 @@ function showCityResults() {
       i++
     ) {
 
+
       var city =
         cities[i];
+
 
       if (
         query &&
@@ -6644,15 +8551,20 @@ function showCityResults() {
         continue;
       }
 
+
       results.push({
+
 
         prefecture:
           pref,
 
+
         city:
           city
 
+
       });
+
 
       if (
         results.length >= 100
@@ -6660,7 +8572,9 @@ function showCityResults() {
         break;
       }
 
+
     }
+
 
     if (
       results.length >= 100
@@ -6668,14 +8582,18 @@ function showCityResults() {
       break;
     }
 
+
   }
+
 
   var box =
     document.getElementById(
       'cityResults'
     );
 
+
   box.innerHTML = '';
+
 
   for (
     var j = 0;
@@ -6683,56 +8601,74 @@ function showCityResults() {
     j++
   ) {
 
+
     var result =
       results[j];
+
 
     var item =
       document.createElement(
         'div'
       );
 
+
     item.className =
       'combo-option';
 
+
     item.textContent =
+
 
       result.city +
 
+
       '｜' +
 
+
       result.prefecture;
+
 
     item.onclick =
       makeCitySelector(
         result
       );
 
+
     box.appendChild(
       item
     );
 
+
   }
+
 
   box.classList.add(
     'show'
   );
 
+
 }
+
+
 
 
 function makeCitySelector(row) {
 
+
   return function() {
+
 
     setValue(
       'city',
       row.city
     );
 
+
     setValue(
       'prefecture',
       row.prefecture
     );
+
 
     document.getElementById(
       'cityResults'
@@ -6740,12 +8676,17 @@ function makeCitySelector(row) {
       'show'
     );
 
+
   };
+
 
 }
 
 
+
+
 function hideCombos() {
+
 
   document.getElementById(
     'prefResults'
@@ -6753,18 +8694,23 @@ function hideCombos() {
     'show'
   );
 
+
   document.getElementById(
     'cityResults'
   ).classList.remove(
     'show'
   );
 
+
 }
+
+
 
 
 document.addEventListener(
   'click',
   function(e) {
+
 
     if (
       !e.target.closest(
@@ -6772,9 +8718,12 @@ document.addEventListener(
       )
     ) {
 
+
       hideCombos();
 
+
     }
+
 
     if (
       !e.target.closest(
@@ -6782,48 +8731,66 @@ document.addEventListener(
       )
     ) {
 
+
       hideSettingSuggestions();
+
 
     }
 
+
   }
 );
+
+
 
 
 /* ========================================
    外部リンク
    ======================================== */
 
+
 function openGoogleMap(
   address
 ) {
+
 
   if (!address) {
     return;
   }
 
+
   window.open(
 
+
     'https://www.google.com/maps/search/?api=1&query=' +
+
 
     encodeURIComponent(
       address
     ),
 
+
     '_blank',
+
 
     'noopener'
 
+
   );
 
+
 }
+
+
 
 
 /* ========================================
    設定
    ======================================== */
 
+
 var settingCandidates = {
+
 
   appName: [
     'つながりマップ',
@@ -6838,6 +8805,7 @@ var settingCandidates = {
     'Teacher Map'
   ],
 
+
   personLabel: [
     '先生',
     '講師',
@@ -6847,6 +8815,7 @@ var settingCandidates = {
     '担当者',
     '受講生'
   ],
+
 
   placeLabel: [
     '店名',
@@ -6859,6 +8828,7 @@ var settingCandidates = {
     '施設名'
   ],
 
+
   placeKanaLabel: [
     '店名ふりがな',
     'サロン名ふりがな',
@@ -6870,7 +8840,10 @@ var settingCandidates = {
     '施設名ふりがな'
   ]
 
+
 };
+
+
 
 
 function showSettingSuggestions(
@@ -6880,15 +8853,18 @@ function showSettingSuggestions(
   showAll
 ) {
 
+
   var input =
     document.getElementById(
       inputId
     );
 
+
   var box =
     document.getElementById(
       resultId
     );
+
 
   if (
     !input ||
@@ -6897,7 +8873,9 @@ function showSettingSuggestions(
     return;
   }
 
+
   hideSettingSuggestions();
+
 
   var query =
     String(
@@ -6905,106 +8883,140 @@ function showSettingSuggestions(
       ''
     ).trim();
 
+
   var candidates =
     settingCandidates[
       candidateType
     ] ||
     [];
 
+
   box.innerHTML = '';
+
 
   var matched;
 
+
   if (showAll) {
+
 
     matched =
       candidates.slice();
 
+
   } else {
+
 
     matched =
       candidates.filter(
         function(candidate) {
 
+
           if (!query) {
             return true;
           }
+
 
           return candidate.indexOf(
             query
           ) !== -1;
 
+
         }
       );
 
+
   }
+
 
   matched.forEach(
     function(candidate) {
+
 
       var item =
         document.createElement(
           'button'
         );
 
+
       item.type =
         'button';
+
 
       item.className =
         'setting-option';
 
+
       item.textContent =
         candidate;
+
 
       item.onclick =
         function(event) {
 
+
           event.preventDefault();
           event.stopPropagation();
+
 
           input.value =
             candidate;
 
+
           hideSettingSuggestions();
 
+
         };
+
 
       box.appendChild(
         item
       );
 
+
     }
   );
+
 
   if (
     matched.length === 0
   ) {
+
 
     var note =
       document.createElement(
         'div'
       );
 
+
     note.className =
       'setting-no-result';
 
+
     note.textContent =
       '候補にない名称もそのまま入力できます。';
+
 
     box.appendChild(
       note
     );
 
+
   }
+
 
   box.classList.add(
     'show'
   );
 
+
 }
 
 
+
+
 function hideSettingSuggestions() {
+
 
   document
     .querySelectorAll(
@@ -7013,17 +9025,23 @@ function hideSettingSuggestions() {
     .forEach(
       function(box) {
 
+
         box.classList.remove(
           'show'
         );
 
+
       }
     );
+
 
 }
 
 
+
+
 function personLabel() {
+
 
   return String(
     appSettings.personLabel ||
@@ -7031,10 +9049,14 @@ function personLabel() {
   ).trim() ||
     '人物';
 
+
 }
 
 
+
+
 function placeLabel() {
+
 
   return String(
     appSettings.placeLabel ||
@@ -7042,10 +9064,14 @@ function placeLabel() {
   ).trim() ||
     '店名';
 
+
 }
 
 
+
+
 function placeKanaLabel() {
+
 
   return String(
     appSettings.placeKanaLabel ||
@@ -7053,10 +9079,14 @@ function placeKanaLabel() {
   ).trim() ||
     '店名ふりがな';
 
+
 }
 
 
+
+
 function appName() {
+
 
   return String(
     appSettings.appName ||
@@ -7064,7 +9094,10 @@ function appName() {
   ).trim() ||
     'Mirel Map';
 
+
 }
+
+
 
 
 function mirelClampNumber(value, min, max, fallback) {
@@ -7072,6 +9105,7 @@ function mirelClampNumber(value, min, max, fallback) {
   if (!isFinite(n)) n = Number(fallback);
   return Math.min(max, Math.max(min, n));
 }
+
 
 function mirelTypographyPresetValues(kind, preset) {
   if (kind === 'font') {
@@ -7084,12 +9118,14 @@ function mirelTypographyPresetValues(kind, preset) {
   return { lineHeight: 1.50, itemGap: 9 };
 }
 
+
 function mirelSyncTypographyNumber(rangeId, numberId) {
   var range = document.getElementById(rangeId);
   var number = document.getElementById(numberId);
   if (!range || !number) return;
   number.value = range.value;
 }
+
 
 function mirelSyncTypographyRange(numberId, rangeId, presetId) {
   var range = document.getElementById(rangeId);
@@ -7104,6 +9140,7 @@ function mirelSyncTypographyRange(numberId, rangeId, presetId) {
   if (preset) preset.value = 'custom';
   updateFontSizePreview();
 }
+
 
 function mirelTypographyNumberTyping(numberId, rangeId, presetId) {
   var range = document.getElementById(rangeId);
@@ -7123,6 +9160,7 @@ function mirelTypographyNumberTyping(numberId, rangeId, presetId) {
   }
 }
 
+
 function mirelTypographyCustomChanged(kind) {
   var preset = document.getElementById(kind === 'font' ? 'settingFontSize' : 'settingLineSpacing');
   if (preset) preset.value = 'custom';
@@ -7134,6 +9172,7 @@ function mirelTypographyCustomChanged(kind) {
   }
   updateFontSizePreview();
 }
+
 
 function applyTypographyPreset(kind) {
   if (kind === 'font') {
@@ -7156,25 +9195,32 @@ function applyTypographyPreset(kind) {
   updateFontSizePreview();
 }
 
+
 function updateFontSizePreview() {
+
 
   var fontPreview = document.getElementById('settingFontSizePreview');
   var spacingPreview = document.getElementById('settingSpacingPreview');
 
+
   var size = valueOf('settingFontSize') || 'standard';
   if (['small', 'standard', 'large', 'custom'].indexOf(size) === -1) size = 'standard';
 
+
   var spacing = valueOf('settingLineSpacing') || 'standard';
   if (['compact', 'standard', 'spacious', 'custom'].indexOf(spacing) === -1) spacing = 'standard';
+
 
   var fontScale = mirelClampNumber(valueOf('settingFontScale'), 80, 140, 100);
   var lineHeight = mirelClampNumber(valueOf('settingLineHeight'), 1.10, 2.00, 1.50);
   var itemGap = mirelClampNumber(valueOf('settingItemGap'), 2, 24, 9);
 
+
   if (fontPreview) {
     fontPreview.setAttribute('data-preview-font-size', size);
     fontPreview.style.setProperty('--preview-scale', String(fontScale / 100));
   }
+
 
   if (spacingPreview) {
     spacingPreview.setAttribute('data-preview-line-spacing', spacing);
@@ -7182,6 +9228,7 @@ function updateFontSizePreview() {
     spacingPreview.style.setProperty('--preview-line-height', String(lineHeight));
     spacingPreview.style.setProperty('--preview-gap', itemGap + 'px');
   }
+
 
   var spacingLabel = document.getElementById('settingLineSpacingPreviewLabel');
   if (spacingLabel) {
@@ -7191,6 +9238,7 @@ function updateFontSizePreview() {
       spacing === 'custom' ? '詳細設定' : '標準';
   }
 
+
   var label = document.getElementById('settingFontSizePreviewLabel');
   if (label) {
     label.textContent =
@@ -7199,33 +9247,42 @@ function updateFontSizePreview() {
       size === 'custom' ? '詳細設定' : '標準';
   }
 
+
   var detail = document.getElementById('settingTypographyPreviewDetail');
   if (detail) detail.textContent = '行間 ' + lineHeight.toFixed(2) + ' / 余白 ' + itemGap + 'px';
 }
 
 
 
+
+
+
 function fillSettingsForm() {
+
 
   setValue(
     'settingAppName',
     appName()
   );
 
+
   setValue(
     'settingPersonLabel',
     personLabel()
   );
+
 
   setValue(
     'settingPlaceLabel',
     placeLabel()
   );
 
+
   setValue(
     'settingPlaceKanaLabel',
     placeKanaLabel()
   );
+
 
   setValue(
     'settingFontSize',
@@ -7235,6 +9292,7 @@ function fillSettingsForm() {
     )
   );
 
+
   setValue(
     'settingLineSpacing',
     (
@@ -7243,6 +9301,7 @@ function fillSettingsForm() {
     )
   );
 
+
   setValue('settingFontScale', appSettings.fontScale || 100);
   setValue('settingFontScaleNumber', appSettings.fontScale || 100);
   setValue('settingLineHeight', appSettings.lineHeight || 1.5);
@@ -7250,14 +9309,20 @@ function fillSettingsForm() {
   setValue('settingItemGap', appSettings.itemGap || 9);
   setValue('settingItemGapNumber', appSettings.itemGap || 9);
 
+
   updateFontSizePreview();
+
 
 }
 
 
+
+
 async function saveSettingsForm() {
 
+
   var payload = {
+
 
     appName:
       valueOf(
@@ -7265,11 +9330,13 @@ async function saveSettingsForm() {
       ) ||
       'Mirel Map',
 
+
     personLabel:
       valueOf(
         'settingPersonLabel'
       ) ||
       '人物',
+
 
     placeLabel:
       valueOf(
@@ -7277,11 +9344,13 @@ async function saveSettingsForm() {
       ) ||
       '店名',
 
+
     placeKanaLabel:
       valueOf(
         'settingPlaceKanaLabel'
       ) ||
       '店名ふりがな',
+
 
     fontSize:
       valueOf(
@@ -7289,21 +9358,27 @@ async function saveSettingsForm() {
       ) ||
       'standard',
 
+
     lineSpacing:
       valueOf(
         'settingLineSpacing'
       ) ||
       'standard',
 
+
     fontScale: mirelClampNumber(valueOf('settingFontScale'), 80, 140, 100),
     lineHeight: mirelClampNumber(valueOf('settingLineHeight'), 1.10, 2.00, 1.50),
     itemGap: mirelClampNumber(valueOf('settingItemGap'), 2, 24, 9)
 
+
   };
+
 
   setLoading(true);
 
+
   try {
+
 
     appSettings =
       await runScript(
@@ -7313,13 +9388,18 @@ async function saveSettingsForm() {
         ]
       );
 
+
     cacheUiSettings();
+
 
     applySettingsToUi();
 
+
     renderAll();
 
+
     renderJapanMap();
+
 
     /* 再描画後に生成された一覧・詳細・フォーム要素にも設定を再適用 */
     requestAnimationFrame(function() {
@@ -7327,33 +9407,46 @@ async function saveSettingsForm() {
       requestAnimationFrame(applySettingsToUi);
     });
 
+
     appToast(
       '設定を保存しました。'
     );
 
+
   } catch (e) {
+
 
     handleError(e);
 
+
   } finally {
+
 
     setLoading(false);
 
+
   }
+
 
 }
 
 
+
+
 function applyFontSizeSetting() {
 
+
   if (!document.body) return;
+
 
   var size = String(appSettings.fontSize || 'standard');
   if (['small','standard','large','custom'].indexOf(size) === -1) size = 'standard';
 
+
   var fallback = mirelTypographyPresetValues('font', size === 'custom' ? 'standard' : size).fontScale;
   var scale = mirelClampNumber(appSettings.fontScale, 80, 140, fallback);
   var ratio = scale / 100;
+
 
   document.body.setAttribute('data-mirel-font-size', size);
   document.body.style.setProperty('--mirel-ui-scale', String(ratio));
@@ -7369,16 +9462,22 @@ function applyFontSizeSetting() {
 }
 
 
+
+
 function applyLineSpacingSetting() {
 
+
   if (!document.body) return;
+
 
   var spacing = String(appSettings.lineSpacing || 'standard');
   if (['compact','standard','spacious','custom'].indexOf(spacing) === -1) spacing = 'standard';
 
+
   var preset = mirelTypographyPresetValues('spacing', spacing === 'custom' ? 'standard' : spacing);
   var lineHeight = mirelClampNumber(appSettings.lineHeight, 1.10, 2.00, preset.lineHeight);
   var itemGap = mirelClampNumber(appSettings.itemGap, 2, 24, preset.itemGap);
+
 
   document.body.setAttribute('data-mirel-line-spacing', spacing);
   document.body.style.setProperty('--mirel-content-line-height', String(lineHeight));
@@ -7394,238 +9493,331 @@ function applyLineSpacingSetting() {
 
 
 
+
+
+
 function applySettingsToUi() {
+
 
   applyFontSizeSetting();
   applyLineSpacingSetting();
 
+
   var app =
     appName();
 
+
   var person =
     personLabel();
+
 
   var brandName =
     document.getElementById(
       'brandName'
     );
 
+
   if (brandName) {
+
 
     brandName.textContent =
       app;
 
+
   }
+
 
   var brandSub =
     document.getElementById(
       'brandSub'
     );
 
+
   if (brandSub) {
+
 
     brandSub.textContent =
 
+
       '全国の' +
+
 
       person +
 
+
       '管理';
 
+
   }
+
 
   var authAppName =
     document.getElementById(
       'authAppName'
     );
 
+
   if (authAppName) {
+
 
     authAppName.textContent =
       app;
 
+
   }
+
 
   var authDescription =
     document.getElementById(
       'authDescription'
     );
 
+
   if (authDescription) {
+
 
     authDescription.textContent =
 
+
       'Googleアカウントでログインして' +
+
 
       person +
 
+
       '情報を開きます。';
+
 
   }
 
+
   document.title =
     app;
+
 
   var appleAppTitle =
     document.getElementById(
       'appleAppTitle'
     );
 
+
   if (appleAppTitle) {
+
 
     appleAppTitle.setAttribute(
       'content',
       app
     );
 
+
   }
+
 
   var listPageTitle =
     document.getElementById(
       'listPageTitle'
     );
 
+
   if (listPageTitle) {
+
 
     listPageTitle.textContent =
 
+
       person +
+
 
       '一覧';
 
+
   }
+
 
   var navListText =
     document.getElementById(
       'navListText'
     );
 
+
   if (navListText) {
+
 
     navListText.textContent =
 
+
       person +
+
 
       '一覧';
 
+
   }
+
 
   var mapLegendActive =
     document.getElementById(
       'mapLegendActive'
     );
 
+
   if (mapLegendActive) {
+
 
     mapLegendActive.textContent =
 
+
       person +
+
 
       'あり';
 
+
   }
+
 
   var activePrefBtn =
     document.getElementById(
       'activePrefBtn'
     );
 
+
   if (activePrefBtn) {
+
 
     activePrefBtn.textContent =
 
+
       person +
+
 
       'がいる県のみ';
 
+
   }
+
 
   var mapSearch =
     document.getElementById(
       'mapSearch'
     );
 
+
   if (mapSearch) {
+
 
     mapSearch.placeholder =
 
+
       '名前・' +
+
 
       placeLabel() +
 
+
       '・地域を検索';
 
+
   }
+
 
   var listSearch =
     document.getElementById(
       'listSearch'
     );
 
+
   if (listSearch) {
+
 
     listSearch.placeholder =
 
+
       '名前・呼び名・' +
+
 
       placeLabel() +
 
+
       '・地域で検索';
 
+
   }
+
 
   var globalSearch =
     document.getElementById(
       'globalSearch'
     );
 
+
   if (globalSearch) {
+
 
     globalSearch.placeholder =
 
+
       '名前・ふりがな・呼び名・' +
+
 
       placeLabel() +
 
+
       '・SNS・住所';
 
+
   }
+
 
   var placeNameLabel =
     document.getElementById(
       'placeNameLabel'
     );
 
+
   if (placeNameLabel) {
+
 
     placeNameLabel.textContent =
       placeLabel();
 
+
   }
+
 
   var placeKanaLabelEl =
     document.getElementById(
       'placeKanaLabel'
     );
 
+
   if (placeKanaLabelEl) {
+
 
     placeKanaLabelEl.textContent =
       placeKanaLabel();
 
+
   }
 
 
+
+
 }
+
+
 
 
 /* PWA manifest は index.html から静的 manifest.webmanifest のみを参照する。
    Blob による動的上書きは行わない。 */
 
 
+
+
 /* ========================================
    アプリ内確認ダイアログ
    ======================================== */
+
 
 function appConfirm(
   title,
@@ -7633,89 +9825,113 @@ function appConfirm(
   okText
 ) {
 
+
   return new Promise(
     function(resolve) {
+
 
       var modal =
         document.getElementById(
           'confirmModal'
         );
 
+
       var titleEl =
         document.getElementById(
           'confirmTitle'
         );
+
 
       var messageEl =
         document.getElementById(
           'confirmMessage'
         );
 
+
       var cancel =
         document.getElementById(
           'confirmCancel'
         );
+
 
       var ok =
         document.getElementById(
           'confirmOk'
         );
 
+
       titleEl.textContent =
         title ||
         '確認';
+
 
       messageEl.textContent =
         message ||
         '';
 
+
       ok.textContent =
         okText ||
         '削除する';
 
+
       function finish(result) {
+
 
         modal.classList.remove(
           'show'
         );
 
+
         cancel.onclick = null;
         ok.onclick = null;
 
+
         resolve(result);
 
+
       }
+
 
       cancel.onclick =
         function() {
           finish(false);
         };
 
+
       ok.onclick =
         function() {
           finish(true);
         };
 
+
       modal.classList.add(
         'show'
       );
 
+
     }
   );
 
+
 }
+
+
 
 
 /* ========================================
    共通
    ======================================== */
 
+
 function valueOf(id) {
+
 
   var el =
     document.getElementById(
       id
     );
+
 
   return el
     ? String(
@@ -7724,7 +9940,10 @@ function valueOf(id) {
       ).trim()
     : '';
 
+
 }
+
+
 
 
 function setValue(
@@ -7732,26 +9951,34 @@ function setValue(
   value
 ) {
 
+
   var el =
     document.getElementById(
       id
     );
 
+
   if (!el) {
     return;
   }
 
+
   el.value =
+
 
     value === null ||
     value === undefined
       ? ''
       : value;
 
+
 }
 
 
+
+
 function setLoading(show) {
+
 
   document.getElementById(
     'loading'
@@ -7760,12 +9987,17 @@ function setLoading(show) {
     show
   );
 
+
 }
+
+
 
 
 function handleError(error) {
 
+
   setLoading(false);
+
 
   var message =
     error &&
@@ -7773,96 +10005,125 @@ function handleError(error) {
       ? error.message
       : String(error);
 
+
   if (message === 'Failed to fetch') {
     message =
       '通信に失敗しました。通信状態を確認して、もう一度お試しください。';
   }
 
+
   if (typeof appToast === 'function') {
     appToast(message);
   }
 
+
 }
+
+
 
 
 function escapeHtml(str) {
 
+
   return String(
+
 
     str === null ||
     str === undefined
       ? ''
       : str
 
+
   )
+
 
     .replace(
       /&/g,
       '&amp;'
     )
 
+
     .replace(
       /</g,
       '&lt;'
     )
+
 
     .replace(
       />/g,
       '&gt;'
     )
 
+
     .replace(
       /"/g,
       '&quot;'
     )
+
 
     .replace(
       /'/g,
       '&#039;'
     );
 
+
 }
+
+
 
 
 function escapeAttr(str) {
 
+
   return escapeHtml(str);
+
 
 }
 
 
+
+
 function escapeJs(str) {
 
+
   return String(
+
 
     str === null ||
     str === undefined
       ? ''
       : str
 
+
   )
+
 
     .replace(
       /\\/g,
       '\\\\'
     )
 
+
     .replace(
       /'/g,
       "\\'"
     )
+
 
     .replace(
       /\r/g,
       ''
     )
 
+
     .replace(
       /\n/g,
       '\\n'
     );
 
+
 }
+
 
 /* =========================================================
    Mirel Map
@@ -7870,20 +10131,27 @@ function escapeJs(str) {
    2026-10-08
    ========================================================= */
 
+
 var mirelAffiliations =
   [];
+
 
 var mirelTeacherAffiliations =
   {};
 
+
 var mirelProfiles =
   {};
+
 
 var mirelFeatureSettings =
   {};
 
 
+
+
 var MIREL_FEATURE_DEFAULTS = {
+
 
   gender: true,
   phone: true,
@@ -7898,20 +10166,27 @@ var MIREL_FEATURE_DEFAULTS = {
   interactions: true,
   children: true
 
+
 };
+
+
 
 
 /* =========================================================
    学年候補
    ========================================================= */
 
+
 gradeOptions = [
 
+
   '',
+
 
   '年少',
   '年中',
   '年長',
+
 
   '小1',
   '小2',
@@ -7920,21 +10195,26 @@ gradeOptions = [
   '小5',
   '小6',
 
+
   '中1',
   '中2',
   '中3',
+
 
   '高1',
   '高2',
   '高3',
 
+
   '短大1',
   '短大2',
+
 
   '大学1',
   '大学2',
   '大学3',
   '大学4',
+
 
   '大学6年制1',
   '大学6年制2',
@@ -7943,35 +10223,46 @@ gradeOptions = [
   '大学6年制5',
   '大学6年制6',
 
+
   '専門1',
   '専門2',
   '専門3',
   '専門4',
 
+
   '修士1',
   '修士2',
+
 
   '博士1',
   '博士2',
   '博士3',
 
+
   'その他'
 
+
 ];
+
+
 
 
 /* =========================================================
    ON / OFF
    ========================================================= */
 
+
 function mirelFeatureOn(
   key
 ) {
+
 
   var value =
     mirelFeatureSettings[
       key
     ];
+
+
 
 
   if (
@@ -7980,13 +10271,17 @@ function mirelFeatureOn(
     value === ''
   ) {
 
+
     return (
       MIREL_FEATURE_DEFAULTS[
         key
       ] !== false
     );
 
+
   }
+
+
 
 
   return (
@@ -7996,14 +10291,19 @@ function mirelFeatureOn(
     value === 'true'
   );
 
+
 }
+
+
 
 
 /* =========================================================
    拡張データ読込
    ========================================================= */
 
+
 async function mirelLoadExtraData() {
+
 
   var data =
     await runScript(
@@ -8011,9 +10311,13 @@ async function mirelLoadExtraData() {
     );
 
 
+
+
   data =
     data ||
     {};
+
+
 
 
   mirelAffiliations =
@@ -8021,9 +10325,13 @@ async function mirelLoadExtraData() {
     [];
 
 
+
+
   mirelTeacherAffiliations =
     data.teacherAffiliations ||
     {};
+
+
 
 
   mirelProfiles =
@@ -8031,14 +10339,21 @@ async function mirelLoadExtraData() {
     {};
 
 
+
+
   mirelFeatureSettings =
     data.featureSettings ||
     {};
 
 
+
+
   mirelApplyProfileDerivedValues();
 
+
 }
+
+
 
 
 /* =========================================================
@@ -8046,22 +10361,30 @@ async function mirelLoadExtraData() {
    初期データは1回のAPI通信でまとめて取得
    ========================================================= */
 
+
 var mirelBaseStartApp =
   startApp;
+
+
 
 
 startApp =
   async function() {
 
+
     await mirelBaseStartApp();
 
+
   };
+
 
 /* =========================================================
    CSS
    ========================================================= */
 
+
 function mirelInstallExtraStyles() {
+
 
   if (
     document.getElementById(
@@ -8069,9 +10392,13 @@ function mirelInstallExtraStyles() {
     )
   ) {
 
+
     return;
 
+
   }
+
+
 
 
   var style =
@@ -8080,11 +10407,16 @@ function mirelInstallExtraStyles() {
     );
 
 
+
+
   style.id =
     'mirel-extra-style';
 
 
+
+
   style.textContent = `
+
 
     .mirel-extra-section {
       margin-top: 22px;
@@ -8092,12 +10424,14 @@ function mirelInstallExtraStyles() {
       border-top: 1px solid #eee3e1;
     }
 
+
     .mirel-feature-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 12px;
     }
+
 
     .mirel-feature-toggle {
       display: flex;
@@ -8110,11 +10444,13 @@ function mirelInstallExtraStyles() {
       font-size: 14px;
     }
 
+
     .mirel-feature-toggle input {
       width: 18px;
       height: 18px;
       accent-color: #df607f;
     }
+
 
     .mirel-aff-create-box {
       margin-top: 12px;
@@ -8124,15 +10460,18 @@ function mirelInstallExtraStyles() {
       background: #fffafa;
     }
 
+
     .mirel-aff-create-title {
       margin-bottom: 10px;
       font-size: 14px;
       font-weight: 700;
     }
 
+
     .mirel-aff-create-note {
       margin-bottom: 10px;
     }
+
 
     .mirel-aff-name-input,
     .mirel-aff-edit-name {
@@ -8142,12 +10481,14 @@ function mirelInstallExtraStyles() {
       font-size: 16px;
     }
 
+
     .mirel-aff-color-line {
       display: flex;
       align-items: center;
       gap: 9px;
       margin-top: 10px;
     }
+
 
     .mirel-aff-color-label,
     .mirel-aff-edit-label {
@@ -8156,10 +10497,12 @@ function mirelInstallExtraStyles() {
       color: #665d5a;
     }
 
+
     .mirel-aff-edit-label {
       display: block;
       margin-bottom: 6px;
     }
+
 
     .mirel-aff-create-actions,
     .mirel-aff-edit-actions {
@@ -8169,15 +10512,18 @@ function mirelInstallExtraStyles() {
       margin-top: 12px;
     }
 
+
     .mirel-aff-master-list {
       margin-top: 18px;
     }
+
 
     .mirel-aff-existing-title {
       margin-bottom: 8px;
       font-size: 14px;
       font-weight: 700;
     }
+
 
     .mirel-aff-master-row {
       margin-top: 9px;
@@ -8187,6 +10533,7 @@ function mirelInstallExtraStyles() {
       background: #fff;
     }
 
+
     .mirel-aff-view-row {
       display: grid;
       grid-template-columns: 34px minmax(0, 1fr);
@@ -8194,6 +10541,7 @@ function mirelInstallExtraStyles() {
       row-gap: 8px;
       align-items: center;
     }
+
 
     .mirel-aff-view-actions {
       grid-column: 2;
@@ -8204,11 +10552,13 @@ function mirelInstallExtraStyles() {
       justify-content: flex-end;
     }
 
+
     .mirel-aff-order-actions {
       display: inline-flex;
       gap: 4px;
       align-items: center;
     }
+
 
     .mirel-aff-order-button {
       width: 28px;
@@ -8220,6 +10570,7 @@ function mirelInstallExtraStyles() {
       line-height: 1;
     }
 
+
     .mirel-aff-mini-action {
       min-width: 0 !important;
       padding: 7px 10px !important;
@@ -8229,13 +10580,16 @@ function mirelInstallExtraStyles() {
       white-space: nowrap;
     }
 
+
     .mirel-aff-order-button:disabled {
       opacity: .32;
     }
 
+
     .mirel-aff-order-note {
       margin: 4px 0 10px;
     }
+
 
     .mirel-aff-view-swatch {
       width: 34px;
@@ -8243,6 +10597,7 @@ function mirelInstallExtraStyles() {
       border-radius: 999px;
       border: 1px solid #ded2cf;
     }
+
 
     .mirel-aff-view-name {
       min-width: 0;
@@ -8256,9 +10611,11 @@ function mirelInstallExtraStyles() {
       line-height: 1.45;
     }
 
+
     .mirel-aff-edit-panel {
       padding-top: 4px;
     }
+
 
     .mirel-aff-master-row input[type="color"] {
       position: absolute;
@@ -8267,6 +10624,7 @@ function mirelInstallExtraStyles() {
       opacity: 0;
       pointer-events: none;
     }
+
 
     .mirel-aff-color-preview {
       display: inline-block;
@@ -8280,6 +10638,7 @@ function mirelInstallExtraStyles() {
       background: #f7d8df;
     }
 
+
     .mirel-aff-palette {
       display: flex;
       flex-wrap: wrap;
@@ -8287,6 +10646,7 @@ function mirelInstallExtraStyles() {
       grid-column: 1 / -1;
       margin: 2px 0 4px;
     }
+
 
     .mirel-aff-preset {
       position: relative;
@@ -8302,9 +10662,11 @@ function mirelInstallExtraStyles() {
       cursor: pointer;
     }
 
+
     .mirel-aff-preset:active {
       transform: scale(0.94);
     }
+
 
     .mirel-aff-custom-color {
       position: relative;
@@ -8323,6 +10685,7 @@ function mirelInstallExtraStyles() {
       overflow: hidden;
     }
 
+
     .mirel-aff-custom-color input[type="color"] {
       position: absolute;
       inset: 0;
@@ -8332,12 +10695,14 @@ function mirelInstallExtraStyles() {
       cursor: pointer;
     }
 
+
     .mirel-feature-save-actions {
       display: flex;
       justify-content: flex-end;
       margin-top: 14px;
       padding-bottom: 4px;
     }
+
 
     .mirel-aff-picker {
       display: flex;
@@ -8346,16 +10711,19 @@ function mirelInstallExtraStyles() {
       margin-top: 8px;
     }
 
+
     .mirel-aff-choice {
       position: relative;
       cursor: pointer;
     }
+
 
     .mirel-aff-choice input {
       position: absolute;
       opacity: 0;
       pointer-events: none;
     }
+
 
     .mirel-aff-choice span {
       display: inline-flex;
@@ -8368,10 +10736,12 @@ function mirelInstallExtraStyles() {
       font-weight: 600;
     }
 
+
     .mirel-aff-choice input:checked + span {
       border-color: #444;
       box-shadow: 0 0 0 2px #fff inset;
     }
+
 
     .mirel-aff-tags {
       display: flex;
@@ -8379,6 +10749,7 @@ function mirelInstallExtraStyles() {
       gap: 6px;
       margin-top: 5px;
     }
+
 
     .mirel-aff-tag {
       display: inline-flex;
@@ -8389,6 +10760,7 @@ function mirelInstallExtraStyles() {
       font-size: 12px;
       font-weight: 600;
     }
+
 
     .mirel-filter-select {
       width: 100%;
@@ -8401,9 +10773,11 @@ function mirelInstallExtraStyles() {
       font-size: 15px;
     }
 
+
     .mirel-hidden {
       display: none !important;
     }
+
 
     .mirel-setup-overlay {
       position: fixed;
@@ -8413,6 +10787,7 @@ function mirelInstallExtraStyles() {
       overflow-y: auto;
       padding: 24px 16px 60px;
     }
+
 
     .mirel-setup-card {
       max-width: 560px;
@@ -8424,11 +10799,13 @@ function mirelInstallExtraStyles() {
       box-shadow: 0 10px 40px rgba(80,50,50,.08);
     }
 
+
     .mirel-setup-title {
       font-size: 24px;
       font-weight: 700;
       margin-bottom: 8px;
     }
+
 
     .mirel-setup-note {
       color: #777;
@@ -8437,11 +10814,13 @@ function mirelInstallExtraStyles() {
       margin-bottom: 18px;
     }
 
+
     .mirel-phone-link {
       color: inherit;
       text-decoration: underline;
       text-underline-offset: 3px;
     }
+
 
     .mirel-toast {
       position: fixed;
@@ -8462,28 +10841,37 @@ function mirelInstallExtraStyles() {
       box-shadow: 0 8px 30px rgba(0,0,0,.18);
     }
 
+
     .mirel-toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
 
+
   `;
+
+
 
 
   document.head.appendChild(
     style
   );
 
+
 }
+
+
 
 
 /* =========================================================
    所属
    ========================================================= */
 
+
 function mirelAffiliationById(
   id
 ) {
+
 
   for (
     var i = 0;
@@ -8491,29 +10879,39 @@ function mirelAffiliationById(
     i++
   ) {
 
+
     if (
       mirelAffiliations[i]
         .affiliationId ===
       id
     ) {
 
+
       return mirelAffiliations[
         i
       ];
 
+
     }
+
 
   }
 
 
+
+
   return null;
 
+
 }
+
+
 
 
 function mirelAffiliationIds(
   teacherId
 ) {
+
 
   return (
     mirelTeacherAffiliations[
@@ -8522,12 +10920,16 @@ function mirelAffiliationIds(
     []
   );
 
+
 }
+
+
 
 
 function mirelAffiliationNames(
   teacherId
 ) {
+
 
   return mirelAffiliationIds(
     teacherId
@@ -8535,21 +10937,28 @@ function mirelAffiliationNames(
     .map(
       function(id) {
 
+
         var row =
           mirelAffiliationById(
             id
           );
 
 
+
+
         return row
           ? row.name
           : '';
+
 
       }
     )
     .filter(Boolean);
 
+
 }
+
+
 
 
 function mirelTeacherHasAffiliation(
@@ -8557,9 +10966,12 @@ function mirelTeacherHasAffiliation(
   affiliationId
 ) {
 
+
   if (!affiliationId) {
     return true;
   }
+
+
 
 
   return (
@@ -8570,7 +10982,11 @@ function mirelTeacherHasAffiliation(
     ) !== -1
   );
 
+
 }
+
+
+
 
 
 
@@ -8587,15 +11003,20 @@ var MIREL_AFFILIATION_PASTEL_COLORS = [
 ];
 
 
+
+
 function mirelAffiliationDisplayColor(
   color
 ) {
+
 
   var value =
     String(
       color ||
       '#f7d8df'
     ).trim();
+
+
 
 
   if (
@@ -8607,11 +11028,14 @@ function mirelAffiliationDisplayColor(
   }
 
 
+
+
   var r =
     parseInt(
       value.slice(1, 3),
       16
     );
+
 
   var g =
     parseInt(
@@ -8619,11 +11043,14 @@ function mirelAffiliationDisplayColor(
       16
     );
 
+
   var b =
     parseInt(
       value.slice(5, 7),
       16
     );
+
+
 
 
   var max =
@@ -8633,6 +11060,7 @@ function mirelAffiliationDisplayColor(
       b
     );
 
+
   var min =
     Math.min(
       r,
@@ -8640,12 +11068,15 @@ function mirelAffiliationDisplayColor(
       b
     );
 
+
   var lightness =
     (
       max +
       min
     ) /
     510;
+
+
 
 
   /*
@@ -8661,16 +11092,22 @@ function mirelAffiliationDisplayColor(
   }
 
 
+
+
   function pastelChannel(
     channel
   ) {
+
 
     return Math.round(
       255 * 0.8 +
       channel * 0.2
     );
 
+
   }
+
+
 
 
   return (
@@ -8683,6 +11120,7 @@ function mirelAffiliationDisplayColor(
       .map(
         function(channel) {
 
+
           return channel
             .toString(16)
             .padStart(
@@ -8690,12 +11128,16 @@ function mirelAffiliationDisplayColor(
               '0'
             );
 
+
         }
       )
       .join('')
   );
 
+
 }
+
+
 
 
 function mirelSetAffiliationColor(
@@ -8703,10 +11145,13 @@ function mirelSetAffiliationColor(
   color
 ) {
 
+
   var input =
     document.getElementById(
       inputId
     );
+
+
 
 
   if (!input) {
@@ -8714,13 +11159,18 @@ function mirelSetAffiliationColor(
   }
 
 
+
+
   var displayColor =
     mirelAffiliationDisplayColor(
       color
     );
 
+
   input.value =
     displayColor;
+
+
 
 
   var preview =
@@ -8729,23 +11179,30 @@ function mirelSetAffiliationColor(
     );
 
 
+
+
   if (preview) {
     preview.style.background =
       displayColor;
   }
 
+
 }
+
+
 
 
 function mirelAffiliationPaletteHtml(
   inputId
 ) {
 
+
   return (
     '<div class="mirel-aff-palette" aria-label="淡い色の候補">' +
     MIREL_AFFILIATION_PASTEL_COLORS
       .map(
         function(color) {
+
 
           return (
             '<button type="button" ' +
@@ -8771,6 +11228,7 @@ function mirelAffiliationPaletteHtml(
             '\')"></button>'
           );
 
+
         }
       )
       .join('') +
@@ -8791,36 +11249,46 @@ function mirelAffiliationPaletteHtml(
     '</div>'
   );
 
+
 }
+
+
 
 
 function mirelAffiliationTagsHtml(
   teacherId
 ) {
 
+
   var ids =
     mirelAffiliationIds(
       teacherId
     );
 
+
   if (!ids.length) {
     return '';
   }
 
+
   var tags =
     '';
 
+
   ids.forEach(
     function(id) {
+
 
       var row =
         mirelAffiliationById(
           id
         );
 
+
       if (!row) {
         return;
       }
+
 
       tags +=
         '<span class="mirel-aff-tag" style="background:' +
@@ -8835,8 +11303,10 @@ function mirelAffiliationTagsHtml(
         ) +
         '</span>';
 
+
     }
   );
+
 
   return tags
     ? '<div class="mirel-aff-tags">' +
@@ -8844,12 +11314,16 @@ function mirelAffiliationTagsHtml(
       '</div>'
     : '';
 
+
 }
+
+
 
 
 function mirelGradeAgeDisplay(
   grade
 ) {
+
 
   var ranges = {
     '年少': [3, 4],
@@ -8890,12 +11364,15 @@ function mirelGradeAgeDisplay(
     '博士3': [26, 27]
   };
 
+
   var range =
     ranges[grade];
+
 
   if (!range) {
     return '';
   }
+
 
   return (
     range[0] === range[1]
@@ -8903,13 +11380,18 @@ function mirelGradeAgeDisplay(
       : String(range[0]) + '〜' + String(range[1]) + '歳'
   );
 
+
 }
+
+
 
 
 function mirelApplyProfileDerivedValues() {
 
+
   teachers.forEach(
     function(teacher) {
+
 
       var profile =
         mirelProfiles[
@@ -8917,14 +11399,17 @@ function mirelApplyProfileDerivedValues() {
         ] ||
         {};
 
+
       var gradeDisplay =
         mirelGradeDisplay(
           profile.grade,
           profile.gradeBaseYear
         );
 
+
       teacher.gradeDisplay =
         gradeDisplay;
+
 
       if (
         !teacher.ageDisplay &&
@@ -8932,27 +11417,37 @@ function mirelApplyProfileDerivedValues() {
         gradeDisplay !== '卒業・修了'
       ) {
 
+
         teacher.ageDisplay =
           mirelGradeAgeDisplay(
             gradeDisplay
           );
 
+
       }
+
 
     }
   );
 
+
 }
+
+
 
 
 /* =========================================================
    学年
    ========================================================= */
 
+
 function mirelCurrentFiscalYear() {
+
 
   var now =
     new Date();
+
+
 
 
   return (
@@ -8961,18 +11456,24 @@ function mirelCurrentFiscalYear() {
       : now.getFullYear() - 1
   );
 
+
 }
+
+
 
 
 function mirelGradeGroups() {
 
+
   return [
+
 
     [
       '年少',
       '年中',
       '年長'
     ],
+
 
     [
       '小1',
@@ -8983,11 +11484,13 @@ function mirelGradeGroups() {
       '小6'
     ],
 
+
     [
       '中1',
       '中2',
       '中3'
     ],
+
 
     [
       '高1',
@@ -8995,10 +11498,12 @@ function mirelGradeGroups() {
       '高3'
     ],
 
+
     [
       '短大1',
       '短大2'
     ],
+
 
     [
       '大学1',
@@ -9006,6 +11511,7 @@ function mirelGradeGroups() {
       '大学3',
       '大学4'
     ],
+
 
     [
       '大学6年制1',
@@ -9016,6 +11522,7 @@ function mirelGradeGroups() {
       '大学6年制6'
     ],
 
+
     [
       '専門1',
       '専門2',
@@ -9023,10 +11530,12 @@ function mirelGradeGroups() {
       '専門4'
     ],
 
+
     [
       '修士1',
       '修士2'
     ],
+
 
     [
       '博士1',
@@ -9034,9 +11543,13 @@ function mirelGradeGroups() {
       '博士3'
     ]
 
+
   ];
 
+
 }
+
+
 
 
 function mirelGradeDisplay(
@@ -9044,9 +11557,12 @@ function mirelGradeDisplay(
   baseYear
 ) {
 
+
   if (!grade) {
     return '';
   }
+
+
 
 
   if (
@@ -9054,9 +11570,13 @@ function mirelGradeDisplay(
     'その他'
   ) {
 
+
     return grade;
 
+
   }
+
+
 
 
   var diff =
@@ -9067,13 +11587,19 @@ function mirelGradeDisplay(
     );
 
 
+
+
   if (diff < 0) {
     diff = 0;
   }
 
 
+
+
   var groups =
     mirelGradeGroups();
+
+
 
 
   for (
@@ -9082,19 +11608,25 @@ function mirelGradeDisplay(
     i++
   ) {
 
+
     var index =
       groups[i].indexOf(
         grade
       );
 
 
+
+
     if (
       index !== -1
     ) {
 
+
       var next =
         index +
         diff;
+
+
 
 
       if (
@@ -9102,23 +11634,34 @@ function mirelGradeDisplay(
         groups[i].length
       ) {
 
+
         return '卒業・修了';
 
+
       }
+
+
 
 
       return groups[i][
         next
       ];
 
+
     }
+
 
   }
 
 
+
+
   return grade;
 
+
 }
+
+
 
 
 /* =========================================================
@@ -9126,7 +11669,9 @@ function mirelGradeDisplay(
    学年・所属を追加
    ========================================================= */
 
+
 function mirelInstallTeacherExtraFields() {
+
 
   var salon =
     document.getElementById(
@@ -9134,9 +11679,13 @@ function mirelInstallTeacherExtraFields() {
     );
 
 
+
+
   if (!salon) {
     return;
   }
+
+
 
 
   var salonField =
@@ -9145,9 +11694,13 @@ function mirelInstallTeacherExtraFields() {
     );
 
 
+
+
   if (!salonField) {
     return;
   }
+
+
 
 
   if (
@@ -9156,32 +11709,44 @@ function mirelInstallTeacherExtraFields() {
     )
   ) {
 
+
     var gradeField =
       document.createElement(
         'div'
       );
 
 
+
+
     gradeField.className =
       'field mirel-field-compact';
 
+
     gradeField.id =
       'mirelGradeField';
+
+
 
 
     var options =
       '<option value=""></option>';
 
 
+
+
     gradeOptions.forEach(
       function(value) {
+
 
         if (!value) {
           return;
         }
 
 
+
+
         options +=
+
 
           '<option value="' +
           escapeHtml(
@@ -9189,25 +11754,36 @@ function mirelInstallTeacherExtraFields() {
           ) +
           '">' +
 
+
           escapeHtml(
             value
           ) +
 
+
           '</option>';
+
 
       }
     );
 
 
+
+
     gradeField.innerHTML =
+
 
       '<label>学年</label>' +
 
+
       '<select id="mirelGrade">' +
+
 
       options +
 
+
       '</select>';
+
+
 
 
     salonField.parentNode.insertBefore(
@@ -9215,7 +11791,10 @@ function mirelInstallTeacherExtraFields() {
       salonField
     );
 
+
   }
+
+
 
 
   if (
@@ -9224,24 +11803,34 @@ function mirelInstallTeacherExtraFields() {
     )
   ) {
 
+
     var affField =
       document.createElement(
         'div'
       );
 
 
+
+
     affField.className =
       'field';
+
 
     affField.id =
       'mirelAffiliationField';
 
 
+
+
     affField.innerHTML =
+
 
       '<label>所属</label>' +
 
+
       '<div id="mirelAffiliationPicker" class="mirel-aff-picker"></div>';
+
+
 
 
     salonField.parentNode.insertBefore(
@@ -9249,14 +11838,19 @@ function mirelInstallTeacherExtraFields() {
       salonField
     );
 
+
   }
 
+
 }
+
+
 
 
 function mirelRenderAffiliationPicker(
   teacherId
 ) {
+
 
   var box =
     document.getElementById(
@@ -9264,9 +11858,13 @@ function mirelRenderAffiliationPicker(
     );
 
 
+
+
   if (!box) {
     return;
   }
+
+
 
 
   var selected =
@@ -9275,27 +11873,38 @@ function mirelRenderAffiliationPicker(
     );
 
 
+
+
   if (
     !mirelAffiliations.length
   ) {
 
+
     box.innerHTML =
+
 
       '<div class="form-note">' +
       '所属は設定画面から追加できます。' +
       '</div>';
 
+
     return;
 
+
   }
+
+
 
 
   var html =
     '';
 
 
+
+
   mirelAffiliations.forEach(
     function(row) {
+
 
       var checked =
         selected.indexOf(
@@ -9303,9 +11912,13 @@ function mirelRenderAffiliationPicker(
         ) !== -1;
 
 
+
+
       html +=
 
+
         '<label class="mirel-aff-choice">' +
+
 
         '<input type="checkbox" ' +
         'class="mirel-aff-checkbox" ' +
@@ -9321,6 +11934,7 @@ function mirelRenderAffiliationPicker(
         ) +
         '>' +
 
+
         '<span style="' +
         'background:' +
         escapeHtml(
@@ -9332,25 +11946,35 @@ function mirelRenderAffiliationPicker(
         'color:#444;' +
         '">' +
 
+
         escapeHtml(
           row.name
         ) +
 
+
         '</span>' +
 
+
         '</label>';
+
 
     }
   );
 
 
+
+
   box.innerHTML =
     html;
+
 
 }
 
 
+
+
 function mirelSelectedAffiliationIds() {
+
 
   return Array
     .from(
@@ -9361,31 +11985,44 @@ function mirelSelectedAffiliationIds() {
     .map(
       function(input) {
 
+
         return input.value;
+
 
       }
     );
 
+
 }
+
+
 
 
 /* =========================================================
    openTeacherForm 拡張
    ========================================================= */
 
+
 var mirelBaseOpenTeacherForm =
   openTeacherForm;
 
 
+
+
 openTeacherForm =
   function(id) {
+
 
     mirelBaseOpenTeacherForm(
       id
     );
 
 
+
+
     mirelInstallTeacherExtraFields();
+
+
 
 
     var profile =
@@ -9399,19 +12036,27 @@ openTeacherForm =
         : {};
 
 
+
+
     var grade =
       document.getElementById(
         'mirelGrade'
       );
 
 
+
+
     if (grade) {
+
 
       grade.value =
         profile.grade ||
         '';
 
+
     }
+
+
 
 
     mirelRenderAffiliationPicker(
@@ -9420,26 +12065,37 @@ openTeacherForm =
     );
 
 
+
+
     mirelApplyFormVisibility();
 
+
   };
+
+
 
 
 /* =========================================================
    saveTeacherForm 拡張
    ========================================================= */
 
+
 var mirelBaseSaveTeacherForm =
   saveTeacherForm;
+
+
 
 
 saveTeacherForm =
   async function() {
 
+
     var originalTeacherId =
       valueOf(
         'teacherId'
       );
+
+
 
 
     var gradeInput =
@@ -9448,17 +12104,25 @@ saveTeacherForm =
       );
 
 
+
+
     var grade =
       gradeInput
         ? gradeInput.value
         : '';
 
 
+
+
     var affiliationIds =
       mirelSelectedAffiliationIds();
 
 
+
+
     await mirelBaseSaveTeacherForm();
+
+
 
 
     var teacherId =
@@ -9466,32 +12130,46 @@ saveTeacherForm =
       selectedTeacherId;
 
 
+
+
     if (!teacherId) {
       return;
     }
 
 
+
+
     try {
+
 
       var result =
         await runScript(
 
+
           'saveMirelTeacherExtras',
 
+
           [{
+
 
             teacherId:
               teacherId,
 
+
             grade:
               grade,
+
 
             affiliationIds:
               affiliationIds
 
+
           }]
 
+
         );
+
+
 
 
       result =
@@ -9499,9 +12177,13 @@ saveTeacherForm =
         {};
 
 
+
+
       mirelAffiliations =
         result.affiliations ||
         mirelAffiliations;
+
+
 
 
       mirelTeacherAffiliations =
@@ -9509,12 +12191,18 @@ saveTeacherForm =
         mirelTeacherAffiliations;
 
 
+
+
       mirelProfiles =
         result.profiles ||
         mirelProfiles;
 
 
+
+
       mirelApplyProfileDerivedValues();
+
+
 
 
       if (
@@ -9522,50 +12210,70 @@ saveTeacherForm =
         teacherId
       ) {
 
+
         var teacher =
           findTeacher(
             teacherId
           );
 
 
+
+
         if (teacher) {
+
 
           renderTeacherDetail(
             teacher
           );
 
+
         }
+
 
       }
 
 
+
+
       mirelRefreshAffiliationFilters();
 
+
     } catch (e) {
+
 
       handleError(
         e
       );
 
+
     }
 
+
   };
+
+
 
 
 /* =========================================================
    詳細へ学年・所属を表示
    ========================================================= */
 
+
 var mirelBaseRenderTeacherDetail =
   renderTeacherDetail;
+
+
 
 
 renderTeacherDetail =
   function(teacher) {
 
+
     mirelBaseRenderTeacherDetail(
       teacher
     );
+
+
 
 
     mirelInjectDetailExtras(
@@ -9573,14 +12281,20 @@ renderTeacherDetail =
     );
 
 
+
+
     mirelApplyDetailVisibility();
 
+
   };
+
+
 
 
 function mirelInjectDetailExtras(
   teacher
 ) {
+
 
   var detail =
     document.getElementById(
@@ -9588,9 +12302,13 @@ function mirelInjectDetailExtras(
     );
 
 
+
+
   if (!detail) {
     return;
   }
+
+
 
 
   var firstCard =
@@ -9599,9 +12317,13 @@ function mirelInjectDetailExtras(
     );
 
 
+
+
   if (!firstCard) {
     return;
   }
+
+
 
 
   firstCard
@@ -9611,14 +12333,20 @@ function mirelInjectDetailExtras(
     .forEach(
       function(row) {
 
+
         row.remove();
+
 
       }
     );
 
 
+
+
   var beforeRow =
     null;
+
+
 
 
   firstCard
@@ -9628,10 +12356,13 @@ function mirelInjectDetailExtras(
     .forEach(
       function(row) {
 
+
         var label =
           row.querySelector(
             '.label'
           );
+
+
 
 
         if (
@@ -9645,13 +12376,18 @@ function mirelInjectDetailExtras(
           )
         ) {
 
+
           beforeRow =
             row;
 
+
         }
+
 
       }
     );
+
+
 
 
   var profile =
@@ -9661,11 +12397,14 @@ function mirelInjectDetailExtras(
     {};
 
 
+
+
   if (
     mirelFeatureOn(
       'grade'
     )
   ) {
+
 
     var gradeText =
       mirelGradeDisplay(
@@ -9674,7 +12413,10 @@ function mirelInjectDetailExtras(
       );
 
 
+
+
     if (gradeText) {
+
 
       var gradeRow =
         document.createElement(
@@ -9682,13 +12424,19 @@ function mirelInjectDetailExtras(
         );
 
 
+
+
       gradeRow.className =
         'detail-row mirel-extra-detail-row';
 
 
+
+
       gradeRow.innerHTML =
 
+
         '<div class="label">学年</div>' +
+
 
         '<div class="value">' +
         escapeHtml(
@@ -9697,14 +12445,20 @@ function mirelInjectDetailExtras(
         '</div>';
 
 
+
+
       firstCard.insertBefore(
         gradeRow,
         beforeRow
       );
 
+
     }
 
+
   }
+
+
 
 
   if (
@@ -9713,13 +12467,17 @@ function mirelInjectDetailExtras(
     )
   ) {
 
+
     var ids =
       mirelAffiliationIds(
         teacher.teacherId
       );
 
 
+
+
     if (ids.length) {
+
 
       var affRow =
         document.createElement(
@@ -9727,16 +12485,23 @@ function mirelInjectDetailExtras(
         );
 
 
+
+
       affRow.className =
         'detail-row mirel-extra-detail-row';
+
+
 
 
       var tags =
         '';
 
 
+
+
       ids.forEach(
         function(id) {
+
 
           var row =
             mirelAffiliationById(
@@ -9744,12 +12509,17 @@ function mirelInjectDetailExtras(
             );
 
 
+
+
           if (!row) {
             return;
           }
 
 
+
+
           tags +=
+
 
             '<span class="mirel-aff-tag" ' +
             'style="background:' +
@@ -9760,23 +12530,32 @@ function mirelInjectDetailExtras(
             ) +
             ';">' +
 
+
             escapeHtml(
               row.name
             ) +
 
+
             '</span>';
+
 
         }
       );
 
 
+
+
       affRow.innerHTML =
 
+
         '<div class="label">所属</div>' +
+
 
         '<div class="value mirel-aff-tags">' +
         tags +
         '</div>';
+
+
 
 
       firstCard.insertBefore(
@@ -9784,19 +12563,27 @@ function mirelInjectDetailExtras(
         beforeRow
       );
 
+
     }
+
 
   }
 
+
 }
+
+
 
 
 /* =========================================================
    検索に所属を追加
    ========================================================= */
 
+
 var mirelBaseTeacherMatches =
   teacherMatches;
+
+
 
 
 teacherMatches =
@@ -9805,6 +12592,7 @@ teacherMatches =
     query
   ) {
 
+
     if (
       mirelBaseTeacherMatches(
         teacher,
@@ -9812,14 +12600,20 @@ teacherMatches =
       )
     ) {
 
+
       return true;
 
+
     }
+
+
 
 
     if (!query) {
       return true;
     }
+
+
 
 
     var affText =
@@ -9832,26 +12626,35 @@ teacherMatches =
         .toLowerCase();
 
 
+
+
     return (
       affText.indexOf(
         query.toLowerCase()
       ) !== -1
     );
 
+
   };
+
+
 
 
 /* =========================================================
    所属絞り込み
    ========================================================= */
 
+
 function mirelInstallSearchFilters() {
+
 
   mirelInstallOneFilter(
     'listSearch',
     'mirelListAffiliationFilter',
     renderFullTeacherList
   );
+
+
 
 
   mirelInstallOneFilter(
@@ -9861,9 +12664,14 @@ function mirelInstallSearchFilters() {
   );
 
 
+
+
   mirelRefreshAffiliationFilters();
 
+
 }
+
+
 
 
 function mirelInstallOneFilter(
@@ -9872,10 +12680,13 @@ function mirelInstallOneFilter(
   callback
 ) {
 
+
   var search =
     document.getElementById(
       searchId
     );
+
+
 
 
   if (
@@ -9885,9 +12696,13 @@ function mirelInstallOneFilter(
     )
   ) {
 
+
     return;
 
+
   }
+
+
 
 
   var select =
@@ -9896,25 +12711,34 @@ function mirelInstallOneFilter(
     );
 
 
+
+
   select.id =
     filterId;
 
+
   select.className =
     'mirel-filter-select';
+
+
 
 
   select.onchange =
     callback;
 
 
+
+
   if (
     searchId === 'listSearch'
   ) {
+
 
     var row =
       document.getElementById(
         'mirelListFilterRow'
       );
+
 
     if (row) {
       row.appendChild(
@@ -9923,17 +12747,23 @@ function mirelInstallOneFilter(
       return;
     }
 
+
   }
+
 
   search.insertAdjacentElement(
     'afterend',
     select
   );
 
+
 }
 
 
+
+
 function mirelRefreshAffiliationFilters() {
+
 
   [
     'mirelListAffiliationFilter',
@@ -9942,10 +12772,13 @@ function mirelRefreshAffiliationFilters() {
     .forEach(
       function(id) {
 
+
         var select =
           document.getElementById(
             id
           );
+
+
 
 
         if (!select) {
@@ -9953,21 +12786,30 @@ function mirelRefreshAffiliationFilters() {
         }
 
 
+
+
         var current =
           select.value;
 
 
+
+
         var html =
+
 
           '<option value="">' +
           '所属：すべて' +
           '</option>';
 
 
+
+
         mirelAffiliations.forEach(
           function(row) {
 
+
             html +=
+
 
               '<option value="' +
               escapeHtml(
@@ -9975,18 +12817,25 @@ function mirelRefreshAffiliationFilters() {
               ) +
               '">' +
 
+
               escapeHtml(
                 row.name
               ) +
 
+
               '</option>';
+
 
           }
         );
 
 
+
+
         select.innerHTML =
           html;
+
+
 
 
         if (
@@ -9997,41 +12846,55 @@ function mirelRefreshAffiliationFilters() {
             .some(
               function(option) {
 
+
                 return (
                   option.value ===
                   current
                 );
 
+
               }
             )
         ) {
 
+
           select.value =
             current;
 
+
         }
+
 
       }
     );
 
+
 }
+
+
 
 
 /* =========================================================
    一覧絞り込み
    ========================================================= */
 
+
 var mirelBaseRenderFullTeacherList =
   renderFullTeacherList;
+
+
 
 
 renderFullTeacherList =
   function() {
 
+
     var filter =
       document.getElementById(
         'mirelListAffiliationFilter'
       );
+
+
 
 
     var affiliationId =
@@ -10040,57 +12903,81 @@ renderFullTeacherList =
         : '';
 
 
+
+
     if (!affiliationId) {
+
 
       mirelBaseRenderFullTeacherList();
 
+
       return;
 
+
     }
+
+
 
 
     var original =
       teachers;
 
 
+
+
     teachers =
       original.filter(
         function(teacher) {
+
 
           return mirelTeacherHasAffiliation(
             teacher.teacherId,
             affiliationId
           );
 
+
         }
       );
 
 
+
+
     try {
+
 
       mirelBaseRenderFullTeacherList();
 
+
     } finally {
+
 
       teachers =
         original;
 
+
     }
 
+
   };
+
+
 
 
 /* =========================================================
    検索画面
    ========================================================= */
 
+
 renderSearchResults =
   function() {
+
 
     var search =
       document.getElementById(
         'globalSearch'
       );
+
+
 
 
     var query =
@@ -10102,10 +12989,14 @@ renderSearchResults =
         : '';
 
 
+
+
     var filter =
       document.getElementById(
         'mirelSearchAffiliationFilter'
       );
+
+
 
 
     var affiliationId =
@@ -10114,10 +13005,14 @@ renderSearchResults =
         : '';
 
 
+
+
     var resultBox =
       document.getElementById(
         'searchResults'
       );
+
+
 
 
     if (!resultBox) {
@@ -10125,28 +13020,39 @@ renderSearchResults =
     }
 
 
+
+
     if (
       !query &&
       !affiliationId
     ) {
 
+
       resultBox.innerHTML =
+
 
         '<div class="empty">' +
         '検索語を入力するか、所属を選択してください。' +
         '</div>';
 
+
       return;
 
+
     }
+
+
 
 
     var html =
       '';
 
 
+
+
     teachers.forEach(
       function(teacher) {
+
 
         if (
           !teacherMatches(
@@ -10155,9 +13061,13 @@ renderSearchResults =
           )
         ) {
 
+
           return;
 
+
         }
+
+
 
 
         if (
@@ -10167,9 +13077,13 @@ renderSearchResults =
           )
         ) {
 
+
           return;
 
+
         }
+
+
 
 
         html +=
@@ -10177,13 +13091,18 @@ renderSearchResults =
             teacher
           );
 
+
       }
     );
 
 
+
+
     resultBox.innerHTML =
 
+
       html ||
+
 
       (
         '<div class="empty">' +
@@ -10194,14 +13113,19 @@ renderSearchResults =
         'はいません。</div>'
       );
 
+
   };
+
+
 
 
 /* =========================================================
    設定画面
    ========================================================= */
 
+
 function mirelInstallSettingsUi() {
+
 
   var page =
     document.getElementById(
@@ -10209,9 +13133,13 @@ function mirelInstallSettingsUi() {
     );
 
 
+
+
   if (!page) {
     return;
   }
+
+
 
 
   var card =
@@ -10220,11 +13148,17 @@ function mirelInstallSettingsUi() {
     );
 
 
+
+
   if (!card) {
+
 
     return;
 
+
   }
+
+
 
 
   var existingArea =
@@ -10233,7 +13167,10 @@ function mirelInstallSettingsUi() {
     );
 
 
+
+
   if (existingArea) {
+
 
     /* index.html に既存の設定領域がある場合でも、
        速度診断が未配置なら「設定を保存」の直後へ必ず追加する。 */
@@ -10246,6 +13183,7 @@ function mirelInstallSettingsUi() {
         '<div class="form-note">直近の起動・保存を自動計測します。「計測結果をコピー」でそのまま送れます。</div>' +
         '<div id="mirelPerformancePanel"></div>';
 
+
       if (featureActions && featureActions.parentNode) {
         featureActions.parentNode.insertBefore(perfSection, featureActions.nextSibling);
       } else {
@@ -10253,15 +13191,22 @@ function mirelInstallSettingsUi() {
       }
     }
 
+
     mirelRenderFeatureSettings();
+
 
     mirelRenderAffiliationMaster();
 
+
     mirelRenderPerformancePanel();
+
 
     return;
 
+
   }
+
+
 
 
   var actions =
@@ -10270,32 +13215,44 @@ function mirelInstallSettingsUi() {
     );
 
 
+
+
   var area =
     document.createElement(
       'div'
     );
 
 
+
+
   area.id =
     'mirelExtraSettings';
+
 
   area.className =
     'mirel-extra-section';
 
 
+
+
   area.innerHTML =
 
+
     '<div class="section-title">使用する項目</div>' +
+
 
     '<div class="form-note">' +
     'OFFにしても登録済みデータは削除されません。再度ONにすると元のデータが表示されます。' +
     '</div>' +
 
+
     '<div id="mirelFeatureGrid" class="mirel-feature-grid"></div>' +
+
 
     '<div class="mirel-feature-save-actions">' +
       '<button class="primary" type="button" onclick="saveSettingsForm()">設定を保存</button>' +
     '</div>' +
+
 
     '<div class="mirel-extra-section mirel-perf-section">' +
       '<div class="section-title">速度診断</div>' +
@@ -10303,54 +13260,76 @@ function mirelInstallSettingsUi() {
       '<div id="mirelPerformancePanel"></div>' +
     '</div>' +
 
+
     '<div class="mirel-extra-section">' +
 
-      '<div class="section-title">所属ラベル</div>' +
+
+      '<div class="section-title">分類ラベル</div>' +
+
 
       '<div class="form-note">' +
-      '所属ラベルは「追加」または「保存」を押した時点で反映されます。上の「設定を保存」は不要です。色はパステル候補またはカスタム色から選べます。' +
+      '分類ラベルは「追加」または「保存」を押した時点で反映されます。上の「設定を保存」は不要です。色はパステル候補またはカスタム色から選べます。' +
       '</div>' +
 
+
       '<div id="mirelAffiliationMaster"></div>' +
+
 
     '</div>';
 
 
+
+
   if (actions) {
+
 
     actions.style.display =
       'none';
+
 
     card.insertBefore(
       area,
       actions
     );
 
+
   } else {
+
 
     card.appendChild(
       area
     );
 
+
   }
+
+
 
 
   mirelRenderFeatureSettings();
 
+
   mirelRenderAffiliationMaster();
+
 
   mirelRenderPerformancePanel();
 
+
 }
+
+
 
 
 /* =========================================================
    使用項目
    ========================================================= */
 
+
 function mirelFeatureDefinitions() {
 
+
   return [
+
 
     ['map', '地図表示'],
     ['gender', '性別'],
@@ -10365,12 +13344,17 @@ function mirelFeatureDefinitions() {
     ['interactions', '交流履歴'],
     ['children', '子ども情報']
 
+
   ];
+
 
 }
 
 
+
+
 function mirelRenderFeatureSettings() {
+
 
   var grid =
     document.getElementById(
@@ -10378,22 +13362,31 @@ function mirelRenderFeatureSettings() {
     );
 
 
+
+
   if (!grid) {
     return;
   }
+
+
 
 
   var html =
     '';
 
 
+
+
   mirelFeatureDefinitions()
     .forEach(
       function(row) {
 
+
         html +=
 
+
           '<label class="mirel-feature-toggle">' +
+
 
           '<input type="checkbox" ' +
           'class="mirel-feature-setting" ' +
@@ -10409,40 +13402,56 @@ function mirelRenderFeatureSettings() {
           ) +
           '>' +
 
+
           '<span>' +
           escapeHtml(
             row[1]
           ) +
           '</span>' +
 
+
           '</label>';
+
 
       }
     );
 
 
+
+
   grid.innerHTML =
     html;
 
+
 }
+
+
 
 
 /* =========================================================
    設定保存を拡張
    ========================================================= */
 
+
 var mirelBaseSaveSettingsForm =
   saveSettingsForm;
+
+
 
 
 saveSettingsForm =
   async function() {
 
+
     await mirelBaseSaveSettingsForm();
+
+
 
 
     var payload =
       {};
+
+
 
 
     document
@@ -10452,27 +13461,37 @@ saveSettingsForm =
       .forEach(
         function(input) {
 
+
           payload[
             input.dataset.feature
           ] =
             input.checked;
 
+
         }
       );
 
 
+
+
     try {
+
 
       var result =
         await runScript(
 
+
           'saveMirelFeatureSettings',
+
 
           [
             payload
           ]
 
+
         );
+
+
 
 
       mirelFeatureSettings =
@@ -10483,86 +13502,116 @@ saveSettingsForm =
         mirelFeatureSettings;
 
 
+
+
       mirelApplyCurrentVisibility();
+
 
       renderAll();
 
+
       renderJapanMap();
 
+
     } catch (e) {
+
 
       handleError(
         e
       );
 
+
     }
 
+
   };
+
+
 
 
 /* =========================================================
    所属マスター
    ========================================================= */
 
+
 function mirelRenderAffiliationMaster() {
+
 
   var box =
     document.getElementById(
       'mirelAffiliationMaster'
     );
 
+
   if (!box) {
     return;
   }
 
+
   var html =
     '<div class="mirel-aff-create-box">' +
 
-      '<div class="mirel-aff-create-title">新しい所属ラベルを作成</div>' +
+
+      '<div class="mirel-aff-create-title">新しい分類ラベルを作成</div>' +
+
 
       '<div class="small-note mirel-aff-create-note">' +
         '①ラベル名を入力 → ②色を選択 → ③「追加」でその場で保存' +
       '</div>' +
 
-      '<input id="mirelNewAffName" class="mirel-aff-name-input" type="text" placeholder="新しい所属ラベル名">' +
+
+      '<input id="mirelNewAffName" class="mirel-aff-name-input" type="text" placeholder="新しい分類ラベル名">' +
+
 
       '<input id="mirelNewAffColor" type="hidden" value="#f7d8df">' +
+
 
       '<div class="mirel-aff-color-line">' +
         '<span class="mirel-aff-color-label">色</span>' +
         '<span class="mirel-aff-color-preview" id="mirelNewAffColor_preview" style="background:#f7d8df" aria-hidden="true"></span>' +
       '</div>' +
 
+
       mirelAffiliationPaletteHtml(
         'mirelNewAffColor'
       ) +
+
 
       '<div class="mirel-aff-create-actions">' +
         '<button class="primary" type="button" onclick="mirelAddAffiliation()">追加</button>' +
       '</div>' +
 
+
     '</div>' +
 
+
     '<div class="mirel-aff-master-list">' +
-      '<div class="mirel-aff-existing-title">登録済みの所属ラベル</div>' +
+      '<div class="mirel-aff-existing-title">登録済みの分類ラベル</div>' +
       '<div class="small-note mirel-aff-order-note">上にあるラベルほど、人物フォームでは左から先に表示されます。</div>';
 
+
   if (!mirelAffiliations.length) {
+
 
     html +=
       '<div class="empty">所属はまだありません。</div>';
 
+
   } else {
+
 
     mirelAffiliations.forEach(
       function(row, index) {
+
 
         var color =
           mirelAffiliationDisplayColor(
             row.color
           );
 
+
         html +=
+
 
           '<div class="mirel-aff-master-row" id="mirelAffRow_' +
           escapeAttr(
@@ -10570,11 +13619,13 @@ function mirelRenderAffiliationMaster() {
           ) +
           '">' +
 
+
             '<div class="mirel-aff-view-row" id="mirelAffView_' +
             escapeAttr(
               row.affiliationId
             ) +
             '">' +
+
 
               '<span class="mirel-aff-view-swatch" style="background:' +
               escapeAttr(
@@ -10582,11 +13633,13 @@ function mirelRenderAffiliationMaster() {
               ) +
               ';"></span>' +
 
+
               '<div class="mirel-aff-view-name">' +
               escapeHtml(
                 row.name
               ) +
               '</div>' +
+
 
               '<div class="mirel-aff-view-actions">' +
                 '<div class="mirel-aff-order-actions" aria-label="表示順">' +
@@ -10606,11 +13659,13 @@ function mirelRenderAffiliationMaster() {
                   '\', 1)">↓</button>' +
                 '</div>' +
 
+
                 '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelStartAffiliationEdit(\'' +
                 escapeJs(
                   row.affiliationId
                 ) +
                 '\')">編集</button>' +
+
 
                 '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelDeleteAffiliation(\'' +
                 escapeJs(
@@ -10619,13 +13674,16 @@ function mirelRenderAffiliationMaster() {
                 '\')">削除</button>' +
               '</div>' +
 
+
             '</div>' +
+
 
             '<div class="mirel-aff-edit-panel" id="mirelAffEdit_' +
             escapeAttr(
               row.affiliationId
             ) +
             '" style="display:none">' +
+
 
               '<input type="hidden" id="mirelAffColor_' +
               escapeAttr(
@@ -10637,11 +13695,13 @@ function mirelRenderAffiliationMaster() {
               ) +
               '">' +
 
+
               '<label class="mirel-aff-edit-label" for="mirelAffName_' +
               escapeAttr(
                 row.affiliationId
               ) +
               '">ラベル名</label>' +
+
 
               '<input class="mirel-aff-edit-name" type="text" id="mirelAffName_' +
               escapeAttr(
@@ -10652,6 +13712,7 @@ function mirelRenderAffiliationMaster() {
                 row.name
               ) +
               '">' +
+
 
               '<div class="mirel-aff-color-line">' +
                 '<span class="mirel-aff-color-label">色</span>' +
@@ -10666,10 +13727,12 @@ function mirelRenderAffiliationMaster() {
                 ';" aria-hidden="true"></span>' +
               '</div>' +
 
+
               mirelAffiliationPaletteHtml(
                 'mirelAffColor_' +
                 row.affiliationId
               ) +
+
 
               '<div class="mirel-aff-edit-actions">' +
                 '<button type="button" class="secondary" onclick="mirelCancelAffiliationEdit(\'' +
@@ -10678,6 +13741,7 @@ function mirelRenderAffiliationMaster() {
                 ) +
                 '\')">キャンセル</button>' +
 
+
                 '<button type="button" class="primary" onclick="mirelUpdateAffiliation(\'' +
                 escapeJs(
                   row.affiliationId
@@ -10685,27 +13749,37 @@ function mirelRenderAffiliationMaster() {
                 '\')">保存</button>' +
               '</div>' +
 
+
             '</div>' +
 
+
           '</div>';
+
 
       }
     );
 
+
   }
 
+
   html += '</div>';
+
 
   box.innerHTML =
     html;
 
+
 }
+
+
 
 
 async function mirelMoveAffiliation(
   id,
   direction
 ) {
+
 
   var currentIndex =
     mirelAffiliations.findIndex(
@@ -10719,11 +13793,15 @@ async function mirelMoveAffiliation(
     );
 
 
+
+
   if (
     currentIndex === -1
   ) {
     return;
   }
+
+
 
 
   var nextIndex =
@@ -10734,6 +13812,8 @@ async function mirelMoveAffiliation(
     );
 
 
+
+
   if (
     nextIndex < 0 ||
     nextIndex >= mirelAffiliations.length
@@ -10742,8 +13822,12 @@ async function mirelMoveAffiliation(
   }
 
 
+
+
   var reordered =
     mirelAffiliations.slice();
+
+
 
 
   var moved =
@@ -10753,6 +13837,8 @@ async function mirelMoveAffiliation(
     )[0];
 
 
+
+
   reordered.splice(
     nextIndex,
     0,
@@ -10760,16 +13846,24 @@ async function mirelMoveAffiliation(
   );
 
 
+
+
   var previous =
     mirelAffiliations;
+
+
 
 
   mirelAffiliations =
     reordered;
 
 
+
+
   mirelRenderAffiliationMaster();
   mirelRefreshAffiliationFilters();
+
+
 
 
   if (
@@ -10778,16 +13872,21 @@ async function mirelMoveAffiliation(
     )
   ) {
 
+
     mirelRenderAffiliationPicker(
       valueOf(
         'teacherId'
       )
     );
 
+
   }
 
 
+
+
   try {
+
 
     var result =
       await runScript(
@@ -10802,9 +13901,13 @@ async function mirelMoveAffiliation(
       );
 
 
+
+
     mirelAffiliations =
       result.affiliations ||
       reordered;
+
+
 
 
     mirelTeacherAffiliations =
@@ -10812,8 +13915,12 @@ async function mirelMoveAffiliation(
       mirelTeacherAffiliations;
 
 
+
+
     mirelRenderAffiliationMaster();
     mirelRefreshAffiliationFilters();
+
+
 
 
     if (
@@ -10822,34 +13929,45 @@ async function mirelMoveAffiliation(
       )
     ) {
 
+
       mirelRenderAffiliationPicker(
         valueOf(
           'teacherId'
         )
       );
 
+
     }
 
+
   } catch (e) {
+
 
     mirelAffiliations =
       previous;
 
+
     mirelRenderAffiliationMaster();
     mirelRefreshAffiliationFilters();
+
 
     handleError(
       e
     );
 
+
   }
 
+
 }
+
+
 
 
 function mirelStartAffiliationEdit(
   id
 ) {
+
 
   document
     .querySelectorAll(
@@ -10861,6 +13979,8 @@ function mirelStartAffiliationEdit(
           'none';
       }
     );
+
+
 
 
   document
@@ -10875,11 +13995,14 @@ function mirelStartAffiliationEdit(
     );
 
 
+
+
   var view =
     document.getElementById(
       'mirelAffView_' +
       id
     );
+
 
   var edit =
     document.getElementById(
@@ -10888,10 +14011,14 @@ function mirelStartAffiliationEdit(
     );
 
 
+
+
   if (view) {
     view.style.display =
       'none';
   }
+
+
 
 
   if (edit) {
@@ -10899,24 +14026,34 @@ function mirelStartAffiliationEdit(
       'block';
   }
 
+
 }
+
+
 
 
 function mirelCancelAffiliationEdit(
   id
 ) {
 
+
   mirelRenderAffiliationMaster();
+
 
 }
 
 
+
+
 async function mirelAddAffiliation() {
+
 
   var name =
     valueOf(
       'mirelNewAffName'
     );
+
+
 
 
   var colorInput =
@@ -10925,21 +14062,30 @@ async function mirelAddAffiliation() {
     );
 
 
+
+
   var color =
     colorInput
       ? colorInput.value
       : '#f7d8df';
 
 
+
+
   if (!name) {
+
 
     appToast(
       '所属名を入力してください。'
     );
 
+
     return;
 
+
   }
+
+
 
 
   await mirelSaveAffiliation({
@@ -10948,22 +14094,29 @@ async function mirelAddAffiliation() {
   });
 
 
+
+
   setValue(
     'mirelNewAffName',
     ''
   );
+
 
   mirelSetAffiliationColor(
     'mirelNewAffColor',
     '#f7d8df'
   );
 
+
 }
+
+
 
 
 async function mirelUpdateAffiliation(
   id
 ) {
+
 
   var name =
     valueOf(
@@ -10972,15 +14125,22 @@ async function mirelUpdateAffiliation(
     );
 
 
+
+
   if (!name) {
+
 
     appToast(
       '所属名を入力してください。'
     );
 
+
     return;
 
+
   }
+
+
 
 
   var colorInput =
@@ -10990,45 +14150,63 @@ async function mirelUpdateAffiliation(
     );
 
 
+
+
   await mirelSaveAffiliation({
+
 
     affiliationId:
       id,
 
+
     name:
       name,
+
 
     color:
       colorInput
         ? colorInput.value
         : '#f7d8df'
 
+
   });
 
+
 }
+
+
 
 
 async function mirelSaveAffiliation(
   payload
 ) {
 
+
   try {
+
 
     setLoading(
       true
     );
 
 
+
+
     var result =
       await runScript(
 
+
         'saveMirelAffiliation',
+
 
         [
           payload
         ]
 
+
       );
+
+
 
 
     mirelAffiliations =
@@ -11036,14 +14214,21 @@ async function mirelSaveAffiliation(
       [];
 
 
+
+
     mirelTeacherAffiliations =
       result.teacherAffiliations ||
       {};
 
 
+
+
     mirelRenderAffiliationMaster();
 
+
     mirelRefreshAffiliationFilters();
+
+
 
 
     if (
@@ -11052,34 +14237,45 @@ async function mirelSaveAffiliation(
       )
     ) {
 
+
       mirelRenderAffiliationPicker(
         valueOf(
           'teacherId'
         )
       );
 
+
     }
 
+
   } catch (e) {
+
 
     handleError(
       e
     );
 
+
   } finally {
+
 
     setLoading(
       false
     );
 
+
   }
 
+
 }
+
+
 
 
 async function mirelDeleteAffiliation(
   id
 ) {
+
 
   if (
     !(await appConfirm(
@@ -11088,28 +14284,40 @@ async function mirelDeleteAffiliation(
     ))
   ) {
 
+
     return;
+
 
   }
 
 
+
+
   try {
+
 
     setLoading(
       true
     );
 
 
+
+
     var result =
       await runScript(
 
+
         'deleteMirelAffiliation',
+
 
         [
           id
         ]
 
+
       );
+
+
 
 
     mirelAffiliations =
@@ -11117,42 +14325,58 @@ async function mirelDeleteAffiliation(
       [];
 
 
+
+
     mirelTeacherAffiliations =
       result.teacherAffiliations ||
       {};
 
 
+
+
     mirelRenderAffiliationMaster();
+
 
     mirelRefreshAffiliationFilters();
 
+
     renderAll();
 
+
   } catch (e) {
+
 
     handleError(
       e
     );
 
+
   } finally {
+
 
     setLoading(
       false
     );
 
+
   }
 
+
 }
+
+
 
 
 /* =========================================================
    フォーム表示 ON/OFF
    ========================================================= */
 
+
 function mirelToggleField(
   id,
   visible
 ) {
+
 
   var element =
     document.getElementById(
@@ -11160,9 +14384,13 @@ function mirelToggleField(
     );
 
 
+
+
   if (!element) {
     return;
   }
+
+
 
 
   var field =
@@ -11172,15 +14400,21 @@ function mirelToggleField(
     element;
 
 
+
+
   field.classList.toggle(
     'mirel-hidden',
     !visible
   );
 
+
 }
 
 
+
+
 function mirelApplyFormVisibility() {
+
 
   mirelToggleField(
     'gender',
@@ -11188,6 +14422,8 @@ function mirelApplyFormVisibility() {
       'gender'
     )
   );
+
+
 
 
   mirelToggleField(
@@ -11198,6 +14434,8 @@ function mirelApplyFormVisibility() {
   );
 
 
+
+
   [
     'birthYear',
     'birthMonth',
@@ -11206,6 +14444,7 @@ function mirelApplyFormVisibility() {
     .forEach(
       function(id) {
 
+
         mirelToggleField(
           id,
           mirelFeatureOn(
@@ -11213,8 +14452,11 @@ function mirelApplyFormVisibility() {
           )
         );
 
+
       }
     );
+
+
 
 
   mirelToggleField(
@@ -11225,6 +14467,8 @@ function mirelApplyFormVisibility() {
   );
 
 
+
+
   mirelToggleField(
     'mirelGrade',
     mirelFeatureOn(
@@ -11233,13 +14477,18 @@ function mirelApplyFormVisibility() {
   );
 
 
+
+
   var aff =
     document.getElementById(
       'mirelAffiliationField'
     );
 
 
+
+
   if (aff) {
+
 
     aff.classList.toggle(
       'mirel-hidden',
@@ -11248,7 +14497,10 @@ function mirelApplyFormVisibility() {
       )
     );
 
+
   }
+
+
 
 
   mirelToggleField(
@@ -11259,6 +14511,8 @@ function mirelApplyFormVisibility() {
   );
 
 
+
+
   mirelToggleField(
     'salonKana',
     mirelFeatureOn(
@@ -11267,10 +14521,14 @@ function mirelApplyFormVisibility() {
   );
 
 
+
+
   var addressVisible =
     mirelFeatureOn(
       'address'
     );
+
+
 
 
   /* 郵便番号＋「住所を入力」ボタンをまとめて非表示 */
@@ -11279,12 +14537,14 @@ function mirelApplyFormVisibility() {
       'postalCode'
     );
 
+
   var postalRow =
     postal
       ? postal.closest(
           '.mirel-postal-row'
         )
       : null;
+
 
   if (postalRow) {
     postalRow.classList.toggle(
@@ -11294,11 +14554,14 @@ function mirelApplyFormVisibility() {
   }
 
 
+
+
   /* 都道府県＋市区町村の行もまとめて非表示 */
   var prefecture =
     document.getElementById(
       'prefecture'
     );
+
 
   var addressGrid =
     prefecture
@@ -11306,6 +14569,7 @@ function mirelApplyFormVisibility() {
           '.grid2'
         )
       : null;
+
 
   if (addressGrid) {
     addressGrid.classList.toggle(
@@ -11315,6 +14579,8 @@ function mirelApplyFormVisibility() {
   }
 
 
+
+
   [
     'address1',
     'address2'
@@ -11322,13 +14588,17 @@ function mirelApplyFormVisibility() {
     .forEach(
       function(id) {
 
+
         mirelToggleField(
           id,
           addressVisible
         );
 
+
       }
     );
+
+
 
 
   /* SNS・交流履歴・子ども情報は中身ではなく見出しごと消す */
@@ -11340,14 +14610,17 @@ function mirelApplyFormVisibility() {
     .forEach(
       function(row) {
 
+
         var section =
           document.getElementById(
             row[0]
           );
 
+
         if (!section) {
           return;
         }
+
 
         section.classList.toggle(
           'mirel-hidden',
@@ -11356,16 +14629,21 @@ function mirelApplyFormVisibility() {
           )
         );
 
+
       }
     );
 
+
 }
+
 
 /* =========================================================
    Detail表示 ON/OFF
    ========================================================= */
 
+
 function mirelApplyDetailVisibility() {
+
 
   var detail =
     document.getElementById(
@@ -11373,9 +14651,13 @@ function mirelApplyDetailVisibility() {
     );
 
 
+
+
   if (!detail) {
     return;
   }
+
+
 
 
   detail
@@ -11385,10 +14667,13 @@ function mirelApplyDetailVisibility() {
     .forEach(
       function(row) {
 
+
         var label =
           row.querySelector(
             '.label'
           );
+
+
 
 
         if (!label) {
@@ -11396,12 +14681,18 @@ function mirelApplyDetailVisibility() {
         }
 
 
+
+
         var text =
           label.textContent.trim();
 
 
+
+
         var visible =
           true;
+
+
 
 
         if (
@@ -11409,12 +14700,16 @@ function mirelApplyDetailVisibility() {
           '性別'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'gender'
             );
 
+
         }
+
+
 
 
         if (
@@ -11422,12 +14717,16 @@ function mirelApplyDetailVisibility() {
           '電話番号'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'phone'
             );
 
+
         }
+
+
 
 
         if (
@@ -11435,12 +14734,16 @@ function mirelApplyDetailVisibility() {
           '誕生日'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'birthday'
             );
 
+
         }
+
+
 
 
         if (
@@ -11448,12 +14751,16 @@ function mirelApplyDetailVisibility() {
           '年齢'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'age'
             );
 
+
         }
+
+
 
 
         if (
@@ -11461,12 +14768,16 @@ function mirelApplyDetailVisibility() {
           '学年'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'grade'
             );
 
+
         }
+
+
 
 
         if (
@@ -11474,12 +14785,16 @@ function mirelApplyDetailVisibility() {
           '所属'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'affiliation'
             );
 
+
         }
+
+
 
 
         if (
@@ -11489,12 +14804,16 @@ function mirelApplyDetailVisibility() {
             placeKanaLabel()
         ) {
 
+
           visible =
             mirelFeatureOn(
               'place'
             );
 
+
         }
+
+
 
 
         if (
@@ -11502,12 +14821,16 @@ function mirelApplyDetailVisibility() {
           '住所'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'address'
             );
 
+
         }
+
+
 
 
         if (
@@ -11515,12 +14838,16 @@ function mirelApplyDetailVisibility() {
           '郵便番号'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'address'
             );
 
+
         }
+
+
 
 
         if (
@@ -11528,12 +14855,16 @@ function mirelApplyDetailVisibility() {
           'リンク・SNS'
         ) {
 
+
           visible =
             mirelFeatureOn(
               'sns'
             );
 
+
         }
+
+
 
 
         row.classList.toggle(
@@ -11541,8 +14872,11 @@ function mirelApplyDetailVisibility() {
           !visible
         );
 
+
       }
     );
+
+
 
 
   detail
@@ -11552,10 +14886,13 @@ function mirelApplyDetailVisibility() {
     .forEach(
       function(card) {
 
+
         var title =
           card.querySelector(
             '.section-title'
           );
+
+
 
 
         if (!title) {
@@ -11563,8 +14900,12 @@ function mirelApplyDetailVisibility() {
         }
 
 
+
+
         var text =
           title.textContent.trim();
+
+
 
 
         if (
@@ -11573,6 +14914,7 @@ function mirelApplyDetailVisibility() {
           ) === 0
         ) {
 
+
           card.classList.toggle(
             'mirel-hidden',
             !mirelFeatureOn(
@@ -11580,7 +14922,10 @@ function mirelApplyDetailVisibility() {
             )
           );
 
+
         }
+
+
 
 
         if (
@@ -11589,6 +14934,7 @@ function mirelApplyDetailVisibility() {
           ) === 0
         ) {
 
+
           card.classList.toggle(
             'mirel-hidden',
             !mirelFeatureOn(
@@ -11596,10 +14942,14 @@ function mirelApplyDetailVisibility() {
             )
           );
 
+
         }
+
 
       }
     );
+
+
 
 
   detail
@@ -11609,6 +14959,7 @@ function mirelApplyDetailVisibility() {
     .forEach(
       function(button) {
 
+
         if (
           button.textContent.indexOf(
             'Google Maps'
@@ -11617,10 +14968,12 @@ function mirelApplyDetailVisibility() {
           return;
         }
 
+
         var actions =
           button.closest(
             '.actions'
           );
+
 
         if (actions) {
           actions.classList.toggle(
@@ -11631,25 +14984,34 @@ function mirelApplyDetailVisibility() {
           );
         }
 
+
       }
     );
 
+
 }
+
+
 
 
 /* =========================================================
    現在画面へ設定反映
    ========================================================= */
 
+
 function mirelApplyCurrentVisibility() {
+
 
   mirelApplyMapVisibility();
   mirelApplyFormVisibility();
 
 
+
+
   if (
     selectedTeacherId
   ) {
+
 
     var teacher =
       findTeacher(
@@ -11657,46 +15019,62 @@ function mirelApplyCurrentVisibility() {
       );
 
 
+
+
     if (teacher) {
+
 
       renderTeacherDetail(
         teacher
       );
 
+
     }
+
 
   }
 
+
 }
+
+
 
 
 function appToast(
   message
 ) {
 
+
   var toast =
     document.getElementById(
       'mirelToast'
     );
 
+
   if (!toast) {
+
 
     toast =
       document.createElement(
         'div'
       );
 
+
     toast.id =
       'mirelToast';
 
+
     toast.className =
       'mirel-toast';
+
 
     document.body.appendChild(
       toast
     );
 
+
   }
+
 
   toast.textContent =
     String(
@@ -11704,34 +15082,44 @@ function appToast(
       ''
     );
 
+
   toast.classList.add(
     'show'
   );
+
 
   clearTimeout(
     appToast._timer
   );
 
+
   appToast._timer =
     setTimeout(
       function() {
+
 
         toast.classList.remove(
           'show'
         );
 
+
       },
       2200
     );
 
+
 }
+
+
 
 
 /* =========================================================
    初回セットアップ
    ========================================================= */
 
+
 function mirelMaybeShowInitialSetup() {
+
 
   if (
     mirelFeatureSettings
@@ -11739,9 +15127,13 @@ function mirelMaybeShowInitialSetup() {
       '1'
   ) {
 
+
     return;
 
+
   }
+
+
 
 
   if (
@@ -11750,9 +15142,13 @@ function mirelMaybeShowInitialSetup() {
     )
   ) {
 
+
     return;
 
+
   }
+
+
 
 
   var overlay =
@@ -11761,24 +15157,34 @@ function mirelMaybeShowInitialSetup() {
     );
 
 
+
+
   overlay.id =
     'mirelSetupOverlay';
 
+
   overlay.className =
     'mirel-setup-overlay';
+
+
 
 
   var checks =
     '';
 
 
+
+
   mirelFeatureDefinitions()
     .forEach(
       function(row) {
 
+
         checks +=
 
+
           '<label class="mirel-feature-toggle">' +
+
 
           '<input ' +
           'type="checkbox" ' +
@@ -11787,60 +15193,83 @@ function mirelMaybeShowInitialSetup() {
           row[0] +
           '" checked>' +
 
+
           '<span>' +
           escapeHtml(
             row[1]
           ) +
           '</span>' +
 
+
           '</label>';
+
 
       }
     );
 
 
+
+
   overlay.innerHTML =
 
+
     '<div class="mirel-setup-card">' +
+
 
       '<div class="mirel-setup-title">' +
       '使用する項目を選択' +
       '</div>' +
 
+
       '<div class="mirel-setup-note">' +
       '後から設定画面でいつでも変更できます。OFFにしてもデータは削除されません。' +
       '</div>' +
+
 
       '<div class="mirel-feature-grid">' +
       checks +
       '</div>' +
 
+
       '<div class="form-actions" style="margin-top:22px;">' +
+
 
         '<button class="primary" type="button" onclick="mirelFinishSetup()">' +
         'この内容で始める' +
         '</button>' +
 
+
       '</div>' +
 
+
     '</div>';
+
+
 
 
   document.body.appendChild(
     overlay
   );
 
+
 }
+
+
 
 
 async function mirelFinishSetup() {
 
+
   var payload = {
+
 
     setupCompleted:
       true
 
+
   };
+
+
 
 
   document
@@ -11850,37 +15279,51 @@ async function mirelFinishSetup() {
     .forEach(
       function(input) {
 
+
         payload[
           input.dataset.feature
         ] =
           input.checked;
 
+
       }
     );
 
 
+
+
   try {
+
 
     setLoading(
       true
     );
 
 
+
+
     var result =
       await runScript(
 
+
         'saveMirelFeatureSettings',
+
 
         [
           payload
         ]
 
+
       );
+
+
 
 
     mirelFeatureSettings =
       result.featureSettings ||
       {};
+
+
 
 
     var overlay =
@@ -11889,32 +15332,46 @@ async function mirelFinishSetup() {
       );
 
 
+
+
     if (overlay) {
 
+
       overlay.remove();
+
 
     }
 
 
+
+
     mirelRenderFeatureSettings();
+
 
     mirelApplyCurrentVisibility();
 
+
   } catch (e) {
+
 
     handleError(
       e
     );
 
+
   } finally {
+
 
     setLoading(
       false
     );
 
+
   }
 
+
 }
+
 
 /* 速度診断 表示 */
 (function mirelInstallPerfStyles(){
@@ -11933,23 +15390,29 @@ async function mirelFinishSetup() {
 })();
 
 
+
+
 /* =========================================================
    2026-10-09-26
    ワークスペース切替 / 別Googleアカウント切替
    ========================================================= */
 
+
 var mirelWorkspaceState = null;
 var mirelWorkspaceLoading = false;
+
 
 function mirelClearUserLocalCache() {
   try { localStorage.removeItem(STORAGE_APP_SNAPSHOT); } catch (e) {}
   try { localStorage.removeItem('academyUiSettings'); } catch (e) {}
 }
 
+
 function mirelLogoutAndSwitchAccount() {
   clearAccessToken();
   try { localStorage.removeItem(STORAGE_AUTHORIZED); } catch (e) {}
   mirelClearUserLocalCache();
+
 
   teachers = [];
   mirelAffiliations = [];
@@ -11957,7 +15420,9 @@ function mirelLogoutAndSwitchAccount() {
   mirelProfiles = {};
   mirelFeatureSettings = {};
 
+
   showLoginScreen();
+
 
   var message = document.getElementById('authMessage');
   if (message) {
@@ -11965,11 +15430,13 @@ function mirelLogoutAndSwitchAccount() {
   }
 }
 
+
 function mirelEnsureWorkspacePanel() {
   var page = document.getElementById('pageSettings');
   if (!page) return;
   var card = page.querySelector('.card');
   if (!card) return;
+
 
   var panel = document.getElementById('mirelWorkspaceSection');
   if (!panel) {
@@ -11978,8 +15445,9 @@ function mirelEnsureWorkspacePanel() {
     panel.className = 'mirel-extra-section mirel-workspace-section';
     panel.innerHTML =
       '<div class="section-title">データの使い分け</div>' +
-      '<div class="form-note">用途ごとに人物・所属ラベル・設定を完全に分けられます。</div>' +
+      '<div class="form-note">用途ごとに人物・分類ラベル・設定を完全に分けられます。</div>' +
       '<div id="mirelWorkspacePanel"><div class="small-note">読み込み中…</div></div>';
+
 
     var extra = document.getElementById('mirelExtraSettings');
     if (extra && extra.parentNode === card) {
@@ -11989,8 +15457,10 @@ function mirelEnsureWorkspacePanel() {
     }
   }
 
+
   mirelLoadWorkspacePanel();
 }
+
 
 async function mirelLoadWorkspacePanel(force) {
   var host = document.getElementById('mirelWorkspacePanel');
@@ -11999,6 +15469,7 @@ async function mirelLoadWorkspacePanel(force) {
     mirelRenderWorkspacePanel();
     return;
   }
+
 
   mirelWorkspaceLoading = true;
   try {
@@ -12011,19 +15482,23 @@ async function mirelLoadWorkspacePanel(force) {
   }
 }
 
+
 function mirelRenderWorkspacePanel() {
   var host = document.getElementById('mirelWorkspacePanel');
   if (!host) return;
 
+
   var state = mirelWorkspaceState || {};
   var list = Array.isArray(state.workspaces) ? state.workspaces : [];
   var activeId = String(state.activeWorkspaceId || '');
+
 
   var options = list.map(function(ws) {
     var selected = String(ws.id) === activeId ? ' selected' : '';
     return '<option value="' + escapeHtml(String(ws.id || '')) + '"' + selected + '>' +
       escapeHtml(String(ws.name || 'メイン')) + '</option>';
   }).join('');
+
 
   host.innerHTML =
     '<div class="field">' +
@@ -12032,7 +15507,7 @@ function mirelRenderWorkspacePanel() {
         '<select id="mirelWorkspaceSelect">' + options + '</select>' +
         '<button type="button" class="secondary" onclick="mirelSwitchWorkspaceFromUi()">切り替え</button>' +
       '</div>' +
-      '<div class="small-note">切り替えると、このワークスペース専用の人物・設定・所属ラベルが表示されます。</div>' +
+      '<div class="small-note">切り替えると、このワークスペース専用の人物・設定・分類ラベルが表示されます。</div>' +
     '</div>' +
     '<div class="mirel-workspace-create-box">' +
       '<div class="mirel-workspace-create-title">新しいワークスペースを作成</div>' +
@@ -12047,6 +15522,7 @@ function mirelRenderWorkspacePanel() {
     '</div>';
 }
 
+
 async function mirelSwitchWorkspaceFromUi() {
   var select = document.getElementById('mirelWorkspaceSelect');
   if (!select || !select.value) return;
@@ -12054,6 +15530,7 @@ async function mirelSwitchWorkspaceFromUi() {
     appToast('すでにこのワークスペースを使用しています。');
     return;
   }
+
 
   setLoading(true);
   try {
@@ -12066,6 +15543,7 @@ async function mirelSwitchWorkspaceFromUi() {
   }
 }
 
+
 async function mirelCreateWorkspaceFromUi() {
   var input = document.getElementById('mirelNewWorkspaceName');
   var name = input ? String(input.value || '').trim() : '';
@@ -12074,6 +15552,7 @@ async function mirelCreateWorkspaceFromUi() {
     if (input) input.focus();
     return;
   }
+
 
   setLoading(true);
   try {
@@ -12086,11 +15565,13 @@ async function mirelCreateWorkspaceFromUi() {
   }
 }
 
+
 var mirelBaseInstallSettingsUiForWorkspace = mirelInstallSettingsUi;
 mirelInstallSettingsUi = function() {
   mirelBaseInstallSettingsUiForWorkspace();
   mirelEnsureWorkspacePanel();
 };
+
 
 /* 設定ページを開いた時にも最新のワークスペース一覧を確認する */
 var mirelBaseShowPageForWorkspace = showPage;
@@ -12101,6 +15582,9 @@ showPage = function(pageName) {
   }
   return result;
 };
+
+
+
 
 
 
@@ -12117,4 +15601,43 @@ showPage = function(pageName) {
     renderAll = wrapped;
   }
 })();
+
+/* =========================================================
+   2026-10-11-48
+   起動画面の切り替わり改善
+   ・ネイティブスプラッシュ → HTMLローディングを同じ画像で連続表示
+   ・ログイン画面／アプリ画面を先に描画してからローディングをフェードアウト
+   ========================================================= */
+
+showLoginScreen = function() {
+  var appShell = document.getElementById('appShell');
+  var authScreen = document.getElementById('authScreen');
+
+  if (appShell) {
+    appShell.classList.add('hidden');
+  }
+
+  if (authScreen) {
+    authScreen.classList.remove('hidden');
+  }
+
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      setLoading(false);
+    });
+  });
+};
+
+showAppScreen = function() {
+  var authScreen = document.getElementById('authScreen');
+  var appShell = document.getElementById('appShell');
+
+  if (authScreen) {
+    authScreen.classList.add('hidden');
+  }
+
+  if (appShell) {
+    appShell.classList.remove('hidden');
+  }
+};
 
