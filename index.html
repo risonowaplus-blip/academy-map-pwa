@@ -10,7 +10,7 @@
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
-  <meta name="mirel-app-version" content="2026.10.10-43">
+  <meta name="mirel-app-version" content="2026.10.11-48">
 
   <meta
     name="theme-color"
@@ -751,6 +751,75 @@
   .mirel-font-preview-compact .mirel-font-preview-small { margin-top: 4px; }
 </style>
 
+
+<style id="mirel-boot-and-settings-20261011-48">
+  /* 起動画面：iOSネイティブスプラッシュと同じ画像を継続表示し、
+     次画面を先に描画してからフェードアウトする */
+  #loading.mirel-loading-screen {
+    display: block !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility 0s linear .18s;
+    will-change: opacity;
+    background: #eaf8ff !important;
+  }
+  #loading.mirel-loading-screen.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity .12s ease;
+  }
+
+  /* 設定画面：6項目を初動で一覧できるコンパクトな折りたたみ */
+  #pageSettings .mirel-settings-accordion {
+    margin: 6px 0 !important;
+    padding: 0 !important;
+    border: 1px solid rgba(80,110,140,.18) !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    overflow: hidden !important;
+  }
+  #pageSettings .mirel-settings-accordion > summary {
+    min-height: 42px !important;
+    padding: 10px 13px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    list-style: none !important;
+    cursor: pointer !important;
+    font-weight: 700 !important;
+    user-select: none !important;
+  }
+  #pageSettings .mirel-settings-accordion > summary::-webkit-details-marker {
+    display: none !important;
+  }
+  #pageSettings .mirel-settings-accordion > summary::after {
+    content: "＋" !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    font-weight: 500 !important;
+    opacity: .65 !important;
+  }
+  #pageSettings .mirel-settings-accordion[open] > summary::after {
+    content: "−" !important;
+  }
+  #pageSettings .mirel-settings-accordion[open] > summary {
+    border-bottom: 1px solid rgba(80,110,140,.12) !important;
+  }
+  #pageSettings .mirel-settings-accordion-body {
+    padding: 13px 14px 15px !important;
+  }
+  #pageSettings .mirel-bulk-delete-note {
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  #pageSettings .mirel-bulk-delete-button {
+    width: 100%;
+  }
+</style>
+
 </head>
 
 
@@ -800,7 +869,7 @@
   aria-label="読み込み中"
 >
   <img
-    src="./loading-screen.png"
+    src="./splash-828x1792.png"
     alt="Mirel Map 読み込み中"
   >
 </div>
@@ -898,7 +967,6 @@
 
 
             <div class="map-legend">
-
               <span class="legend-item">
 
                 <span class="legend-dot teacher-dot"></span>
@@ -1292,11 +1360,11 @@
 <div class="mirel-extra-section">
 
             <div class="section-title">
-              所属ラベル
+              分類ラベル
             </div>
 
             <div class="form-note">
-              所属ラベルは「追加」または「保存」を押した時点で反映されます。上の「設定を保存」は不要です。色はパステル候補またはカスタム色から選べます。
+              分類ラベルは「追加」または「保存」を押した時点で反映されます。上の「設定を保存」は不要です。色はパステル候補またはカスタム色から選べます。
             </div>
 
             <div id="mirelAffiliationMaster"></div>
@@ -1798,7 +1866,6 @@
   <label>
     メモ
   </label>
-
   <textarea id="memo"></textarea>
 
 </div>
@@ -2185,9 +2252,9 @@
 
 <script src="./config.js?v=20261009-39"></script>
 
-<script src="./app.js?v=20261010-47"></script>
+<script src="./app.js?v=20261011-48"></script>
 
-<script src="./app-enhancements.js?v=20261010-45"></script>
+<script src="./app-enhancements.js?v=20261011-48"></script>
 
 </body>
 
