@@ -5,6 +5,8 @@ var selectedTeacherId = '';
 var prefMode = 'active';
 
 
+
+
 var tokenClient = null;
 var accessToken = '';
 var accessTokenExpiresAt = 0;
@@ -14,7 +16,11 @@ var mirelInteractiveLoginActive = false;
 var mirelInteractiveAuthRetryUsed = false;
 
 
+
+
 var mapInstance = null;
+
+
 
 
 var interactionFormSource = 'detail';
@@ -23,9 +29,13 @@ var deletedInteractionIds = [];
 var editingPendingInteractionIndex = -1;
 
 
+
+
 var pendingLinks = [];
 var deletedLinkIds = [];
 var editingPendingLinkIndex = -1;
+
+
 
 
 var appSettings = {
@@ -41,6 +51,8 @@ var appSettings = {
 };
 
 
+
+
 var STORAGE_TOKEN = 'academyAccessToken';
 var STORAGE_EXPIRES = 'academyAccessTokenExpiresAt';
 var STORAGE_AUTHORIZED = 'academyGoogleAuthorized';
@@ -48,13 +60,19 @@ var STORAGE_APP_SNAPSHOT = 'mirelAppSnapshotV2';
 var APP_SNAPSHOT_VERSION = 2;
 
 
+
+
 /* ========================================
    速度診断
    ======================================== */
 
 
+
+
 var MIREL_PERF_STORAGE = 'mirelPerformanceHistoryV1';
 var mirelLastApiTimings = {};
+
+
 
 
 function mirelPerfNow() {
@@ -68,6 +86,8 @@ function mirelPerfNow() {
 }
 
 
+
+
 function mirelPerfMs(value) {
   var n = Number(value || 0);
   if (!isFinite(n)) {
@@ -75,6 +95,8 @@ function mirelPerfMs(value) {
   }
   return Math.round(n);
 }
+
+
 
 
 function mirelSavePerformance(type, values) {
@@ -85,6 +107,8 @@ function mirelSavePerformance(type, values) {
     },
     values || {}
   );
+
+
 
 
   try {
@@ -105,14 +129,20 @@ function mirelSavePerformance(type, values) {
   } catch (e) {}
 
 
+
+
   try {
     console.log('[Mirel速度診断]', entry);
   } catch (e) {}
 
 
+
+
   mirelRenderPerformancePanel();
   return entry;
 }
+
+
 
 
 function mirelPerformanceHistory() {
@@ -127,6 +157,8 @@ function mirelPerformanceHistory() {
 }
 
 
+
+
 function mirelLastPerformance(type) {
   var history = mirelPerformanceHistory();
   for (var i = history.length - 1; i >= 0; i--) {
@@ -138,6 +170,8 @@ function mirelLastPerformance(type) {
 }
 
 
+
+
 function mirelFormatPerfMs(ms) {
   var n = mirelPerfMs(ms);
   if (n >= 1000) {
@@ -145,6 +179,8 @@ function mirelFormatPerfMs(ms) {
   }
   return n + 'ms';
 }
+
+
 
 
 function mirelPerformanceServerLines(server) {
@@ -176,6 +212,8 @@ function mirelPerformanceServerLines(server) {
 }
 
 
+
+
 function mirelPerfEntryHtml(title, entry) {
   if (!entry) {
     return (
@@ -185,6 +223,8 @@ function mirelPerfEntryHtml(title, entry) {
       '</div>'
     );
   }
+
+
 
 
   var main = [];
@@ -202,7 +242,11 @@ function mirelPerfEntryHtml(title, entry) {
   }
 
 
+
+
   var serverLine = mirelPerformanceServerLines(entry.server);
+
+
 
 
   return (
@@ -217,6 +261,8 @@ function mirelPerfEntryHtml(title, entry) {
 }
 
 
+
+
 function mirelRenderPerformancePanel() {
   var el = document.getElementById('mirelPerformancePanel');
   if (!el) {
@@ -229,6 +275,8 @@ function mirelRenderPerformancePanel() {
     mirelPerfEntryHtml('直近の保存', save) +
     '<button type="button" class="secondary mirel-perf-copy" onclick="mirelCopyPerformanceReport()">計測結果をコピー</button>';
 }
+
+
 
 
 function mirelBuildPerformanceReport() {
@@ -254,6 +302,8 @@ function mirelBuildPerformanceReport() {
 }
 
 
+
+
 async function mirelCopyPerformanceReport() {
   var text = mirelBuildPerformanceReport();
   try {
@@ -267,6 +317,10 @@ async function mirelCopyPerformanceReport() {
     }
   }
 }
+
+
+
+
 
 
 
@@ -324,6 +378,10 @@ var prefectures = [
 
 
 
+
+
+
+
 var gradeOptions = [
   '',
   '年少',
@@ -366,11 +424,15 @@ var gradeOptions = [
 ];
 
 
+
+
 /* =========================================================
    Mirel Map アプリバージョン
    ========================================================= */
-var MIREL_APP_VERSION = '2026.10.11-48';
-var MIREL_APP_BUILD = '20261011-48';
+var MIREL_APP_VERSION = '2026.10.11-50';
+var MIREL_APP_BUILD = '20261011-50';
+
+
 
 
 function mirelNotifyAppUpdated_() {
@@ -389,9 +451,13 @@ function mirelNotifyAppUpdated_() {
 }
 
 
+
+
 /* ========================================
    起動
    ======================================== */
+
+
 
 
 window.addEventListener(
@@ -399,20 +465,32 @@ window.addEventListener(
   function() {
 
 
+
+
     restoreCachedUiSettings();
+
+
 
 
     mirelNotifyAppUpdated_();
 
 
+
+
     registerServiceWorker();
+
+
 
 
     waitForGoogleIdentity(
       function() {
 
 
+
+
         if (!configReady()) {
+
+
 
 
           document.getElementById(
@@ -421,23 +499,35 @@ window.addEventListener(
             'config.js の設定が完了していません。';
 
 
+
+
           document.getElementById(
             'loginButton'
           ).disabled = true;
+
+
 
 
           return;
         }
 
 
+
+
         initializeGoogleTokenClient();
+
+
 
 
         restoreOrLogin();
 
 
+
+
       }
     );
+
+
 
 
   }
@@ -446,7 +536,13 @@ window.addEventListener(
 
 
 
+
+
+
+
 function registerServiceWorker() {
+
+
 
 
   if (!('serviceWorker' in navigator)) {
@@ -454,7 +550,11 @@ function registerServiceWorker() {
   }
 
 
+
+
   var swUrl = './sw.js?v=' + encodeURIComponent(MIREL_APP_BUILD);
+
+
 
 
   navigator.serviceWorker
@@ -462,8 +562,12 @@ function registerServiceWorker() {
     .then(function(registration) {
 
 
+
+
       /* 起動ごとに最新版のService Workerを確認 */
       registration.update().catch(function() {});
+
+
 
 
       if (registration.waiting) {
@@ -471,9 +575,13 @@ function registerServiceWorker() {
       }
 
 
+
+
       registration.addEventListener('updatefound', function() {
         var worker = registration.installing;
         if (!worker) return;
+
+
 
 
         worker.addEventListener('statechange', function() {
@@ -484,6 +592,8 @@ function registerServiceWorker() {
       });
     })
     .catch(function() {});
+
+
 
 
   navigator.serviceWorker.addEventListener('controllerchange', function() {
@@ -500,17 +610,29 @@ function registerServiceWorker() {
 
 
 
+
+
+
+
 function waitForGoogleIdentity(callback) {
 
 
+
+
   var attempts = 0;
+
+
 
 
   var timer = setInterval(
     function() {
 
 
+
+
       attempts++;
+
+
 
 
       if (
@@ -520,20 +642,32 @@ function waitForGoogleIdentity(callback) {
       ) {
 
 
+
+
         clearInterval(timer);
 
 
+
+
         callback();
+
+
 
 
         return;
       }
 
 
+
+
       if (attempts > 100) {
 
 
+
+
         clearInterval(timer);
+
+
 
 
         document.getElementById(
@@ -542,7 +676,11 @@ function waitForGoogleIdentity(callback) {
           'Googleログインを読み込めませんでした。画面を再読み込みしてください。';
 
 
+
+
       }
+
+
 
 
     },
@@ -550,7 +688,13 @@ function waitForGoogleIdentity(callback) {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -558,24 +702,38 @@ function waitForGoogleIdentity(callback) {
 function initializeGoogleTokenClient() {
 
 
+
+
   tokenClient =
     google.accounts.oauth2.initTokenClient({
+
+
 
 
       client_id: CONFIG.GOOGLE_CLIENT_ID,
 
 
+
+
       scope: CONFIG.SCOPES,
+
+
 
 
       callback:
         function(resp) {
 
 
+
+
           if (resp.error) {
 
 
+
+
             if (pendingTokenReject) {
+
+
 
 
               pendingTokenReject(
@@ -586,19 +744,29 @@ function initializeGoogleTokenClient() {
               );
 
 
+
+
             }
 
 
+
+
             clearPendingTokenPromise();
+
+
 
 
             return;
           }
 
 
+
+
           accessToken =
             resp.access_token ||
             '';
+
+
 
 
           var expiresIn =
@@ -608,19 +776,27 @@ function initializeGoogleTokenClient() {
             );
 
 
+
+
           accessTokenExpiresAt =
             Date.now() +
             expiresIn * 1000 -
             60000;
 
 
+
+
           try {
+
+
 
 
             localStorage.setItem(
               STORAGE_TOKEN,
               accessToken
             );
+
+
 
 
             localStorage.setItem(
@@ -631,16 +807,24 @@ function initializeGoogleTokenClient() {
             );
 
 
+
+
             localStorage.setItem(
               STORAGE_AUTHORIZED,
               '1'
             );
 
 
+
+
           } catch (e) {}
 
 
+
+
           if (pendingTokenResolve) {
+
+
 
 
             pendingTokenResolve(
@@ -648,19 +832,33 @@ function initializeGoogleTokenClient() {
             );
 
 
+
+
           }
+
+
 
 
           clearPendingTokenPromise();
 
 
+
+
         }
+
+
 
 
     });
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -668,8 +866,12 @@ function initializeGoogleTokenClient() {
 function clearPendingTokenPromise() {
 
 
+
+
   pendingTokenResolve = null;
   pendingTokenReject = null;
+
+
 
 
 }
@@ -677,7 +879,13 @@ function clearPendingTokenPromise() {
 
 
 
+
+
+
+
 function configReady() {
+
+
 
 
   return (
@@ -692,7 +900,13 @@ function configReady() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -700,17 +914,25 @@ function configReady() {
 async function restoreOrLogin() {
 
 
+
+
   var savedToken = '';
   var savedExpiresAt = 0;
 
 
+
+
   try {
+
+
 
 
     savedToken =
       localStorage.getItem(
         STORAGE_TOKEN
       ) || '';
+
+
 
 
     savedExpiresAt =
@@ -721,7 +943,11 @@ async function restoreOrLogin() {
       );
 
 
+
+
   } catch (e) {}
+
+
 
 
   if (
@@ -730,21 +956,33 @@ async function restoreOrLogin() {
   ) {
 
 
+
+
     accessToken =
       savedToken;
+
+
 
 
     accessTokenExpiresAt =
       savedExpiresAt;
 
 
+
+
     await startApp();
+
+
 
 
     return;
 
 
+
+
   }
+
+
 
 
   /*
@@ -759,7 +997,13 @@ async function restoreOrLogin() {
   showLoginScreen();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -767,11 +1011,17 @@ async function restoreOrLogin() {
 function requestGoogleToken(promptMode) {
 
 
+
+
   return new Promise(
     function(resolve, reject) {
 
 
+
+
       if (!tokenClient) {
+
+
 
 
         reject(
@@ -781,15 +1031,23 @@ function requestGoogleToken(promptMode) {
         );
 
 
+
+
         return;
       }
+
+
 
 
       pendingTokenResolve = resolve;
       pendingTokenReject = reject;
 
 
+
+
       try {
+
+
 
 
         tokenClient.requestAccessToken({
@@ -797,20 +1055,32 @@ function requestGoogleToken(promptMode) {
         });
 
 
+
+
       } catch (e) {
+
+
 
 
         clearPendingTokenPromise();
 
 
+
+
         reject(e);
+
+
 
 
       }
 
 
+
+
     }
   );
+
+
 
 
 }
@@ -818,7 +1088,13 @@ function requestGoogleToken(promptMode) {
 
 
 
+
+
+
+
 async function login() {
+
+
 
 
   setLoading(true);
@@ -826,12 +1102,18 @@ async function login() {
   mirelInteractiveAuthRetryUsed = false;
 
 
+
+
   try {
+
+
 
 
     await requestGoogleToken(
       'select_account'
     );
+
+
 
 
     /*
@@ -842,12 +1124,18 @@ async function login() {
     await startApp();
 
 
+
+
     if (accessToken) {
       showAppScreen();
     }
 
 
+
+
   } catch (e) {
+
+
 
 
     if (!accessToken) {
@@ -857,17 +1145,29 @@ async function login() {
     }
 
 
+
+
   } finally {
+
+
 
 
     mirelInteractiveLoginActive = false;
     setLoading(false);
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -875,9 +1175,13 @@ async function login() {
 function showLoginScreen() {
 
 
+
+
   /* 認証判定が終わるまではログイン画面を見せず、
      本当にログインが必要な場合だけここで表示する */
   setLoading(false);
+
+
 
 
   document.getElementById(
@@ -887,6 +1191,8 @@ function showLoginScreen() {
   );
 
 
+
+
   document.getElementById(
     'authScreen'
   ).classList.remove(
@@ -894,7 +1200,13 @@ function showLoginScreen() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -902,11 +1214,15 @@ function showLoginScreen() {
 function showAppScreen() {
 
 
+
+
   document.getElementById(
     'authScreen'
   ).classList.add(
     'hidden'
   );
+
+
 
 
   document.getElementById(
@@ -916,7 +1232,13 @@ function showAppScreen() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -924,11 +1246,17 @@ function showAppScreen() {
 function clearAccessToken() {
 
 
+
+
   accessToken = '';
   accessTokenExpiresAt = 0;
 
 
+
+
   try {
+
+
 
 
     localStorage.removeItem(
@@ -936,15 +1264,25 @@ function clearAccessToken() {
     );
 
 
+
+
     localStorage.removeItem(
       STORAGE_EXPIRES
     );
 
 
+
+
   } catch (e) {}
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -954,6 +1292,8 @@ function clearAccessToken() {
    ======================================== */
 
 
+
+
 async function runScript(
   functionName,
   parameters,
@@ -961,11 +1301,17 @@ async function runScript(
 ) {
 
 
+
+
   var mirelApiStartedAt =
     mirelPerfNow();
 
 
+
+
   if (!accessToken) {
+
+
 
 
     throw new Error(
@@ -973,14 +1319,22 @@ async function runScript(
     );
 
 
+
+
   }
+
+
 
 
   var response =
     await fetch(
 
 
+
+
       'https://script.googleapis.com/v1/scripts/' +
+
+
 
 
       encodeURIComponent(
@@ -988,16 +1342,26 @@ async function runScript(
       ) +
 
 
+
+
       ':run',
+
+
 
 
       {
 
 
+
+
         method: 'POST',
 
 
+
+
         headers: {
+
+
 
 
           'Authorization':
@@ -1005,18 +1369,28 @@ async function runScript(
             accessToken,
 
 
+
+
           'Content-Type':
             'application/json'
 
 
+
+
         },
+
+
 
 
         body:
           JSON.stringify({
 
 
+
+
             function: functionName,
+
+
 
 
             parameters:
@@ -1024,18 +1398,28 @@ async function runScript(
               []
 
 
+
+
           })
+
+
 
 
       }
 
 
+
+
     );
+
+
 
 
   if (
     response.status === 401
   ) {
+
+
 
 
     /*
@@ -1051,10 +1435,14 @@ async function runScript(
     ) {
 
 
+
+
       try {
         await new Promise(function(resolve) {
           setTimeout(resolve, 350);
         });
+
+
 
 
         return await runScript(
@@ -1068,8 +1456,12 @@ async function runScript(
     }
 
 
+
+
     clearAccessToken();
     showLoginScreen();
+
+
 
 
     throw new Error(
@@ -1077,19 +1469,29 @@ async function runScript(
     );
 
 
+
+
   }
+
+
 
 
   var mirelFetchFinishedAt =
     mirelPerfNow();
 
 
+
+
   var data =
     await response.json();
 
 
+
+
   var mirelApiFinishedAt =
     mirelPerfNow();
+
+
 
 
   if (
@@ -1098,8 +1500,12 @@ async function runScript(
   ) {
 
 
+
+
     var msg =
       'Apps Scriptの実行に失敗しました。';
+
+
 
 
     if (
@@ -1108,11 +1514,17 @@ async function runScript(
     ) {
 
 
+
+
       msg =
         data.error.message;
 
 
+
+
     }
+
+
 
 
     if (
@@ -1123,25 +1535,37 @@ async function runScript(
     ) {
 
 
+
+
       msg =
         data.error
           .details[0]
           .errorMessage;
 
 
+
+
     }
+
+
 
 
     throw new Error(msg);
 
 
+
+
   }
+
+
 
 
   var mirelResult =
     data.response
       ? data.response.result
       : null;
+
+
 
 
   mirelLastApiTimings[functionName] = {
@@ -1162,10 +1586,18 @@ async function runScript(
   };
 
 
+
+
   return mirelResult;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -1175,22 +1607,34 @@ async function runScript(
    ======================================== */
 
 
+
+
 async function startApp() {
+
+
 
 
   var mirelStartupStartedAt =
     mirelPerfNow();
 
 
+
+
   var mirelCacheVisibleMs =
     null;
+
+
 
 
   var restoredFromCache =
     restoreCachedAppSnapshot();
 
 
+
+
   if (restoredFromCache) {
+
+
 
 
     /*
@@ -1210,25 +1654,39 @@ async function startApp() {
     setLoading(false);
 
 
+
+
     mirelCacheVisibleMs =
       mirelPerfNow() -
       mirelStartupStartedAt;
 
 
+
+
   } else {
+
+
 
 
     setLoading(true);
 
 
+
+
   }
+
+
 
 
   /* 住所マスターはアプリ本体の表示を待たせず並行読込 */
   loadAddressMaster();
 
 
+
+
   try {
+
+
 
 
     var data =
@@ -1237,12 +1695,16 @@ async function startApp() {
       );
 
 
+
+
     teachers =
       (
         data &&
         data.teachers
       ) ||
       [];
+
+
 
 
     appSettings =
@@ -1257,6 +1719,8 @@ async function startApp() {
       );
 
 
+
+
     var extraData =
       (
         data &&
@@ -1265,9 +1729,13 @@ async function startApp() {
       {};
 
 
+
+
     mirelAffiliations =
       extraData.affiliations ||
       [];
+
+
 
 
     mirelTeacherAffiliations =
@@ -1275,14 +1743,20 @@ async function startApp() {
       {};
 
 
+
+
     mirelProfiles =
       extraData.profiles ||
       {};
 
 
+
+
     mirelFeatureSettings =
       extraData.featureSettings ||
       {};
+
+
 
 
     mirelApplyProfileDerivedValues();
@@ -1299,13 +1773,19 @@ async function startApp() {
     renderJapanMap();
 
 
+
+
     var mirelStartupFinishedAt =
       mirelPerfNow();
+
+
 
 
     var mirelInitialApi =
       mirelLastApiTimings.getInitialData ||
       {};
+
+
 
 
     mirelSavePerformance(
@@ -1329,7 +1809,11 @@ async function startApp() {
     );
 
 
+
+
   } catch (e) {
+
+
 
 
     if (restoredFromCache) {
@@ -1343,13 +1827,21 @@ async function startApp() {
     }
 
 
+
+
   } finally {
+
+
 
 
     setLoading(false);
 
 
+
+
   }
+
+
 
 
 }
@@ -1357,10 +1849,18 @@ async function startApp() {
 
 
 
+
+
+
+
 function restoreCachedAppSnapshot() {
 
 
+
+
   try {
+
+
 
 
     var raw =
@@ -1369,13 +1869,19 @@ function restoreCachedAppSnapshot() {
       );
 
 
+
+
     if (!raw) {
       return false;
     }
 
 
+
+
     var snapshot =
       JSON.parse(raw);
+
+
 
 
     if (
@@ -1390,9 +1896,13 @@ function restoreCachedAppSnapshot() {
     }
 
 
+
+
     teachers =
       snapshot.teachers ||
       [];
+
+
 
 
     appSettings =
@@ -1404,9 +1914,13 @@ function restoreCachedAppSnapshot() {
       );
 
 
+
+
     var extra =
       snapshot.extra ||
       {};
+
+
 
 
     mirelAffiliations =
@@ -1414,9 +1928,13 @@ function restoreCachedAppSnapshot() {
       [];
 
 
+
+
     mirelTeacherAffiliations =
       extra.teacherAffiliations ||
       {};
+
+
 
 
     mirelProfiles =
@@ -1424,21 +1942,33 @@ function restoreCachedAppSnapshot() {
       {};
 
 
+
+
     mirelFeatureSettings =
       extra.featureSettings ||
       {};
 
 
+
+
     return true;
+
+
 
 
   } catch (e) {
 
 
+
+
     return false;
 
 
+
+
   }
+
+
 
 
 }
@@ -1446,10 +1976,18 @@ function restoreCachedAppSnapshot() {
 
 
 
+
+
+
+
 function cacheAppSnapshot() {
 
 
+
+
   try {
+
+
 
 
     var snapshot = {
@@ -1474,10 +2012,14 @@ function cacheAppSnapshot() {
     };
 
 
+
+
     var raw =
       JSON.stringify(
         snapshot
       );
+
+
 
 
     /* localStorage上限に近づいた場合は無理に保存しない */
@@ -1486,13 +2028,19 @@ function cacheAppSnapshot() {
     }
 
 
+
+
     localStorage.setItem(
       STORAGE_APP_SNAPSHOT,
       raw
     );
 
 
+
+
   } catch (e) {}
+
+
 
 
 }
@@ -1500,10 +2048,18 @@ function cacheAppSnapshot() {
 
 
 
+
+
+
+
 function restoreCachedUiSettings() {
 
 
+
+
   try {
+
+
 
 
     var cached =
@@ -1512,7 +2068,11 @@ function restoreCachedUiSettings() {
       );
 
 
+
+
     if (cached) {
+
+
 
 
       appSettings =
@@ -1523,13 +2083,21 @@ function restoreCachedUiSettings() {
         );
 
 
+
+
       applySettingsToUi();
+
+
 
 
     }
 
 
+
+
   } catch (e) {}
+
+
 
 
 }
@@ -1537,10 +2105,18 @@ function restoreCachedUiSettings() {
 
 
 
+
+
+
+
 function cacheUiSettings() {
 
 
+
+
   try {
+
+
 
 
     localStorage.setItem(
@@ -1551,10 +2127,18 @@ function cacheUiSettings() {
     );
 
 
+
+
   } catch (e) {}
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -1564,12 +2148,18 @@ function cacheUiSettings() {
    ======================================== */
 
 
+
+
 function getRegionName(pref) {
+
+
 
 
   if (pref === '北海道') {
     return '北海道';
   }
+
+
 
 
   if (
@@ -1586,6 +2176,8 @@ function getRegionName(pref) {
   }
 
 
+
+
   if (
     [
       '茨城県',
@@ -1599,6 +2191,8 @@ function getRegionName(pref) {
   ) {
     return '関東';
   }
+
+
 
 
   if (
@@ -1618,6 +2212,8 @@ function getRegionName(pref) {
   }
 
 
+
+
   if (
     [
       '三重県',
@@ -1633,6 +2229,8 @@ function getRegionName(pref) {
   }
 
 
+
+
   if (
     [
       '鳥取県',
@@ -1646,6 +2244,8 @@ function getRegionName(pref) {
   }
 
 
+
+
   if (
     [
       '徳島県',
@@ -1656,6 +2256,8 @@ function getRegionName(pref) {
   ) {
     return '四国';
   }
+
+
 
 
   if (
@@ -1673,12 +2275,18 @@ function getRegionName(pref) {
   }
 
 
+
+
   if (pref === '沖縄県') {
     return '沖縄';
   }
 
 
+
+
   return '';
+
+
 
 
 }
@@ -1686,10 +2294,18 @@ function getRegionName(pref) {
 
 
 
+
+
+
+
 function getRegionBaseColor(region) {
 
 
+
+
   var colors = {
+
+
 
 
     '北海道': '#D9ECF8',
@@ -1703,11 +2319,17 @@ function getRegionBaseColor(region) {
     '沖縄': '#E5D8F0'
 
 
+
+
   };
+
+
 
 
   return colors[region] ||
     '#EEF1F3';
+
+
 
 
 }
@@ -1715,10 +2337,18 @@ function getRegionBaseColor(region) {
 
 
 
+
+
+
+
 function getRegionTeacherColor(region) {
 
 
+
+
   var colors = {
+
+
 
 
     '北海道': '#8DC8EB',
@@ -1732,14 +2362,24 @@ function getRegionTeacherColor(region) {
     '沖縄': '#AE8BCB'
 
 
+
+
   };
+
+
 
 
   return colors[region] ||
     '#FF9A8B';
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -1749,9 +2389,13 @@ function getRegionTeacherColor(region) {
    ======================================== */
 
 
+
+
 function mirelMapEnabled() {
   return mirelFeatureOn('map');
 }
+
+
 
 
 function mirelMapUsesPeople() {
@@ -1759,18 +2403,26 @@ function mirelMapUsesPeople() {
 }
 
 
+
+
 function mirelApplyMapVisibility() {
   var enabled = mirelMapEnabled();
   var usesPeople = mirelMapUsesPeople();
+
+
 
 
   var navMap = document.getElementById('navMap');
   var pageMap = document.getElementById('pageMap');
 
 
+
+
   if (navMap) {
     navMap.style.display = enabled ? '' : 'none';
   }
+
+
 
 
   if (!enabled) {
@@ -1779,6 +2431,8 @@ function mirelApplyMapVisibility() {
     }
     return;
   }
+
+
 
 
   var search = document.getElementById('mapSearch');
@@ -1791,9 +2445,13 @@ function mirelApplyMapVisibility() {
   var activeLegendItem = activeLegend ? activeLegend.closest('.legend-item') : null;
 
 
+
+
   if (search) search.style.display = usesPeople ? '' : 'none';
   if (segmented) segmented.style.display = usesPeople ? '' : 'none';
   if (activeLegendItem) activeLegendItem.style.display = usesPeople ? '' : 'none';
+
+
 
 
   if (!usesPeople) {
@@ -1810,12 +2468,18 @@ function mirelApplyMapVisibility() {
 }
 
 
+
+
 /* ========================================
    日本地図
    ======================================== */
 
 
+
+
 function renderJapanMap() {
+
+
 
 
   var el =
@@ -1824,28 +2488,42 @@ function renderJapanMap() {
     );
 
 
+
+
   if (
     !window.jpmap ||
     !window.jpmap.japanMap
   ) {
 
 
+
+
     el.innerHTML =
       '<div class="empty">日本地図を読み込めませんでした。</div>';
+
+
 
 
     return;
   }
 
 
+
+
   el.innerHTML = '';
+
+
 
 
   var counts =
     getPrefCounts();
 
 
+
+
   var areas = [];
+
+
 
 
   for (
@@ -1855,8 +2533,12 @@ function renderJapanMap() {
   ) {
 
 
+
+
     var pref =
       prefectures[i];
+
+
 
 
     var count =
@@ -1864,8 +2546,12 @@ function renderJapanMap() {
       0;
 
 
+
+
     var region =
       getRegionName(pref);
+
+
 
 
     var color =
@@ -1874,13 +2560,19 @@ function renderJapanMap() {
       );
 
 
+
+
     var hoverColor =
       getRegionTeacherColor(
         region
       );
 
 
+
+
     if (count > 0) {
+
+
 
 
       color =
@@ -1889,7 +2581,11 @@ function renderJapanMap() {
         );
 
 
+
+
     }
+
+
 
 
     if (
@@ -1898,56 +2594,88 @@ function renderJapanMap() {
     ) {
 
 
+
+
       color =
         '#D95770';
+
+
 
 
       hoverColor =
         '#C84660';
 
 
+
+
     }
 
 
+
+
     areas.push({
+
+
 
 
       code:
         i + 1,
 
 
+
+
       color:
         color,
+
+
 
 
       hoverColor:
         hoverColor
 
 
+
+
     });
 
 
+
+
   }
+
+
 
 
   var containerWidth =
     Math.floor(
 
 
+
+
       el.getBoundingClientRect()
         .width ||
+
+
 
 
       el.clientWidth ||
 
 
+
+
       620
+
+
 
 
     );
 
 
+
+
   var mapWidth;
+
+
 
 
   if (
@@ -1956,112 +2684,174 @@ function renderJapanMap() {
   ) {
 
 
+
+
     mapWidth =
       Math.max(
+
+
 
 
         420,
 
 
+
+
         Math.min(
 
 
+
+
           620,
+
+
 
 
           containerWidth *
           1.28
 
 
+
+
         )
+
+
 
 
       );
 
 
+
+
   } else {
+
+
 
 
     mapWidth =
       Math.max(
 
 
+
+
         620,
+
+
 
 
         Math.min(
 
 
+
+
           1000,
+
+
 
 
           containerWidth *
           1.22
 
 
+
+
         )
+
+
 
 
       );
 
 
+
+
   }
+
+
 
 
   mapInstance =
     new jpmap.japanMap(
 
 
+
+
       el,
 
 
+
+
       {
+
+
 
 
         areas:
           areas,
 
 
+
+
         width:
           mapWidth,
+
+
 
 
         showsPrefectureName:
           false,
 
 
+
+
         movesIslands:
           true,
+
+
 
 
         backgroundColor:
           '#FFFFFF',
 
 
+
+
         lineColor:
           '#FFFFFF',
+
+
 
 
         lineWidth:
           1,
 
 
+
+
         borderLineColor:
           '#FFFFFF',
+
+
 
 
         borderLineWidth:
           1.4,
 
 
+
+
         onSelect:
           function(data) {
+
+
 
 
             var code =
               Number(
                 data.code
               );
+
+
 
 
             var pref =
@@ -2071,27 +2861,43 @@ function renderJapanMap() {
               data.name;
 
 
+
+
             selectPrefecture(
               pref
             );
 
 
+
+
           }
+
+
 
 
       }
 
 
+
+
     );
+
+
 
 
   enableMobileMapTouch();
 
 
+
+
 updateSelectedPrefHeading();
 
 
+
+
 }
+
+
 
 
 /* ========================================
@@ -2099,7 +2905,11 @@ updateSelectedPrefHeading();
    ======================================== */
 
 
+
+
 function enableMobileMapTouch() {
+
+
 
 
   if (
@@ -2109,15 +2919,21 @@ function enableMobileMapTouch() {
   }
 
 
+
+
   var map =
     document.getElementById(
       'japanMap'
     );
 
 
+
+
   if (!map) {
     return;
   }
+
+
 
 
   var canvas =
@@ -2126,9 +2942,13 @@ function enableMobileMapTouch() {
     );
 
 
+
+
   if (!canvas) {
     return;
   }
+
+
 
 
   if (
@@ -2139,8 +2959,12 @@ function enableMobileMapTouch() {
   }
 
 
+
+
   canvas.dataset.mobileTouchReady =
     '1';
+
+
 
 
   var startX = 0;
@@ -2148,7 +2972,13 @@ function enableMobileMapTouch() {
   var moved = false;
 
 
+
+
   var TAP_MOVE_LIMIT = 24;
+
+
+
+
 
 
 
@@ -2158,9 +2988,13 @@ function enableMobileMapTouch() {
     function(event) {
 
 
+
+
       if (
         event.touches.length !== 1
       ) {
+
+
 
 
         moved = true;
@@ -2168,20 +3002,30 @@ function enableMobileMapTouch() {
       }
 
 
+
+
       var touch =
         event.touches[0];
+
+
 
 
       startX =
         touch.clientX;
 
 
+
+
       startY =
         touch.clientY;
 
 
+
+
       moved =
         false;
+
+
 
 
     },
@@ -2189,6 +3033,10 @@ function enableMobileMapTouch() {
       passive: true
     }
   );
+
+
+
+
 
 
 
@@ -2198,9 +3046,13 @@ function enableMobileMapTouch() {
     function(event) {
 
 
+
+
       if (
         event.touches.length !== 1
       ) {
+
+
 
 
         moved = true;
@@ -2208,8 +3060,12 @@ function enableMobileMapTouch() {
       }
 
 
+
+
       var touch =
         event.touches[0];
+
+
 
 
       var diffX =
@@ -2218,10 +3074,14 @@ function enableMobileMapTouch() {
         );
 
 
+
+
       var diffY =
         Math.abs(
           touch.clientY - startY
         );
+
+
 
 
       if (
@@ -2230,9 +3090,13 @@ function enableMobileMapTouch() {
       ) {
 
 
+
+
         moved =
           true;
       }
+
+
 
 
     },
@@ -2244,14 +3108,22 @@ function enableMobileMapTouch() {
 
 
 
+
+
+
+
   canvas.addEventListener(
     'touchend',
     function(event) {
 
 
+
+
       if (moved) {
         return;
       }
+
+
 
 
       if (
@@ -2262,11 +3134,19 @@ function enableMobileMapTouch() {
       }
 
 
+
+
       var touch =
         event.changedTouches[0];
 
 
+
+
       event.preventDefault();
+
+
+
+
 
 
 
@@ -2280,16 +3160,24 @@ function enableMobileMapTouch() {
             view: window,
 
 
+
+
             clientX:
               touch.clientX,
+
+
 
 
             clientY:
               touch.clientY,
 
 
+
+
             screenX:
               touch.screenX,
+
+
 
 
             screenY:
@@ -2297,6 +3185,10 @@ function enableMobileMapTouch() {
           }
         )
       );
+
+
+
+
 
 
 
@@ -2310,26 +3202,38 @@ function enableMobileMapTouch() {
             view: window,
 
 
+
+
             clientX:
               touch.clientX,
+
+
 
 
             clientY:
               touch.clientY,
 
 
+
+
             screenX:
               touch.screenX,
+
+
 
 
             screenY:
               touch.screenY,
 
 
+
+
             button: 0
           }
         )
       );
+
+
 
 
     },
@@ -2339,7 +3243,13 @@ function enableMobileMapTouch() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -2349,10 +3259,16 @@ function enableMobileMapTouch() {
    ======================================== */
 
 
+
+
 async function loadAddressMaster() {
 
 
+
+
   try {
+
+
 
 
     var cached =
@@ -2361,27 +3277,43 @@ async function loadAddressMaster() {
       );
 
 
+
+
     if (cached) {
+
+
 
 
       addressMaster =
         JSON.parse(cached);
 
 
+
+
     }
+
+
 
 
   } catch (e) {}
 
 
+
+
   try {
+
+
 
 
     var response =
       await fetch(
 
 
+
+
         'https://geolonia.github.io/japanese-addresses/api/ja.json',
+
+
 
 
         {
@@ -2389,17 +3321,27 @@ async function loadAddressMaster() {
         }
 
 
+
+
       );
 
 
+
+
     if (response.ok) {
+
+
 
 
       addressMaster =
         await response.json();
 
 
+
+
       try {
+
+
 
 
         localStorage.setItem(
@@ -2410,16 +3352,28 @@ async function loadAddressMaster() {
         );
 
 
+
+
       } catch (e) {}
+
+
 
 
     }
 
 
+
+
   } catch (e) {}
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -2429,7 +3383,11 @@ async function loadAddressMaster() {
    ======================================== */
 
 
+
+
 function renderAll() {
+
+
 
 
   mirelApplyMapVisibility();
@@ -2441,7 +3399,13 @@ function renderAll() {
   updateSelectedPrefHeading();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -2449,8 +3413,12 @@ function renderAll() {
 function renderStats() {
 
 
+
+
   var statsEl = document.getElementById('stats');
   if (!statsEl) return;
+
+
 
 
   if (!mirelMapUsesPeople()) {
@@ -2459,11 +3427,17 @@ function renderStats() {
   }
 
 
+
+
   var unknown =
     getUnknownCount();
 
 
+
+
   statsEl.innerHTML =
+
+
 
 
     '<div class="stat">全国 ' +
@@ -2471,9 +3445,13 @@ function renderStats() {
     '名</div>' +
 
 
+
+
     '<div class="stat">所在地不明 ' +
     unknown +
     '名</div>';
+
+
 
 
 }
@@ -2481,15 +3459,25 @@ function renderStats() {
 
 
 
+
+
+
+
 function getPrefCounts() {
+
+
 
 
   var result = {};
 
 
+
+
   if (!mirelMapUsesPeople()) {
     return result;
   }
+
+
 
 
   for (
@@ -2499,13 +3487,19 @@ function getPrefCounts() {
   ) {
 
 
+
+
     var pref =
       teachers[i].prefecture;
+
+
 
 
     if (!pref) {
       continue;
     }
+
+
 
 
     result[pref] =
@@ -2516,10 +3510,16 @@ function getPrefCounts() {
       1;
 
 
+
+
   }
 
 
+
+
   return result;
+
+
 
 
 }
@@ -2527,7 +3527,13 @@ function getPrefCounts() {
 
 
 
+
+
+
+
 function getUnknownCount() {
+
+
 
 
   if (!mirelMapUsesPeople()) {
@@ -2535,7 +3541,11 @@ function getUnknownCount() {
   }
 
 
+
+
   var count = 0;
+
+
 
 
   for (
@@ -2545,21 +3555,33 @@ function getUnknownCount() {
   ) {
 
 
+
+
     if (
       !teachers[i].prefecture
     ) {
 
 
+
+
       count++;
+
+
 
 
     }
 
 
+
+
   }
 
 
+
+
   return count;
+
+
 
 
 }
@@ -2567,7 +3589,13 @@ function getUnknownCount() {
 
 
 
+
+
+
+
 function updateSelectedPrefHeading() {
+
+
 
 
   var el =
@@ -2576,8 +3604,12 @@ function updateSelectedPrefHeading() {
     );
 
 
+
+
   var person =
     personLabel();
+
+
 
 
   if (!mirelMapUsesPeople()) {
@@ -2588,37 +3620,59 @@ function updateSelectedPrefHeading() {
   }
 
 
+
+
   if (
     selectedPrefecture ===
     '__UNKNOWN__'
   ) {
 
 
+
+
     el.textContent =
+
+
 
 
       '所在地不明｜' +
 
 
+
+
       person +
+
+
 
 
       ' ' +
 
 
+
+
       getUnknownCount() +
+
+
 
 
       '名';
 
 
+
+
     return;
+
+
 
 
   }
 
 
+
+
   if (selectedPrefecture) {
+
+
 
 
     var count =
@@ -2628,35 +3682,57 @@ function updateSelectedPrefHeading() {
       0;
 
 
+
+
     el.textContent =
+
+
 
 
       selectedPrefecture +
 
 
+
+
       '｜' +
+
+
 
 
       person +
 
 
+
+
       ' ' +
+
+
 
 
       count +
 
 
+
+
       '名';
+
+
 
 
     return;
 
 
+
+
   }
+
+
 
 
   el.textContent =
     '都道府県を選択';
+
+
 
 
 }
@@ -2664,10 +3740,18 @@ function updateSelectedPrefHeading() {
 
 
 
+
+
+
+
 function setPrefMode(mode) {
 
 
+
+
   prefMode = mode;
+
+
 
 
   document.getElementById(
@@ -2678,6 +3762,8 @@ function setPrefMode(mode) {
   );
 
 
+
+
   document.getElementById(
     'allPrefBtn'
   ).classList.toggle(
@@ -2686,10 +3772,18 @@ function setPrefMode(mode) {
   );
 
 
+
+
   renderPrefList();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -2699,11 +3793,17 @@ function setPrefMode(mode) {
    ======================================== */
 
 
+
+
 function renderPrefList() {
+
+
 
 
   var counts =
     getPrefCounts();
+
+
 
 
   var regionOrder = [
@@ -2719,7 +3819,11 @@ function renderPrefList() {
   ];
 
 
+
+
   var grouped = {};
+
+
 
 
   for (
@@ -2729,12 +3833,18 @@ function renderPrefList() {
   ) {
 
 
+
+
     grouped[
       regionOrder[r]
     ] = [];
 
 
+
+
   }
+
+
 
 
   for (
@@ -2744,13 +3854,19 @@ function renderPrefList() {
   ) {
 
 
+
+
     var pref =
       prefectures[i];
+
+
 
 
     var count =
       counts[pref] ||
       0;
+
+
 
 
     if (
@@ -2762,8 +3878,12 @@ function renderPrefList() {
     }
 
 
+
+
     var region =
       getRegionName(pref);
+
+
 
 
     if (!grouped[region]) {
@@ -2771,24 +3891,38 @@ function renderPrefList() {
     }
 
 
+
+
     grouped[region].push({
+
+
 
 
       prefecture:
         pref,
 
 
+
+
       count:
         count
+
+
 
 
     });
 
 
+
+
   }
 
 
+
+
   var html = '';
+
+
 
 
   for (
@@ -2798,10 +3932,14 @@ function renderPrefList() {
   ) {
 
 
+
+
     var regionName =
       regionOrder[
         regionIndex
       ];
+
+
 
 
     var regionPrefs =
@@ -2811,6 +3949,8 @@ function renderPrefList() {
       [];
 
 
+
+
     if (
       regionPrefs.length === 0
     ) {
@@ -2818,11 +3958,17 @@ function renderPrefList() {
     }
 
 
+
+
     html +=
       '<div class="pref-region-group"' +
 
 
+
+
       ' style="' +
+
+
 
 
       '--region-base:' +
@@ -2832,6 +3978,8 @@ function renderPrefList() {
       ';' +
 
 
+
+
       '--region-active:' +
       getRegionTeacherColor(
         regionName
@@ -2839,10 +3987,16 @@ function renderPrefList() {
       ';">';
 
 
+
+
     html +=
 
 
+
+
       '<div class="pref-region-title">' +
+
+
 
 
       escapeHtml(
@@ -2850,10 +4004,16 @@ function renderPrefList() {
       ) +
 
 
+
+
       '</div>' +
 
 
+
+
       '<div class="pref-region-chips">';
+
+
 
 
     for (
@@ -2863,14 +4023,20 @@ function renderPrefList() {
     ) {
 
 
+
+
       var row =
         regionPrefs[
           prefIndex
         ];
 
 
+
+
       var cls =
         'chip';
+
+
 
 
       if (
@@ -2879,11 +4045,17 @@ function renderPrefList() {
       ) {
 
 
+
+
         cls +=
           ' has';
 
 
+
+
       }
+
+
 
 
       if (
@@ -2892,23 +4064,37 @@ function renderPrefList() {
       ) {
 
 
+
+
         cls +=
           ' selected';
+
+
 
 
       }
 
 
+
+
       html +=
+
+
 
 
         '<button class="' +
 
 
+
+
         cls +
 
 
+
+
         '" onclick="selectPrefecture(\'' +
+
+
 
 
         escapeJs(
@@ -2916,12 +4102,18 @@ function renderPrefList() {
         ) +
 
 
+
+
         '\')">' +
+
+
 
 
         escapeHtml(
           row.prefecture
         ) +
+
+
 
 
         (
@@ -2933,44 +4125,72 @@ function renderPrefList() {
         ) +
 
 
+
+
         '</button>';
+
+
 
 
     }
 
 
+
+
     html +=
+
+
 
 
       '</div>' +
 
 
+
+
       '</div>';
 
 
+
+
   }
+
+
 
 
   var unknown =
     getUnknownCount();
 
 
+
+
   if (mirelMapUsesPeople() && unknown > 0) {
+
+
 
 
     html +=
 
 
+
+
       '<div class="pref-region-group unknown-region">' +
+
+
 
 
       '<div class="pref-region-title">所在地不明</div>' +
 
 
+
+
       '<div class="pref-region-chips">' +
 
 
+
+
       '<button class="chip' +
+
+
 
 
       (
@@ -2981,28 +4201,46 @@ function renderPrefList() {
       ) +
 
 
+
+
       '" onclick="selectUnknown()">' +
+
+
 
 
       '所在地不明 ' +
 
 
+
+
       unknown +
+
+
 
 
       '名' +
 
 
+
+
       '</button>' +
+
+
 
 
       '</div>' +
 
 
+
+
       '</div>';
 
 
+
+
   }
+
+
 
 
   document.getElementById(
@@ -3011,7 +4249,13 @@ function renderPrefList() {
     html;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3019,8 +4263,12 @@ function renderPrefList() {
 function selectPrefecture(pref) {
 
 
+
+
   selectedPrefecture = pref;
   selectedTeacherId = '';
+
+
 
 
   updateSelectedPrefHeading();
@@ -3029,7 +4277,13 @@ function selectPrefecture(pref) {
   renderJapanMap();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3037,12 +4291,18 @@ function selectPrefecture(pref) {
 function selectUnknown() {
 
 
+
+
   selectedPrefecture =
     '__UNKNOWN__';
 
 
+
+
   selectedTeacherId =
     '';
+
+
 
 
   updateSelectedPrefHeading();
@@ -3051,7 +4311,13 @@ function selectUnknown() {
   renderJapanMap();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3061,10 +4327,14 @@ function selectUnknown() {
    ======================================== */
 
 
+
+
 function teacherMatches(
   teacher,
   query
 ) {
+
+
 
 
   if (!query) {
@@ -3072,12 +4342,18 @@ function teacherMatches(
   }
 
 
+
+
   var linkText = '';
+
+
 
 
   var links =
     teacher.links ||
     [];
+
+
 
 
   for (
@@ -3087,10 +4363,16 @@ function teacherMatches(
   ) {
 
 
+
+
     linkText +=
 
 
+
+
       ' ' +
+
+
 
 
       (
@@ -3099,7 +4381,11 @@ function teacherMatches(
       ) +
 
 
+
+
       ' ' +
+
+
 
 
       (
@@ -3108,7 +4394,11 @@ function teacherMatches(
       ) +
 
 
+
+
       ' ' +
+
+
 
 
       (
@@ -3117,10 +4407,16 @@ function teacherMatches(
       );
 
 
+
+
   }
 
 
+
+
   var text = [
+
+
 
 
     teacher.name,
@@ -3138,9 +4434,13 @@ function teacherMatches(
     linkText
 
 
+
+
   ]
     .join(' ')
     .toLowerCase();
+
+
 
 
   return text.indexOf(
@@ -3148,7 +4448,13 @@ function teacherMatches(
   ) !== -1;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3156,7 +4462,11 @@ function teacherMatches(
 function teacherCard(teacher) {
 
 
+
+
   var location =
+
+
 
 
     [
@@ -3165,16 +4475,26 @@ function teacherCard(teacher) {
     ]
 
 
+
+
       .filter(Boolean)
+
+
 
 
       .join(' ');
 
 
+
+
   return (
 
 
+
+
     '<div class="teacher" onclick="openTeacherDetail(\'' +
+
+
 
 
     escapeJs(
@@ -3182,10 +4502,16 @@ function teacherCard(teacher) {
     ) +
 
 
+
+
     '\')">' +
 
 
+
+
     '<div class="teacher-name">' +
+
+
 
 
     escapeHtml(
@@ -3194,7 +4520,11 @@ function teacherCard(teacher) {
     ) +
 
 
+
+
     '</div>' +
+
+
 
 
     (
@@ -3208,6 +4538,8 @@ function teacherCard(teacher) {
     ) +
 
 
+
+
     (
       teacher.salonName
         ? '<div class="meta">' +
@@ -3217,6 +4549,8 @@ function teacherCard(teacher) {
           '</div>'
         : ''
     ) +
+
+
 
 
     (
@@ -3230,15 +4564,23 @@ function teacherCard(teacher) {
     ) +
 
 
+
+
     mirelAffiliationTagsHtml(
       teacher.teacherId
     ) +
 
 
+
+
     '</div>'
 
 
+
+
   );
+
+
 
 
 }
@@ -3246,7 +4588,13 @@ function teacherCard(teacher) {
 
 
 
+
+
+
+
 function renderMapTeacherPreview() {
+
+
 
 
   var mapSide =
@@ -3255,15 +4603,23 @@ function renderMapTeacherPreview() {
     );
 
 
+
+
   if (
     !mapSide
   ) {
 
 
+
+
     return;
 
 
+
+
   }
+
+
 
 
   if (!mirelMapUsesPeople()) {
@@ -3272,6 +4628,8 @@ function renderMapTeacherPreview() {
       : '<div class="empty">日本地図または都道府県名を選択してください。</div>';
     return;
   }
+
+
 
 
   var query =
@@ -3285,17 +4643,27 @@ function renderMapTeacherPreview() {
 
 
 
+
+
+
+
   if (
     !selectedPrefecture &&
     !query
   ) {
 
 
+
+
     mapSide.innerHTML =
       '';
 
 
+
+
     return;
+
+
 
 
   }
@@ -3303,7 +4671,13 @@ function renderMapTeacherPreview() {
 
 
 
+
+
+
+
   var list = [];
+
+
 
 
   for (
@@ -3313,8 +4687,12 @@ function renderMapTeacherPreview() {
   ) {
 
 
+
+
     var teacher =
       teachers[i];
+
+
 
 
     if (
@@ -3324,6 +4702,8 @@ function renderMapTeacherPreview() {
     ) {
       continue;
     }
+
+
 
 
     if (
@@ -3337,6 +4717,8 @@ function renderMapTeacherPreview() {
     }
 
 
+
+
     if (
       !teacherMatches(
         teacher,
@@ -3347,17 +4729,25 @@ function renderMapTeacherPreview() {
     }
 
 
+
+
     list.push(
       teacher
     );
 
 
+
+
   }
+
+
 
 
   var title =
     personLabel() +
     '一覧';
+
+
 
 
   if (
@@ -3366,8 +4756,12 @@ function renderMapTeacherPreview() {
   ) {
 
 
+
+
     title =
       '所在地不明';
+
+
 
 
   } else if (
@@ -3375,8 +4769,12 @@ function renderMapTeacherPreview() {
   ) {
 
 
+
+
     title =
       selectedPrefecture;
+
+
 
 
   } else if (
@@ -3384,17 +4782,27 @@ function renderMapTeacherPreview() {
   ) {
 
 
+
+
     title =
       '検索結果';
+
+
 
 
   }
 
 
+
+
   var html =
 
 
+
+
     '<div class="section-title">' +
+
+
 
 
     escapeHtml(
@@ -3402,13 +4810,21 @@ function renderMapTeacherPreview() {
     ) +
 
 
+
+
     ' ' +
+
+
 
 
     list.length +
 
 
+
+
     '名</div>';
+
+
 
 
   if (
@@ -3416,10 +4832,16 @@ function renderMapTeacherPreview() {
   ) {
 
 
+
+
     html +=
 
 
+
+
       '<div class="empty">該当する' +
+
+
 
 
       escapeHtml(
@@ -3427,14 +4849,22 @@ function renderMapTeacherPreview() {
       ) +
 
 
+
+
       'はいません。</div>';
+
+
 
 
   } else {
 
 
+
+
     html +=
       '<div class="teacher-list">';
+
+
 
 
     for (
@@ -3444,24 +4874,36 @@ function renderMapTeacherPreview() {
     ) {
 
 
+
+
       html +=
         teacherCard(
           list[j]
         );
 
 
+
+
     }
+
+
 
 
     html +=
       '</div>';
 
 
+
+
   }
+
+
 
 
   mapSide.innerHTML =
     html;
+
+
 
 
 }
@@ -3469,7 +4911,13 @@ function renderMapTeacherPreview() {
 
 
 
+
+
+
+
 function renderFullTeacherList() {
+
+
 
 
   var query =
@@ -3481,7 +4929,11 @@ function renderFullTeacherList() {
     ).trim();
 
 
+
+
   var html = '';
+
+
 
 
   for (
@@ -3489,6 +4941,8 @@ function renderFullTeacherList() {
     i < teachers.length;
     i++
   ) {
+
+
 
 
     if (
@@ -3499,16 +4953,24 @@ function renderFullTeacherList() {
     ) {
 
 
+
+
       html +=
         teacherCard(
           teachers[i]
         );
 
 
+
+
     }
 
 
+
+
   }
+
+
 
 
   document.getElementById(
@@ -3516,11 +4978,17 @@ function renderFullTeacherList() {
   ).innerHTML =
 
 
+
+
     html ||
+
+
 
 
     (
       '<div class="empty">該当する' +
+
+
 
 
       escapeHtml(
@@ -3528,8 +4996,12 @@ function renderFullTeacherList() {
       ) +
 
 
+
+
       'はいません。</div>'
     );
+
+
 
 
 }
@@ -3537,7 +5009,13 @@ function renderFullTeacherList() {
 
 
 
+
+
+
+
 function renderSearchResults() {
+
+
 
 
   var query =
@@ -3549,7 +5027,11 @@ function renderSearchResults() {
     ).trim();
 
 
+
+
   if (!query) {
+
+
 
 
     document.getElementById(
@@ -3558,11 +5040,17 @@ function renderSearchResults() {
       '<div class="empty">検索語を入力してください。</div>';
 
 
+
+
     return;
   }
 
 
+
+
   var html = '';
+
+
 
 
   for (
@@ -3570,6 +5058,8 @@ function renderSearchResults() {
     i < teachers.length;
     i++
   ) {
+
+
 
 
     if (
@@ -3580,16 +5070,24 @@ function renderSearchResults() {
     ) {
 
 
+
+
       html +=
         teacherCard(
           teachers[i]
         );
 
 
+
+
     }
 
 
+
+
   }
+
+
 
 
   document.getElementById(
@@ -3597,11 +5095,17 @@ function renderSearchResults() {
   ).innerHTML =
 
 
+
+
     html ||
+
+
 
 
     (
       '<div class="empty">該当する' +
+
+
 
 
       escapeHtml(
@@ -3609,11 +5113,19 @@ function renderSearchResults() {
       ) +
 
 
+
+
       'はいません。</div>'
     );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3623,7 +5135,11 @@ function renderSearchResults() {
    ======================================== */
 
 
+
+
 function showPage(name) {
+
+
 
 
   if (name === 'map' && !mirelMapEnabled()) {
@@ -3631,30 +5147,46 @@ function showPage(name) {
   }
 
 
+
+
   var pages = {
+
+
 
 
     map:
       'pageMap',
 
 
+
+
     list:
       'pageList',
+
+
 
 
     search:
       'pageSearch',
 
 
+
+
     detail:
       'pageDetail',
+
+
 
 
     settings:
       'pageSettings'
 
 
+
+
   };
+
+
 
 
   for (
@@ -3662,21 +5194,33 @@ function showPage(name) {
   ) {
 
 
+
+
     document.getElementById(
       pages[key]
     ).classList.toggle(
 
 
+
+
       'active',
+
+
 
 
       key === name
 
 
+
+
     );
 
 
+
+
   }
+
+
 
 
   document.getElementById(
@@ -3687,6 +5231,8 @@ function showPage(name) {
   );
 
 
+
+
   document.getElementById(
     'navList'
   ).classList.toggle(
@@ -3695,10 +5241,14 @@ function showPage(name) {
   );
 
 
+
+
   var navSearch =
     document.getElementById(
       'navSearch'
     );
+
+
 
 
   if (navSearch) {
@@ -3709,6 +5259,8 @@ function showPage(name) {
   }
 
 
+
+
   document.getElementById(
     'navSettings'
   ).classList.toggle(
@@ -3717,9 +5269,13 @@ function showPage(name) {
   );
 
 
+
+
   if (name === 'list') {
     renderFullTeacherList();
   }
+
+
 
 
   if (name === 'search') {
@@ -3727,9 +5283,13 @@ function showPage(name) {
   }
 
 
+
+
   if (name === 'settings') {
     fillSettingsForm();
   }
+
+
 
 
   window.scrollTo(
@@ -3738,7 +5298,13 @@ function showPage(name) {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3748,7 +5314,11 @@ function showPage(name) {
    ======================================== */
 
 
+
+
 function findTeacher(id) {
+
+
 
 
   for (
@@ -3758,25 +5328,41 @@ function findTeacher(id) {
   ) {
 
 
+
+
     if (
       teachers[i].teacherId ===
       id
     ) {
 
 
+
+
       return teachers[i];
+
+
 
 
     }
 
 
+
+
   }
+
+
 
 
   return null;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3784,8 +5370,12 @@ function findTeacher(id) {
 function openTeacherDetail(id) {
 
 
+
+
   var teacher =
     findTeacher(id);
+
+
 
 
   if (!teacher) {
@@ -3793,8 +5383,12 @@ function openTeacherDetail(id) {
   }
 
 
+
+
   selectedTeacherId =
     id;
+
+
 
 
   if (
@@ -3802,17 +5396,27 @@ function openTeacherDetail(id) {
   ) {
 
 
+
+
     selectedPrefecture =
       teacher.prefecture;
+
+
 
 
   }
 
 
+
+
   renderPrefList();
 
 
+
+
   renderJapanMap();
+
+
 
 
   renderTeacherDetail(
@@ -3820,12 +5424,20 @@ function openTeacherDetail(id) {
   );
 
 
+
+
   showPage(
     'detail'
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3833,10 +5445,16 @@ function openTeacherDetail(id) {
 function birthdayText(obj) {
 
 
+
+
   var result = '';
 
 
+
+
   if (obj.birthYear) {
+
+
 
 
     result +=
@@ -3844,10 +5462,16 @@ function birthdayText(obj) {
       '年';
 
 
+
+
   }
 
 
+
+
   if (obj.birthMonth) {
+
+
 
 
     result +=
@@ -3855,10 +5479,16 @@ function birthdayText(obj) {
       '月';
 
 
+
+
   }
 
 
+
+
   if (obj.birthDay) {
+
+
 
 
     result +=
@@ -3866,13 +5496,23 @@ function birthdayText(obj) {
       '日';
 
 
+
+
   }
+
+
 
 
   return result;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3883,6 +5523,8 @@ function detailRow(
 ) {
 
 
+
+
   if (
     value === '' ||
     value === null ||
@@ -3890,26 +5532,42 @@ function detailRow(
   ) {
 
 
+
+
     return '';
   }
+
+
 
 
   return (
 
 
+
+
     '<div class="detail-row">' +
+
+
 
 
     '<div class="label">' +
 
 
+
+
     escapeHtml(label) +
+
+
 
 
     '</div>' +
 
 
+
+
     '<div class="value">' +
+
+
 
 
     escapeHtml(
@@ -3917,16 +5575,28 @@ function detailRow(
     ) +
 
 
+
+
     '</div>' +
+
+
 
 
     '</div>'
 
 
+
+
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3936,9 +5606,13 @@ function phoneDetailRow(
 ) {
 
 
+
+
   if (!phone) {
     return '';
   }
+
+
 
 
   return (
@@ -3957,7 +5631,13 @@ function phoneDetailRow(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -3967,19 +5647,31 @@ function renderTeacherDetail(
 ) {
 
 
+
+
   var html =
+
+
 
 
     '<div class="card">' +
 
 
+
+
     '<div class="detail-head">' +
+
+
 
 
     '<div>' +
 
 
+
+
     '<div class="detail-name">' +
+
+
 
 
     escapeHtml(
@@ -3988,7 +5680,11 @@ function renderTeacherDetail(
     ) +
 
 
+
+
     '</div>' +
+
+
 
 
     (
@@ -4002,24 +5698,38 @@ function renderTeacherDetail(
     ) +
 
 
+
+
     '</div>' +
+
+
 
 
     '<div class="detail-head-actions">' +
 
 
+
+
     '<button class="secondary" onclick="openTeacherForm(\'' +
+
+
 
 
     escapeJs(
       teacher.teacherId
     ) +
+
+
 
 
     '\')">編集</button>' +
 
 
+
+
     '<button class="detail-delete-button" onclick="deleteTeacherAction(\'' +
+
+
 
 
     escapeJs(
@@ -4027,13 +5737,21 @@ function renderTeacherDetail(
     ) +
 
 
+
+
     '\')">削除</button>' +
+
+
 
 
     '</div>' +
 
 
+
+
     '</div>';
+
+
 
 
   html +=
@@ -4043,11 +5761,15 @@ function renderTeacherDetail(
     );
 
 
+
+
   html +=
     detailRow(
       '性別',
       teacher.gender
     );
+
+
 
 
   html +=
@@ -4059,11 +5781,15 @@ function renderTeacherDetail(
     );
 
 
+
+
   html +=
     detailRow(
       '年齢',
       teacher.ageDisplay
     );
+
+
 
 
   html +=
@@ -4073,11 +5799,15 @@ function renderTeacherDetail(
     );
 
 
+
+
   html +=
     detailRow(
       placeKanaLabel(),
       teacher.salonKana
     );
+
+
 
 
   html +=
@@ -4089,6 +5819,8 @@ function renderTeacherDetail(
     );
 
 
+
+
   html +=
     detailRow(
       '住所',
@@ -4096,10 +5828,14 @@ function renderTeacherDetail(
     );
 
 
+
+
   html +=
     phoneDetailRow(
       teacher.phone
     );
+
+
 
 
   html +=
@@ -4109,9 +5845,13 @@ function renderTeacherDetail(
     );
 
 
+
+
   var links =
     teacher.links ||
     [];
+
+
 
 
   if (
@@ -4119,16 +5859,26 @@ function renderTeacherDetail(
   ) {
 
 
+
+
     html +=
+
+
 
 
       '<div class="detail-row">' +
 
 
+
+
       '<div class="label">リンク・SNS</div>' +
 
 
+
+
       '<div class="link-list">';
+
+
 
 
     for (
@@ -4136,6 +5886,8 @@ function renderTeacherDetail(
       linkIndex < links.length;
       linkIndex++
     ) {
+
+
 
 
       html +=
@@ -4146,19 +5898,31 @@ function renderTeacherDetail(
         );
 
 
+
+
     }
+
+
 
 
     html +=
 
 
+
+
       '</div>' +
+
+
 
 
       '</div>';
 
 
+
+
   }
+
+
 
 
   if (
@@ -4166,13 +5930,21 @@ function renderTeacherDetail(
   ) {
 
 
+
+
     html +=
+
+
 
 
       '<div class="actions">' +
 
 
+
+
       '<button class="secondary" onclick="openGoogleMap(\'' +
+
+
 
 
       escapeJs(
@@ -4180,17 +5952,29 @@ function renderTeacherDetail(
       ) +
 
 
+
+
       '\')">Google Maps</button>' +
+
+
 
 
       '</div>';
 
 
+
+
   }
+
+
 
 
   html +=
     '</div>';
+
+
+
+
 
 
 
@@ -4200,28 +5984,46 @@ function renderTeacherDetail(
     [];
 
 
+
+
   html +=
+
+
 
 
     '<div class="card">' +
 
 
+
+
     '<div class="detail-head">' +
+
+
 
 
     '<div class="section-title">交流履歴 ' +
 
 
+
+
     interactions.length +
+
+
 
 
     '件</div>' +
 
 
+
+
     '<button class="primary" onclick="openInteractionForm()">＋ 追加</button>' +
 
 
+
+
     '</div>';
+
+
 
 
   if (
@@ -4229,11 +6031,17 @@ function renderTeacherDetail(
   ) {
 
 
+
+
     html +=
       '<div class="empty">交流記録はまだありません。</div>';
 
 
+
+
   } else {
+
+
 
 
     for (
@@ -4241,6 +6049,8 @@ function renderTeacherDetail(
       interactionIndex < interactions.length;
       interactionIndex++
     ) {
+
+
 
 
       html +=
@@ -4251,14 +6061,24 @@ function renderTeacherDetail(
         );
 
 
+
+
     }
+
+
 
 
   }
 
 
+
+
   html +=
     '</div>';
+
+
+
+
 
 
 
@@ -4268,28 +6088,46 @@ function renderTeacherDetail(
     [];
 
 
+
+
   html +=
+
+
 
 
     '<div class="card">' +
 
 
+
+
     '<div class="detail-head">' +
+
+
 
 
     '<div class="section-title">' +
 
 
+
+
     '子ども情報 ' +
+
+
 
 
     children.length +
 
 
+
+
     '人</div>' +
 
 
+
+
     '<button class="primary" onclick="openTeacherFormForNewChild(\'' +
+
+
 
 
     escapeJs(
@@ -4297,10 +6135,16 @@ function renderTeacherDetail(
     ) +
 
 
+
+
     '\')">＋ 追加</button>' +
 
 
+
+
     '</div>';
+
+
 
 
   if (
@@ -4308,11 +6152,17 @@ function renderTeacherDetail(
   ) {
 
 
+
+
     html +=
       '<div class="empty">子ども情報はまだありません。</div>';
 
 
+
+
   } else {
+
+
 
 
     for (
@@ -4322,19 +6172,29 @@ function renderTeacherDetail(
     ) {
 
 
+
+
       var child =
         children[
           childIndex
         ];
 
 
+
+
       html +=
+
+
 
 
         '<div class="child">' +
 
 
+
+
         '<div class="child-name-text">' +
+
+
 
 
         escapeHtml(
@@ -4344,7 +6204,11 @@ function renderTeacherDetail(
         ) +
 
 
+
+
         '</div>';
+
+
 
 
       if (
@@ -4354,10 +6218,16 @@ function renderTeacherDetail(
       ) {
 
 
+
+
         html +=
 
 
+
+
           '<div class="meta">' +
+
+
 
 
           escapeHtml(
@@ -4365,10 +6235,16 @@ function renderTeacherDetail(
           ) +
 
 
+
+
           '</div>';
 
 
+
+
       }
+
+
 
 
       if (
@@ -4376,10 +6252,16 @@ function renderTeacherDetail(
       ) {
 
 
+
+
         html +=
 
 
+
+
           '<div class="meta">性別：' +
+
+
 
 
           escapeHtml(
@@ -4387,10 +6269,16 @@ function renderTeacherDetail(
           ) +
 
 
+
+
           '</div>';
 
 
+
+
       }
+
+
 
 
       if (
@@ -4398,10 +6286,16 @@ function renderTeacherDetail(
       ) {
 
 
+
+
         html +=
 
 
+
+
           '<div class="meta">学年：' +
+
+
 
 
           escapeHtml(
@@ -4409,10 +6303,16 @@ function renderTeacherDetail(
           ) +
 
 
+
+
           '</div>';
 
 
+
+
       }
+
+
 
 
       if (
@@ -4420,10 +6320,16 @@ function renderTeacherDetail(
       ) {
 
 
+
+
         html +=
 
 
+
+
           '<div class="meta">年齢：' +
+
+
 
 
           escapeHtml(
@@ -4431,10 +6337,16 @@ function renderTeacherDetail(
           ) +
 
 
+
+
           '</div>';
 
 
+
+
       }
+
+
 
 
       if (
@@ -4444,10 +6356,16 @@ function renderTeacherDetail(
       ) {
 
 
+
+
         html +=
 
 
+
+
           '<div class="meta">誕生日：' +
+
+
 
 
           escapeHtml(
@@ -4457,10 +6375,16 @@ function renderTeacherDetail(
           ) +
 
 
+
+
           '</div>';
 
 
+
+
       }
+
+
 
 
       if (
@@ -4468,10 +6392,16 @@ function renderTeacherDetail(
       ) {
 
 
+
+
         html +=
 
 
+
+
           '<div class="meta">' +
+
+
 
 
           escapeHtml(
@@ -4479,24 +6409,38 @@ function renderTeacherDetail(
           ) +
 
 
+
+
           '</div>';
 
 
+
+
       }
+
+
 
 
       html +=
         '</div>';
 
 
+
+
     }
+
+
 
 
   }
 
 
+
+
   html +=
     '</div>';
+
+
 
 
   document.getElementById(
@@ -4505,7 +6449,13 @@ function renderTeacherDetail(
     html;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -4515,9 +6465,13 @@ function renderTeacherDetail(
    ======================================== */
 
 
+
+
 function renderInteractionCard(
   interaction
 ) {
+
+
 
 
   var dateText =
@@ -4525,24 +6479,38 @@ function renderInteractionCard(
     '日付未登録';
 
 
+
+
   var typeText =
     interaction.interactionType ||
     '種別未登録';
 
 
+
+
   var html =
+
+
 
 
     '<div class="child">' +
 
 
+
+
     '<div class="detail-head">' +
+
+
 
 
     '<div>' +
 
 
+
+
     '<div class="interaction-date">' +
+
+
 
 
     escapeHtml(
@@ -4550,10 +6518,16 @@ function renderInteractionCard(
     ) +
 
 
+
+
     '</div>' +
 
 
+
+
     '<span class="interaction-type-label">' +
+
+
 
 
     escapeHtml(
@@ -4561,27 +6535,43 @@ function renderInteractionCard(
     ) +
 
 
+
+
     '</span>' +
 
 
+
+
     '</div>' +
+
+
 
 
     '<div class="detail-head-actions">' +
 
 
+
+
     '<button class="secondary" onclick="openInteractionForm(\'' +
+
+
 
 
     escapeJs(
       interaction.interactionId
     ) +
+
+
 
 
     '\')">編集</button>' +
 
 
+
+
     '<button class="detail-delete-button" onclick="deleteInteractionAction(\'' +
+
+
 
 
     escapeJs(
@@ -4589,13 +6579,21 @@ function renderInteractionCard(
     ) +
 
 
+
+
     '\')">削除</button>' +
+
+
 
 
     '</div>' +
 
 
+
+
     '</div>';
+
+
 
 
   if (
@@ -4603,10 +6601,16 @@ function renderInteractionCard(
   ) {
 
 
+
+
     html +=
 
 
+
+
       '<div style="margin-top:10px;white-space:pre-wrap;line-height:1.7">' +
+
+
 
 
       escapeHtml(
@@ -4614,20 +6618,34 @@ function renderInteractionCard(
       ) +
 
 
+
+
       '</div>';
 
 
+
+
   }
+
+
 
 
   html +=
     '</div>';
 
 
+
+
   return html;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -4637,10 +6655,14 @@ function findInteraction(
 ) {
 
 
+
+
   var teacher =
     findTeacher(
       selectedTeacherId
     );
+
+
 
 
   if (!teacher) {
@@ -4648,9 +6670,13 @@ function findInteraction(
   }
 
 
+
+
   var interactions =
     teacher.interactions ||
     [];
+
+
 
 
   for (
@@ -4660,25 +6686,41 @@ function findInteraction(
   ) {
 
 
+
+
     if (
       interactions[i].interactionId ===
       interactionId
     ) {
 
 
+
+
       return interactions[i];
+
+
 
 
     }
 
 
+
+
   }
+
+
 
 
   return null;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -4688,12 +6730,18 @@ function openInteractionForm(
 ) {
 
 
+
+
   interactionFormSource =
     'detail';
 
 
+
+
   editingPendingInteractionIndex =
     -1;
+
+
 
 
   if (
@@ -4701,8 +6749,12 @@ function openInteractionForm(
   ) {
 
 
+
+
     return;
   }
+
+
 
 
   setValue(
@@ -4711,10 +6763,14 @@ function openInteractionForm(
   );
 
 
+
+
   setValue(
     'interactionDate',
     todayYmd()
   );
+
+
 
 
   setValue(
@@ -4723,10 +6779,14 @@ function openInteractionForm(
   );
 
 
+
+
   setValue(
     'interactionMemo',
     ''
   );
+
+
 
 
   var interaction =
@@ -4737,9 +6797,13 @@ function openInteractionForm(
       : null;
 
 
+
+
   if (
     interaction
   ) {
+
+
 
 
     document.getElementById(
@@ -4748,10 +6812,14 @@ function openInteractionForm(
       '交流記録を編集';
 
 
+
+
     setValue(
       'interactionId',
       interaction.interactionId
     );
+
+
 
 
     setValue(
@@ -4760,10 +6828,14 @@ function openInteractionForm(
     );
 
 
+
+
     setValue(
       'interactionType',
       interaction.interactionType
     );
+
+
 
 
     setValue(
@@ -4772,7 +6844,11 @@ function openInteractionForm(
     );
 
 
+
+
   } else {
+
+
 
 
     document.getElementById(
@@ -4781,7 +6857,11 @@ function openInteractionForm(
       '交流記録を追加';
 
 
+
+
   }
+
+
 
 
   document.getElementById(
@@ -4791,12 +6871,20 @@ function openInteractionForm(
   );
 
 
+
+
 }
 
 
 
 
+
+
+
+
 function closeInteractionForm() {
+
+
 
 
   document.getElementById(
@@ -4806,7 +6894,13 @@ function closeInteractionForm() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -4814,7 +6908,11 @@ function closeInteractionForm() {
 async function saveInteractionForm() {
 
 
+
+
   var payload = {
+
+
 
 
     interactionId:
@@ -4823,10 +6921,14 @@ async function saveInteractionForm() {
       ),
 
 
+
+
     date:
       valueOf(
         'interactionDate'
       ),
+
+
 
 
     interactionType:
@@ -4835,13 +6937,19 @@ async function saveInteractionForm() {
       ),
 
 
+
+
     memo:
       valueOf(
         'interactionMemo'
       )
 
 
+
+
   };
+
+
 
 
   if (
@@ -4850,10 +6958,14 @@ async function saveInteractionForm() {
   ) {
 
 
+
+
     if (
       editingPendingInteractionIndex >=
       0
     ) {
+
+
 
 
       pendingInteractions[
@@ -4862,7 +6974,11 @@ async function saveInteractionForm() {
         payload;
 
 
+
+
     } else {
+
+
 
 
       pendingInteractions.push(
@@ -4870,21 +6986,33 @@ async function saveInteractionForm() {
       );
 
 
+
+
     }
+
+
 
 
     closeInteractionForm();
 
 
+
+
     renderTeacherFormInteractions();
+
+
 
 
     editingPendingInteractionIndex =
       -1;
 
 
+
+
     return;
   }
+
+
 
 
   if (
@@ -4892,18 +7020,28 @@ async function saveInteractionForm() {
   ) {
 
 
+
+
     return;
   }
+
+
 
 
   payload.teacherId =
     selectedTeacherId;
 
 
+
+
   setLoading(true);
 
 
+
+
   try {
+
+
 
 
     await runScript(
@@ -4914,7 +7052,11 @@ async function saveInteractionForm() {
     );
 
 
+
+
     closeInteractionForm();
+
+
 
 
     await refreshTeacherData(
@@ -4922,19 +7064,31 @@ async function saveInteractionForm() {
     );
 
 
+
+
   } catch (e) {
+
+
 
 
     handleError(e);
 
 
+
+
   } finally {
+
+
 
 
     setLoading(false);
 
 
+
+
   }
+
+
 
 
 }
@@ -4942,9 +7096,15 @@ async function saveInteractionForm() {
 
 
 
+
+
+
+
 async function deleteInteractionAction(
   interactionId
 ) {
+
+
 
 
   if (
@@ -4955,14 +7115,22 @@ async function deleteInteractionAction(
   ) {
 
 
+
+
     return;
   }
+
+
 
 
   setLoading(true);
 
 
+
+
   try {
+
+
 
 
     await runScript(
@@ -4973,24 +7141,38 @@ async function deleteInteractionAction(
     );
 
 
+
+
     await refreshTeacherData(
       selectedTeacherId
     );
 
 
+
+
   } catch (e) {
+
+
 
 
     handleError(e);
 
 
+
+
   } finally {
+
+
 
 
     setLoading(false);
 
 
+
+
   }
+
+
 
 
 }
@@ -4998,20 +7180,34 @@ async function deleteInteractionAction(
 
 
 
+
+
+
+
 function todayYmd() {
+
+
 
 
   var now =
     new Date();
 
 
+
+
   return (
+
+
 
 
     now.getFullYear() +
 
 
+
+
     '-' +
+
+
 
 
     String(
@@ -5023,7 +7219,11 @@ function todayYmd() {
     ) +
 
 
+
+
     '-' +
+
+
 
 
     String(
@@ -5034,7 +7234,11 @@ function todayYmd() {
     )
 
 
+
+
   );
+
+
 
 
 }
@@ -5042,9 +7246,15 @@ function todayYmd() {
 
 
 
+
+
+
+
 async function refreshTeacherData(
   teacherId
 ) {
+
+
 
 
   teachers =
@@ -5056,10 +7266,16 @@ async function refreshTeacherData(
     [];
 
 
+
+
   renderAll();
 
 
+
+
   renderJapanMap();
+
+
 
 
   var teacher =
@@ -5068,13 +7284,19 @@ async function refreshTeacherData(
     );
 
 
+
+
   if (
     teacher
   ) {
 
 
+
+
     selectedTeacherId =
       teacherId;
+
+
 
 
     renderTeacherDetail(
@@ -5082,15 +7304,25 @@ async function refreshTeacherData(
     );
 
 
+
+
     showPage(
       'detail'
     );
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -5100,12 +7332,18 @@ async function refreshTeacherData(
    ======================================== */
 
 
+
+
 function openTeacherForm(
   id
 ) {
 
 
+
+
   clearTeacherForm();
+
+
 
 
   var teacher =
@@ -5114,6 +7352,8 @@ function openTeacherForm(
           id
         )
       : null;
+
+
 
 
   pendingInteractions =
@@ -5127,12 +7367,18 @@ function openTeacherForm(
       : [];
 
 
+
+
   deletedInteractionIds =
     [];
 
 
+
+
   editingPendingInteractionIndex =
     -1;
+
+
 
 
   pendingLinks =
@@ -5146,17 +7392,25 @@ function openTeacherForm(
       : [];
 
 
+
+
   deletedLinkIds =
     [];
+
+
 
 
   editingPendingLinkIndex =
     -1;
 
 
+
+
   document.getElementById(
     'modalTitle'
   ).textContent =
+
+
 
 
     teacher
@@ -5166,9 +7420,13 @@ function openTeacherForm(
         'を追加';
 
 
+
+
   if (
     teacher
   ) {
+
+
 
 
     setValue(
@@ -5177,10 +7435,14 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'name',
       teacher.name
     );
+
+
 
 
     setValue(
@@ -5189,10 +7451,14 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'nickname',
       teacher.nickname
     );
+
+
 
 
     setValue(
@@ -5202,11 +7468,15 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'phone',
       teacher.phone ||
       ''
     );
+
+
 
 
     setValue(
@@ -5216,10 +7486,14 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'birthYear',
       teacher.birthYear
     );
+
+
 
 
     setValue(
@@ -5228,10 +7502,14 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'birthDay',
       teacher.birthDay
     );
+
+
 
 
     setValue(
@@ -5240,10 +7518,14 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'salonName',
       teacher.salonName
     );
+
+
 
 
     setValue(
@@ -5252,10 +7534,14 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'prefecture',
       teacher.prefecture
     );
+
+
 
 
     setValue(
@@ -5264,10 +7550,14 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'address1',
       teacher.address1
     );
+
+
 
 
     setValue(
@@ -5276,13 +7566,19 @@ function openTeacherForm(
     );
 
 
+
+
     setValue(
       'memo',
       teacher.memo
     );
 
 
+
+
   } else {
+
+
 
 
     setValue(
@@ -5291,7 +7587,11 @@ function openTeacherForm(
     );
 
 
+
+
   }
+
+
 
 
   var placeNameLabelEl =
@@ -5300,16 +7600,24 @@ function openTeacherForm(
     );
 
 
+
+
   if (
     placeNameLabelEl
   ) {
+
+
 
 
     placeNameLabelEl.textContent =
       placeLabel();
 
 
+
+
   }
+
+
 
 
   var placeKanaLabelEl =
@@ -5318,22 +7626,34 @@ function openTeacherForm(
     );
 
 
+
+
   if (
     placeKanaLabelEl
   ) {
+
+
 
 
     placeKanaLabelEl.textContent =
       placeKanaLabel();
 
 
+
+
   }
+
+
 
 
   renderLinksEditor();
 
 
+
+
   renderChildrenEditor(
+
+
 
 
     teacher
@@ -5342,16 +7662,26 @@ function openTeacherForm(
       : []
 
 
+
+
   );
 
 
+
+
   renderTeacherFormInteractions();
+
+
 
 
   var teacherModal =
   document.getElementById(
     'teacherModal'
   );
+
+
+
+
 
 
 
@@ -5363,9 +7693,15 @@ teacherModal.classList.add(
 
 
 
+
+
+
+
 /* フォームを開くたびに最上部へ戻す */
 requestAnimationFrame(
   function() {
+
+
 
 
     var modalBody =
@@ -5376,20 +7712,32 @@ requestAnimationFrame(
 
 
 
+
+
+
+
     if (
       modalBody
     ) {
+
+
 
 
       modalBody.scrollTop =
         0;
 
 
+
+
     }
+
+
 
 
   }
 );
+
+
 
 
 }
@@ -5397,7 +7745,13 @@ requestAnimationFrame(
 
 
 
+
+
+
+
 function closeTeacherForm() {
+
+
 
 
   document.getElementById(
@@ -5407,31 +7761,47 @@ function closeTeacherForm() {
   );
 
 
+
+
   hideCombos();
+
+
 
 
   pendingInteractions =
     [];
 
 
+
+
   deletedInteractionIds =
     [];
+
+
 
 
   editingPendingInteractionIndex =
     -1;
 
 
+
+
   pendingLinks =
     [];
+
+
 
 
   deletedLinkIds =
     [];
 
 
+
+
   editingPendingLinkIndex =
     -1;
+
+
 
 
 }
@@ -5439,10 +7809,18 @@ function closeTeacherForm() {
 
 
 
+
+
+
+
 function clearTeacherForm() {
 
 
+
+
   var ids = [
+
+
 
 
     'teacherId',
@@ -5464,7 +7842,11 @@ function clearTeacherForm() {
     'memo'
 
 
+
+
   ];
+
+
 
 
   for (
@@ -5474,13 +7856,19 @@ function clearTeacherForm() {
   ) {
 
 
+
+
     setValue(
       ids[i],
       ''
     );
 
 
+
+
   }
+
+
 
 
   setValue(
@@ -5489,7 +7877,13 @@ function clearTeacherForm() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -5497,11 +7891,17 @@ function clearTeacherForm() {
 async function saveTeacherForm() {
 
 
+
+
   var instagramLegacy =
     firstInstagramAccountFromPendingLinks();
 
 
+
+
   var payload = {
+
+
 
 
     teacherId:
@@ -5510,10 +7910,14 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     name:
       valueOf(
         'name'
       ),
+
+
 
 
     kana:
@@ -5522,10 +7926,14 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     nickname:
       valueOf(
         'nickname'
       ),
+
+
 
 
     gender:
@@ -5534,10 +7942,14 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     phone:
       valueOf(
         'phone'
       ),
+
+
 
 
     postalCode:
@@ -5546,10 +7958,14 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     birthYear:
       valueOf(
         'birthYear'
       ),
+
+
 
 
     birthMonth:
@@ -5558,10 +7974,14 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     birthDay:
       valueOf(
         'birthDay'
       ),
+
+
 
 
     ageManual:
@@ -5570,10 +7990,14 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     salonName:
       valueOf(
         'salonName'
       ),
+
+
 
 
     salonKana:
@@ -5582,10 +8006,14 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     prefecture:
       valueOf(
         'prefecture'
       ),
+
+
 
 
     city:
@@ -5594,10 +8022,14 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     address1:
       valueOf(
         'address1'
       ),
+
+
 
 
     address2:
@@ -5606,8 +8038,12 @@ async function saveTeacherForm() {
       ),
 
 
+
+
     instagram:
       instagramLegacy,
+
+
 
 
     memo:
@@ -5616,13 +8052,21 @@ async function saveTeacherForm() {
       )
 
 
+
+
   };
+
+
 
 
   setLoading(true);
 
 
+
+
   try {
+
+
 
 
     var saved =
@@ -5634,9 +8078,13 @@ async function saveTeacherForm() {
       );
 
 
+
+
     await saveChildrenAfterTeacher(
       saved
     );
+
+
 
 
     await saveLinksAfterTeacher(
@@ -5644,9 +8092,13 @@ async function saveTeacherForm() {
     );
 
 
+
+
     await saveInteractionsAfterTeacher(
       saved.teacherId
     );
+
+
 
 
     await refreshAfterSave(
@@ -5654,22 +8106,38 @@ async function saveTeacherForm() {
     );
 
 
+
+
   } catch (e) {
+
+
 
 
     handleError(e);
 
 
+
+
   } finally {
+
+
 
 
     setLoading(false);
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -5679,16 +8147,24 @@ function openTeacherFormForNewChild(
 ) {
 
 
+
+
   openTeacherForm(
     teacherId
   );
 
 
+
+
   addChildRow();
+
+
 
 
   setTimeout(
     function() {
+
+
 
 
       var area =
@@ -5697,26 +8173,40 @@ function openTeacherFormForNewChild(
         );
 
 
+
+
       if (
         area
       ) {
 
 
+
+
         area.scrollIntoView({
+
+
 
 
           behavior:
             'smooth',
 
 
+
+
           block:
             'start'
+
+
 
 
         });
 
 
+
+
       }
+
+
 
 
     },
@@ -5724,7 +8214,13 @@ function openTeacherFormForNewChild(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -5734,7 +8230,11 @@ function openTeacherFormForNewChild(
    ======================================== */
 
 
+
+
 function renderTeacherFormInteractions() {
+
+
 
 
   var area =
@@ -5743,42 +8243,68 @@ function renderTeacherFormInteractions() {
     );
 
 
+
+
   if (!area) {
     return;
   }
 
 
+
+
   var html =
+
+
 
 
     '<div class="detail-head">' +
 
 
+
+
     '<div class="section-title">' +
+
+
 
 
     '交流履歴 ' +
 
 
+
+
     pendingInteractions.length +
+
+
 
 
     '件' +
 
 
+
+
     '</div>' +
+
+
 
 
     '<button type="button" class="secondary" onclick="openTeacherFormInteraction()">' +
 
 
+
+
     '＋ 交流記録' +
+
+
 
 
     '</button>' +
 
 
+
+
     '</div>';
+
+
 
 
   if (
@@ -5787,19 +8313,31 @@ function renderTeacherFormInteractions() {
   ) {
 
 
+
+
     html +=
+
+
 
 
       '<div class="empty">' +
 
 
+
+
       '交流記録はまだありません。' +
+
+
 
 
       '</div>';
 
 
+
+
   }
+
+
 
 
   for (
@@ -5809,23 +8347,37 @@ function renderTeacherFormInteractions() {
   ) {
 
 
+
+
     var interaction =
       pendingInteractions[i];
+
+
 
 
     html +=
 
 
+
+
       '<div class="child">' +
+
+
 
 
       '<div class="detail-head">' +
 
 
+
+
       '<div>' +
 
 
+
+
       '<div class="interaction-date">' +
+
+
 
 
       escapeHtml(
@@ -5834,10 +8386,16 @@ function renderTeacherFormInteractions() {
       ) +
 
 
+
+
       '</div>' +
 
 
+
+
       '<span class="interaction-type-label">' +
+
+
 
 
       escapeHtml(
@@ -5846,37 +8404,61 @@ function renderTeacherFormInteractions() {
       ) +
 
 
+
+
       '</span>' +
 
 
+
+
       '</div>' +
+
+
 
 
       '<div class="detail-head-actions">' +
 
 
+
+
       '<button type="button" class="secondary" onclick="openTeacherFormInteraction(' +
 
 
+
+
       i +
+
+
 
 
       ')">編集</button>' +
 
 
+
+
       '<button type="button" class="detail-delete-button" onclick="removeTeacherFormInteraction(' +
+
+
 
 
       i +
 
 
+
+
       ')">削除</button>' +
+
+
 
 
       '</div>' +
 
 
+
+
       '</div>';
+
+
 
 
     if (
@@ -5884,10 +8466,16 @@ function renderTeacherFormInteractions() {
     ) {
 
 
+
+
       html +=
 
 
+
+
         '<div style="margin-top:8px;white-space:pre-wrap;line-height:1.7">' +
+
+
 
 
         escapeHtml(
@@ -5895,24 +8483,40 @@ function renderTeacherFormInteractions() {
         ) +
 
 
+
+
         '</div>';
 
 
+
+
     }
+
+
 
 
     html +=
       '</div>';
 
 
+
+
   }
+
+
 
 
   area.innerHTML =
     html;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -5922,11 +8526,17 @@ function openTeacherFormInteraction(
 ) {
 
 
+
+
   interactionFormSource =
     'teacherForm';
 
 
+
+
   editingPendingInteractionIndex =
+
+
 
 
     typeof index ===
@@ -5935,10 +8545,14 @@ function openTeacherFormInteraction(
       : -1;
 
 
+
+
   setValue(
     'interactionId',
     ''
   );
+
+
 
 
   setValue(
@@ -5947,10 +8561,14 @@ function openTeacherFormInteraction(
   );
 
 
+
+
   setValue(
     'interactionType',
     ''
   );
+
+
 
 
   setValue(
@@ -5959,10 +8577,14 @@ function openTeacherFormInteraction(
   );
 
 
+
+
   if (
     editingPendingInteractionIndex >=
     0
   ) {
+
+
 
 
     var interaction =
@@ -5971,10 +8593,14 @@ function openTeacherFormInteraction(
       ];
 
 
+
+
     document.getElementById(
       'interactionModalTitle'
     ).textContent =
       '交流記録を編集';
+
+
 
 
     setValue(
@@ -5984,11 +8610,15 @@ function openTeacherFormInteraction(
     );
 
 
+
+
     setValue(
       'interactionDate',
       interaction.date ||
       ''
     );
+
+
 
 
     setValue(
@@ -5998,6 +8628,8 @@ function openTeacherFormInteraction(
     );
 
 
+
+
     setValue(
       'interactionMemo',
       interaction.memo ||
@@ -6005,7 +8637,11 @@ function openTeacherFormInteraction(
     );
 
 
+
+
   } else {
+
+
 
 
     document.getElementById(
@@ -6014,7 +8650,11 @@ function openTeacherFormInteraction(
       '交流記録を追加';
 
 
+
+
   }
+
+
 
 
   document.getElementById(
@@ -6024,7 +8664,13 @@ function openTeacherFormInteraction(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -6034,10 +8680,14 @@ async function removeTeacherFormInteraction(
 ) {
 
 
+
+
   var interaction =
     pendingInteractions[
       index
     ];
+
+
 
 
   if (
@@ -6048,8 +8698,12 @@ async function removeTeacherFormInteraction(
   ) {
 
 
+
+
     return;
   }
+
+
 
 
   if (
@@ -6058,12 +8712,18 @@ async function removeTeacherFormInteraction(
   ) {
 
 
+
+
     deletedInteractionIds.push(
       interaction.interactionId
     );
 
 
+
+
   }
+
+
 
 
   pendingInteractions.splice(
@@ -6072,10 +8732,18 @@ async function removeTeacherFormInteraction(
   );
 
 
+
+
   renderTeacherFormInteractions();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -6085,7 +8753,11 @@ async function removeTeacherFormInteraction(
    ======================================== */
 
 
+
+
 function renderLinksEditor() {
+
+
 
 
   var area =
@@ -6094,39 +8766,63 @@ function renderLinksEditor() {
     );
 
 
+
+
   if (!area) {
     return;
   }
 
 
+
+
   var html =
+
+
 
 
     '<div class="detail-head">' +
 
 
+
+
     '<div class="section-title">' +
+
+
 
 
     'リンク・SNS ' +
 
 
+
+
     pendingLinks.length +
+
+
 
 
     '件</div>' +
 
 
+
+
     '<button type="button" class="secondary" onclick="openTeacherFormLink()">' +
+
+
 
 
     '＋ リンクを追加' +
 
 
+
+
     '</button>' +
 
 
+
+
     '</div>';
+
+
 
 
   if (
@@ -6134,19 +8830,31 @@ function renderLinksEditor() {
   ) {
 
 
+
+
     html +=
+
+
 
 
       '<div class="empty">' +
 
 
+
+
       'リンク・SNSはまだありません。' +
+
+
 
 
       '</div>';
 
 
+
+
   }
+
+
 
 
   for (
@@ -6156,35 +8864,57 @@ function renderLinksEditor() {
   ) {
 
 
+
+
     var link =
       pendingLinks[i];
+
+
 
 
     var label =
 
 
+
+
       link.displayName ||
+
+
 
 
       link.type ||
 
 
+
+
       'リンク';
+
+
 
 
     html +=
 
 
+
+
       '<div class="link-edit">' +
+
+
 
 
       '<div class="detail-head">' +
 
 
+
+
       '<div class="link-row-main">' +
 
 
+
+
       '<div class="link-label">' +
+
+
 
 
       escapeHtml(
@@ -6192,10 +8922,16 @@ function renderLinksEditor() {
       ) +
 
 
+
+
       '</div>' +
 
 
+
+
       '<div class="link-value">' +
+
+
 
 
       escapeHtml(
@@ -6205,50 +8941,84 @@ function renderLinksEditor() {
       ) +
 
 
-      '</div>' +
 
 
       '</div>' +
+
+
+
+
+      '</div>' +
+
+
 
 
       '<div class="detail-head-actions">' +
 
 
+
+
       '<button type="button" class="secondary" onclick="openTeacherFormLink(' +
 
 
+
+
       i +
+
+
 
 
       ')">編集</button>' +
 
 
+
+
       '<button type="button" class="detail-delete-button" onclick="removeTeacherFormLink(' +
+
+
 
 
       i +
 
 
+
+
       ')">削除</button>' +
 
 
-      '</div>' +
 
 
       '</div>' +
+
+
+
+
+      '</div>' +
+
+
 
 
       '</div>';
 
 
+
+
   }
+
+
 
 
   area.innerHTML =
     html;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -6258,7 +9028,11 @@ function openTeacherFormLink(
 ) {
 
 
+
+
   editingPendingLinkIndex =
+
+
 
 
     typeof index ===
@@ -6267,10 +9041,14 @@ function openTeacherFormLink(
       : -1;
 
 
+
+
   setValue(
     'linkId',
     ''
   );
+
+
 
 
   setValue(
@@ -6279,10 +9057,14 @@ function openTeacherFormLink(
   );
 
 
+
+
   setValue(
     'linkDisplayName',
     ''
   );
+
+
 
 
   setValue(
@@ -6291,10 +9073,14 @@ function openTeacherFormLink(
   );
 
 
+
+
   if (
     editingPendingLinkIndex >=
     0
   ) {
+
+
 
 
     var link =
@@ -6303,10 +9089,14 @@ function openTeacherFormLink(
       ];
 
 
+
+
     document.getElementById(
       'linkModalTitle'
     ).textContent =
       'リンク・SNSを編集';
+
+
 
 
     setValue(
@@ -6316,11 +9106,15 @@ function openTeacherFormLink(
     );
 
 
+
+
     setValue(
       'linkType',
       link.type ||
       ''
     );
+
+
 
 
     setValue(
@@ -6330,6 +9124,8 @@ function openTeacherFormLink(
     );
 
 
+
+
     setValue(
       'linkValue',
       link.value ||
@@ -6337,7 +9133,11 @@ function openTeacherFormLink(
     );
 
 
+
+
   } else {
+
+
 
 
     document.getElementById(
@@ -6346,10 +9146,16 @@ function openTeacherFormLink(
       'リンク・SNSを追加';
 
 
+
+
   }
 
 
+
+
   updateLinkInputGuide();
+
+
 
 
   document.getElementById(
@@ -6359,12 +9165,20 @@ function openTeacherFormLink(
   );
 
 
+
+
 }
 
 
 
 
+
+
+
+
 function closeLinkForm() {
+
+
 
 
   document.getElementById(
@@ -6374,8 +9188,12 @@ function closeLinkForm() {
   );
 
 
+
+
   editingPendingLinkIndex =
     -1;
+
+
 
 
 }
@@ -6383,10 +9201,18 @@ function closeLinkForm() {
 
 
 
+
+
+
+
 /* SNSごとに入力案内を切り替える */
 
 
+
+
 function updateLinkInputGuide() {
+
+
 
 
   var type =
@@ -6397,10 +9223,14 @@ function updateLinkInputGuide() {
     );
 
 
+
+
   var label =
     document.getElementById(
       'linkValueLabel'
     );
+
+
 
 
   var input =
@@ -6409,10 +9239,14 @@ function updateLinkInputGuide() {
     );
 
 
+
+
   var note =
     document.getElementById(
       'linkValueNote'
     );
+
+
 
 
   if (
@@ -6420,20 +9254,32 @@ function updateLinkInputGuide() {
   ) {
 
 
+
+
     label.textContent =
       'アカウント名またはURL';
+
+
 
 
     input.placeholder =
       '例：ユーザー名 / @ユーザー名 / Instagram URL';
 
 
+
+
     note.textContent =
       'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
 
+
+
     return;
   }
+
+
+
+
 
 
 
@@ -6443,20 +9289,32 @@ function updateLinkInputGuide() {
   ) {
 
 
+
+
     label.textContent =
       'ユーザー名・ページ名またはURL';
+
+
 
 
     input.placeholder =
       '例：ユーザー名 / Facebook URL';
 
 
+
+
     note.textContent =
       'ユーザー名・ページ名・URLのどれでも登録できます。';
 
 
+
+
     return;
   }
+
+
+
+
 
 
 
@@ -6466,20 +9324,32 @@ function updateLinkInputGuide() {
   ) {
 
 
+
+
     label.textContent =
       'アカウント名またはURL';
+
+
 
 
     input.placeholder =
       '例：ユーザー名 / @ユーザー名 / X URL';
 
 
+
+
     note.textContent =
       'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
 
+
+
     return;
   }
+
+
+
+
 
 
 
@@ -6489,20 +9359,32 @@ function updateLinkInputGuide() {
   ) {
 
 
+
+
     label.textContent =
       'アカウント名またはURL';
+
+
 
 
     input.placeholder =
       '例：ユーザー名 / @ユーザー名 / Threads URL';
 
 
+
+
     note.textContent =
       'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
 
+
+
     return;
   }
+
+
+
+
 
 
 
@@ -6512,20 +9394,32 @@ function updateLinkInputGuide() {
   ) {
 
 
+
+
     label.textContent =
       'アカウント名またはURL';
+
+
 
 
     input.placeholder =
       '例：ユーザー名 / @ユーザー名 / TikTok URL';
 
 
+
+
     note.textContent =
       'ユーザー名・@付きユーザー名・URLのどれでも登録できます。';
 
 
+
+
     return;
   }
+
+
+
+
 
 
 
@@ -6535,20 +9429,32 @@ function updateLinkInputGuide() {
   ) {
 
 
+
+
     label.textContent =
       'ハンドル名またはURL';
+
+
 
 
     input.placeholder =
       '例：@ハンドル名 / YouTube URL';
 
 
+
+
     note.textContent =
       '@ハンドル名またはチャンネルURLを登録できます。';
 
 
+
+
     return;
   }
+
+
+
+
 
 
 
@@ -6558,16 +9464,24 @@ function updateLinkInputGuide() {
   ) {
 
 
+
+
     label.textContent =
       'LINE公式アカウントIDまたはURL';
+
+
 
 
     input.placeholder =
       '例：@アカウントID / LINE URL';
 
 
+
+
     note.textContent =
       'LINE公式アカウントIDまたはURLを登録できます。';
+
+
 
 
     return;
@@ -6576,16 +9490,26 @@ function updateLinkInputGuide() {
 
 
 
+
+
+
+
   label.textContent =
     'URL';
+
+
 
 
   input.placeholder =
     'https://...';
 
 
+
+
   note.textContent =
     'URLを入力してください。';
+
+
 
 
 }
@@ -6593,10 +9517,18 @@ function updateLinkInputGuide() {
 
 
 
+
+
+
+
 function saveLinkForm() {
 
 
+
+
   var payload = {
+
+
 
 
     linkId:
@@ -6605,10 +9537,14 @@ function saveLinkForm() {
       ),
 
 
+
+
     type:
       valueOf(
         'linkType'
       ),
+
+
 
 
     displayName:
@@ -6617,13 +9553,19 @@ function saveLinkForm() {
       ),
 
 
+
+
     value:
       valueOf(
         'linkValue'
       )
 
 
+
+
   };
+
+
 
 
   if (
@@ -6632,13 +9574,19 @@ function saveLinkForm() {
   ) {
 
 
+
+
     pendingLinks[
       editingPendingLinkIndex
     ] =
       payload;
 
 
+
+
   } else {
+
+
 
 
     pendingLinks.push(
@@ -6646,16 +9594,28 @@ function saveLinkForm() {
     );
 
 
+
+
   }
+
+
 
 
   closeLinkForm();
 
 
+
+
   renderLinksEditor();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -6665,10 +9625,14 @@ async function removeTeacherFormLink(
 ) {
 
 
+
+
   var link =
     pendingLinks[
       index
     ];
+
+
 
 
   if (
@@ -6679,8 +9643,12 @@ async function removeTeacherFormLink(
   ) {
 
 
+
+
     return;
   }
+
+
 
 
   if (
@@ -6689,12 +9657,18 @@ async function removeTeacherFormLink(
   ) {
 
 
+
+
     deletedLinkIds.push(
       link.linkId
     );
 
 
+
+
   }
+
+
 
 
   pendingLinks.splice(
@@ -6703,10 +9677,18 @@ async function removeTeacherFormLink(
   );
 
 
+
+
   renderLinksEditor();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -6716,28 +9698,46 @@ function renderDetailLink(
 ) {
 
 
+
+
   var label =
+
+
 
 
     link.displayName ||
 
 
+
+
     link.type ||
+
+
 
 
     'リンク';
 
 
+
+
   return (
+
+
 
 
     '<div class="link-row">' +
 
 
+
+
     '<div class="link-row-main">' +
 
 
+
+
     '<div class="link-label">' +
+
+
 
 
     escapeHtml(
@@ -6745,10 +9745,16 @@ function renderDetailLink(
     ) +
 
 
+
+
     '</div>' +
 
 
+
+
     '<div class="link-value">' +
+
+
 
 
     escapeHtml(
@@ -6758,13 +9764,21 @@ function renderDetailLink(
     ) +
 
 
-    '</div>' +
 
 
     '</div>' +
+
+
+
+
+    '</div>' +
+
+
 
 
     '<button class="secondary link-open" onclick="openLink(\'' +
+
+
 
 
     escapeJs(
@@ -6773,7 +9787,11 @@ function renderDetailLink(
     ) +
 
 
+
+
     '\',\'' +
+
+
 
 
     escapeJs(
@@ -6782,13 +9800,21 @@ function renderDetailLink(
     ) +
 
 
+
+
     '\')">開く</button>' +
+
+
 
 
     '</div>'
 
 
+
+
   );
+
+
 
 
 }
@@ -6796,7 +9822,13 @@ function renderDetailLink(
 
 
 
+
+
+
+
 /* 登録値を画面上で見やすく表示 */
+
+
 
 
 function displayLinkValue(
@@ -6804,10 +9836,14 @@ function displayLinkValue(
 ) {
 
 
+
+
   var type =
     normalizeLinkType(
       link.type
     );
+
+
 
 
   var value =
@@ -6817,9 +9853,13 @@ function displayLinkValue(
     ).trim();
 
 
+
+
   if (!value) {
     return '';
   }
+
+
 
 
   if (
@@ -6827,13 +9867,19 @@ function displayLinkValue(
   ) {
 
 
+
+
     return value;
   }
+
+
 
 
   if (
     type === 'facebook'
   ) {
+
+
 
 
     return stripLeadingAt(
@@ -6842,15 +9888,21 @@ function displayLinkValue(
   }
 
 
+
+
   if (
     type === 'line'
   ) {
+
+
 
 
     return value.charAt(0) === '@'
       ? value
       : '@' + value;
   }
+
+
 
 
   if (
@@ -6860,6 +9912,8 @@ function displayLinkValue(
   ) {
 
 
+
+
     return '@' +
       stripLeadingAt(
         value
@@ -6867,7 +9921,11 @@ function displayLinkValue(
   }
 
 
+
+
   return value;
+
+
 
 
 }
@@ -6875,12 +9933,20 @@ function displayLinkValue(
 
 
 
+
+
+
+
 /* SNS種別を統一 */
+
+
 
 
 function normalizeLinkType(
   type
 ) {
+
+
 
 
   var value =
@@ -6896,11 +9962,15 @@ function normalizeLinkType(
       );
 
 
+
+
   if (
     value === 'twitter'
   ) {
     return 'x';
   }
+
+
 
 
   if (
@@ -6910,7 +9980,11 @@ function normalizeLinkType(
   }
 
 
+
+
   return value;
+
+
 
 
 }
@@ -6918,9 +9992,15 @@ function normalizeLinkType(
 
 
 
+
+
+
+
 function isAccountBasedSocial(
   type
 ) {
+
+
 
 
   return [
@@ -6936,7 +10016,13 @@ function isAccountBasedSocial(
   ) !== -1;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -6944,6 +10030,8 @@ function isAccountBasedSocial(
 function isHttpUrl(
   value
 ) {
+
+
 
 
   return /^https?:\/\//i.test(
@@ -6954,7 +10042,13 @@ function isHttpUrl(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -6962,6 +10056,8 @@ function isHttpUrl(
 function stripLeadingAt(
   value
 ) {
+
+
 
 
   return String(
@@ -6975,7 +10071,13 @@ function stripLeadingAt(
     );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -6983,10 +10085,14 @@ function stripLeadingAt(
 /* SNS URLからアカウント名を拾える場合は拾う */
 
 
+
+
 function extractAccountFromSocialUrl(
   type,
   value
 ) {
+
+
 
 
   var v =
@@ -6996,20 +10102,30 @@ function extractAccountFromSocialUrl(
     ).trim();
 
 
+
+
   if (
     !isHttpUrl(v)
   ) {
+
+
 
 
     return stripLeadingAt(v);
   }
 
 
+
+
   try {
+
+
 
 
     var url =
       new URL(v);
+
+
 
 
     var path =
@@ -7024,9 +10140,13 @@ function extractAccountFromSocialUrl(
         );
 
 
+
+
     if (
       type === 'instagram'
     ) {
+
+
 
 
       return path
@@ -7037,7 +10157,11 @@ function extractAccountFromSocialUrl(
         );
 
 
+
+
     }
+
+
 
 
     if (
@@ -7045,13 +10169,19 @@ function extractAccountFromSocialUrl(
     ) {
 
 
+
+
       if (
         path === 'profile.php'
       ) {
 
 
+
+
         return v;
       }
+
+
 
 
       return path
@@ -7062,7 +10192,11 @@ function extractAccountFromSocialUrl(
         );
 
 
+
+
     }
+
+
 
 
     if (
@@ -7070,6 +10204,8 @@ function extractAccountFromSocialUrl(
     ) {
 
 
+
+
       return path
         .split('/')[0]
         .replace(
@@ -7078,7 +10214,11 @@ function extractAccountFromSocialUrl(
         );
 
 
+
+
     }
+
+
 
 
     if (
@@ -7086,6 +10226,8 @@ function extractAccountFromSocialUrl(
     ) {
 
 
+
+
       return path
         .split('/')[0]
         .replace(
@@ -7094,7 +10236,11 @@ function extractAccountFromSocialUrl(
         );
 
 
+
+
     }
+
+
 
 
     if (
@@ -7102,6 +10248,8 @@ function extractAccountFromSocialUrl(
     ) {
 
 
+
+
       return path
         .split('/')[0]
         .replace(
@@ -7110,7 +10258,11 @@ function extractAccountFromSocialUrl(
         );
 
 
+
+
     }
+
+
 
 
     if (
@@ -7118,8 +10270,12 @@ function extractAccountFromSocialUrl(
     ) {
 
 
+
+
       var first =
         path.split('/')[0];
+
+
 
 
       if (
@@ -7128,24 +10284,36 @@ function extractAccountFromSocialUrl(
       ) {
 
 
+
+
         return first.replace(
           /^@/,
           ''
         );
 
 
+
+
       }
+
+
 
 
       return v;
 
 
+
+
     }
+
+
 
 
     if (
       type === 'line'
     ) {
+
+
 
 
       return path
@@ -7157,13 +10325,21 @@ function extractAccountFromSocialUrl(
         );
 
 
+
+
     }
+
+
 
 
   } catch (e) {}
 
 
+
+
   return v;
+
+
 
 
 }
@@ -7171,13 +10347,21 @@ function extractAccountFromSocialUrl(
 
 
 
+
+
+
+
 /* SNSアカウント名 → 開けるURLへ変換 */
+
+
 
 
 function socialUrlFromValue(
   type,
   value
 ) {
+
+
 
 
   var v =
@@ -7187,9 +10371,13 @@ function socialUrlFromValue(
     ).trim();
 
 
+
+
   if (!v) {
     return '';
   }
+
+
 
 
   if (
@@ -7197,12 +10385,18 @@ function socialUrlFromValue(
   ) {
 
 
+
+
     return v;
   }
 
 
+
+
   var account =
     stripLeadingAt(v);
+
+
 
 
   if (!account) {
@@ -7210,9 +10404,13 @@ function socialUrlFromValue(
   }
 
 
+
+
   if (
     type === 'instagram'
   ) {
+
+
 
 
     return (
@@ -7224,12 +10422,18 @@ function socialUrlFromValue(
     );
 
 
+
+
   }
+
+
 
 
   if (
     type === 'facebook'
   ) {
+
+
 
 
     return (
@@ -7240,12 +10444,18 @@ function socialUrlFromValue(
     );
 
 
+
+
   }
+
+
 
 
   if (
     type === 'x'
   ) {
+
+
 
 
     return (
@@ -7256,12 +10466,18 @@ function socialUrlFromValue(
     );
 
 
+
+
   }
+
+
 
 
   if (
     type === 'threads'
   ) {
+
+
 
 
     return (
@@ -7272,12 +10488,18 @@ function socialUrlFromValue(
     );
 
 
+
+
   }
+
+
 
 
   if (
     type === 'tiktok'
   ) {
+
+
 
 
     return (
@@ -7288,12 +10510,18 @@ function socialUrlFromValue(
     );
 
 
+
+
   }
+
+
 
 
   if (
     type === 'youtube'
   ) {
+
+
 
 
     return (
@@ -7304,12 +10532,18 @@ function socialUrlFromValue(
     );
 
 
+
+
   }
+
+
 
 
   if (
     type === 'line'
   ) {
+
+
 
 
     return (
@@ -7320,10 +10554,16 @@ function socialUrlFromValue(
     );
 
 
+
+
   }
 
 
+
+
   return '';
+
+
 
 
 }
@@ -7331,10 +10571,18 @@ function socialUrlFromValue(
 
 
 
+
+
+
+
 /* Instagram旧列との互換 */
 
 
+
+
 function firstInstagramAccountFromPendingLinks() {
+
+
 
 
   for (
@@ -7342,6 +10590,8 @@ function firstInstagramAccountFromPendingLinks() {
     i < pendingLinks.length;
     i++
   ) {
+
+
 
 
     if (
@@ -7352,9 +10602,13 @@ function firstInstagramAccountFromPendingLinks() {
     ) {
 
 
+
+
       var value =
         pendingLinks[i].value ||
         '';
+
+
 
 
       var account =
@@ -7364,26 +10618,40 @@ function firstInstagramAccountFromPendingLinks() {
         );
 
 
+
+
       if (
         account &&
         !isHttpUrl(account)
       ) {
 
 
+
+
         return account;
       }
+
+
 
 
       return '';
 
 
+
+
     }
+
+
 
 
   }
 
 
+
+
   return '';
+
+
 
 
 }
@@ -7391,7 +10659,13 @@ function firstInstagramAccountFromPendingLinks() {
 
 
 
+
+
+
+
 /* リンクを開く */
+
+
 
 
 function openLink(
@@ -7400,9 +10674,13 @@ function openLink(
 ) {
 
 
+
+
   if (!value) {
     return;
   }
+
+
 
 
   var normalizedType =
@@ -7411,7 +10689,11 @@ function openLink(
     );
 
 
+
+
   var url = '';
+
+
 
 
   if (
@@ -7421,6 +10703,8 @@ function openLink(
   ) {
 
 
+
+
     url =
       socialUrlFromValue(
         normalizedType,
@@ -7428,13 +10712,19 @@ function openLink(
       );
 
 
+
+
   } else {
+
+
 
 
     url =
       String(
         value
       ).trim();
+
+
 
 
     if (
@@ -7444,20 +10734,30 @@ function openLink(
     ) {
 
 
+
+
       url =
         'https://' +
         url;
 
 
+
+
     }
 
 
+
+
   }
+
+
 
 
   if (!url) {
     return;
   }
+
+
 
 
   window.open(
@@ -7467,7 +10767,13 @@ function openLink(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -7477,9 +10783,13 @@ function openLink(
    ======================================== */
 
 
+
+
 function renderChildrenEditor(
   children
 ) {
+
+
 
 
   document.getElementById(
@@ -7487,25 +10797,41 @@ function renderChildrenEditor(
   ).innerHTML =
 
 
+
+
     '<div class="detail-head">' +
+
+
 
 
     '<div class="section-title">子ども情報</div>' +
 
 
+
+
     '<button type="button" class="secondary" onclick="addChildRow()">' +
+
+
 
 
     '＋ 子どもを追加' +
 
 
+
+
     '</button>' +
+
+
 
 
     '</div>' +
 
 
+
+
     '<div id="childRows"></div>';
+
+
 
 
   for (
@@ -7515,15 +10841,25 @@ function renderChildrenEditor(
   ) {
 
 
+
+
     addChildRow(
       children[i]
     );
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -7533,9 +10869,13 @@ function addChildRow(
 ) {
 
 
+
+
   child =
     child ||
     {};
+
+
 
 
   var div =
@@ -7544,8 +10884,12 @@ function addChildRow(
     );
 
 
+
+
   div.className =
     'child-edit';
+
+
 
 
   div.setAttribute(
@@ -7555,8 +10899,12 @@ function addChildRow(
   );
 
 
+
+
   var gradeSelect =
     '<select class="child-grade">';
+
+
 
 
   for (
@@ -7566,14 +10914,22 @@ function addChildRow(
   ) {
 
 
+
+
     var grade =
       gradeOptions[i];
+
+
 
 
     gradeSelect +=
 
 
+
+
       '<option value="' +
+
+
 
 
       escapeAttr(
@@ -7581,7 +10937,11 @@ function addChildRow(
       ) +
 
 
+
+
       '"' +
+
+
 
 
       (
@@ -7592,7 +10952,11 @@ function addChildRow(
       ) +
 
 
+
+
       '>' +
+
+
 
 
       escapeHtml(
@@ -7601,29 +10965,47 @@ function addChildRow(
       ) +
 
 
+
+
       '</option>';
 
 
+
+
   }
+
+
 
 
   gradeSelect +=
     '</select>';
 
 
+
+
   div.innerHTML =
+
+
 
 
     '<div class="grid2">' +
 
 
+
+
     '<div class="field">' +
+
+
 
 
     '<label>名前</label>' +
 
 
+
+
     '<input class="child-name" value="' +
+
+
 
 
     escapeAttr(
@@ -7632,19 +11014,31 @@ function addChildRow(
     ) +
 
 
+
+
     '">' +
+
+
 
 
     '</div>' +
 
 
+
+
     '<div class="field">' +
+
+
 
 
     '<label>ふりがな</label>' +
 
 
+
+
     '<input class="child-kana" value="' +
+
+
 
 
     escapeAttr(
@@ -7653,25 +11047,41 @@ function addChildRow(
     ) +
 
 
+
+
     '">' +
 
 
-    '</div>' +
 
 
     '</div>' +
+
+
+
+
+    '</div>' +
+
+
 
 
     '<div class="grid2">' +
 
 
+
+
     '<div class="field">' +
+
+
 
 
     '<label>呼び名</label>' +
 
 
+
+
     '<input class="child-nickname" value="' +
+
+
 
 
     escapeAttr(
@@ -7680,22 +11090,36 @@ function addChildRow(
     ) +
 
 
+
+
     '">' +
+
+
 
 
     '</div>' +
 
 
+
+
     '<div class="field">' +
+
+
 
 
     '<label>性別</label>' +
 
 
+
+
     '<select class="child-gender">' +
 
 
+
+
     '<option value=""' +
+
+
 
 
     (
@@ -7705,10 +11129,16 @@ function addChildRow(
     ) +
 
 
+
+
     '>未設定</option>' +
 
 
+
+
     '<option value="女"' +
+
+
 
 
     (
@@ -7719,10 +11149,16 @@ function addChildRow(
     ) +
 
 
+
+
     '>女</option>' +
 
 
+
+
     '<option value="男"' +
+
+
 
 
     (
@@ -7733,40 +11169,66 @@ function addChildRow(
     ) +
 
 
+
+
     '>男</option>' +
+
+
 
 
     '</select>' +
 
 
-    '</div>' +
 
 
     '</div>' +
+
+
+
+
+    '</div>' +
+
+
 
 
     '<div class="grid2">' +
 
 
+
+
     '<div class="field">' +
+
+
 
 
     '<label>学年</label>' +
 
 
+
+
     gradeSelect +
+
+
 
 
     '</div>' +
 
 
+
+
     '<div class="field">' +
+
+
 
 
     '<label>年齢</label>' +
 
 
+
+
     '<input type="number" class="child-age" value="' +
+
+
 
 
     escapeAttr(
@@ -7775,22 +11237,36 @@ function addChildRow(
     ) +
 
 
+
+
     '">' +
 
 
-    '</div>' +
 
 
     '</div>' +
+
+
+
+
+    '</div>' +
+
+
 
 
     '<div class="field">' +
 
 
+
+
     '<label>生まれ年</label>' +
 
 
+
+
     '<input type="number" class="child-year" value="' +
+
+
 
 
     escapeAttr(
@@ -7799,22 +11275,36 @@ function addChildRow(
     ) +
 
 
+
+
     '">' +
+
+
 
 
     '</div>' +
 
 
+
+
     '<div class="grid2">' +
+
+
 
 
     '<div class="field">' +
 
 
+
+
     '<label>誕生月</label>' +
 
 
+
+
     '<input type="number" min="1" max="12" class="child-month" value="' +
+
+
 
 
     escapeAttr(
@@ -7823,19 +11313,31 @@ function addChildRow(
     ) +
 
 
+
+
     '">' +
+
+
 
 
     '</div>' +
 
 
+
+
     '<div class="field">' +
+
+
 
 
     '<label>誕生日</label>' +
 
 
+
+
     '<input type="number" min="1" max="31" class="child-day" value="' +
+
+
 
 
     escapeAttr(
@@ -7844,22 +11346,36 @@ function addChildRow(
     ) +
 
 
+
+
     '">' +
 
 
-    '</div>' +
 
 
     '</div>' +
+
+
+
+
+    '</div>' +
+
+
 
 
     '<div class="field">' +
 
 
+
+
     '<label>メモ</label>' +
 
 
+
+
     '<textarea class="child-memo">' +
+
+
 
 
     escapeHtml(
@@ -7868,19 +11384,31 @@ function addChildRow(
     ) +
 
 
+
+
     '</textarea>' +
+
+
 
 
     '</div>' +
 
 
+
+
     '<button type="button" class="detail-delete-button" onclick="removeChildRow(this)">' +
+
+
 
 
     'この子ども情報を削除' +
 
 
+
+
     '</button>';
+
+
 
 
   document.getElementById(
@@ -7890,7 +11418,13 @@ function addChildRow(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -7900,10 +11434,14 @@ async function saveChildrenAfterTeacher(
 ) {
 
 
+
+
   var rows =
     document.querySelectorAll(
       '.child-edit'
     );
+
+
 
 
   for (
@@ -7913,11 +11451,17 @@ async function saveChildrenAfterTeacher(
   ) {
 
 
+
+
     var row =
       rows[i];
 
 
+
+
     var payload = {
+
+
 
 
       childId:
@@ -7927,8 +11471,12 @@ async function saveChildrenAfterTeacher(
         '',
 
 
+
+
       teacherId:
         teacher.teacherId,
+
+
 
 
       name:
@@ -7937,10 +11485,14 @@ async function saveChildrenAfterTeacher(
         ).value,
 
 
+
+
       kana:
         row.querySelector(
           '.child-kana'
         ).value,
+
+
 
 
       nickname:
@@ -7949,10 +11501,14 @@ async function saveChildrenAfterTeacher(
         ).value,
 
 
+
+
       gender:
         row.querySelector(
           '.child-gender'
         ).value,
+
+
 
 
       grade:
@@ -7961,10 +11517,14 @@ async function saveChildrenAfterTeacher(
         ).value,
 
 
+
+
       birthYear:
         row.querySelector(
           '.child-year'
         ).value,
+
+
 
 
       birthMonth:
@@ -7973,10 +11533,14 @@ async function saveChildrenAfterTeacher(
         ).value,
 
 
+
+
       birthDay:
         row.querySelector(
           '.child-day'
         ).value,
+
+
 
 
       ageManual:
@@ -7985,13 +11549,19 @@ async function saveChildrenAfterTeacher(
         ).value,
 
 
+
+
       memo:
         row.querySelector(
           '.child-memo'
         ).value
 
 
+
+
     };
+
+
 
 
     await runScript(
@@ -8002,10 +11572,18 @@ async function saveChildrenAfterTeacher(
     );
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8015,11 +11593,15 @@ async function saveLinksAfterTeacher(
 ) {
 
 
+
+
   for (
     var deleteIndex = 0;
     deleteIndex < deletedLinkIds.length;
     deleteIndex++
   ) {
+
+
 
 
     await runScript(
@@ -8032,7 +11614,11 @@ async function saveLinksAfterTeacher(
     );
 
 
+
+
   }
+
+
 
 
   for (
@@ -8042,8 +11628,12 @@ async function saveLinksAfterTeacher(
   ) {
 
 
+
+
     var link =
       pendingLinks[i];
+
+
 
 
     await runScript(
@@ -8052,13 +11642,19 @@ async function saveLinksAfterTeacher(
         {
 
 
+
+
           linkId:
             link.linkId ||
             '',
 
 
+
+
           teacherId:
             teacherId,
+
+
 
 
           type:
@@ -8066,9 +11662,13 @@ async function saveLinksAfterTeacher(
             '',
 
 
+
+
           displayName:
             link.displayName ||
             '',
+
+
 
 
           value:
@@ -8076,8 +11676,12 @@ async function saveLinksAfterTeacher(
             '',
 
 
+
+
           sortOrder:
             i + 1
+
+
 
 
         }
@@ -8085,10 +11689,18 @@ async function saveLinksAfterTeacher(
     );
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8098,11 +11710,15 @@ async function saveInteractionsAfterTeacher(
 ) {
 
 
+
+
   for (
     var deleteIndex = 0;
     deleteIndex < deletedInteractionIds.length;
     deleteIndex++
   ) {
+
+
 
 
     await runScript(
@@ -8115,7 +11731,11 @@ async function saveInteractionsAfterTeacher(
     );
 
 
+
+
   }
+
+
 
 
   for (
@@ -8125,8 +11745,12 @@ async function saveInteractionsAfterTeacher(
   ) {
 
 
+
+
     var interaction =
       pendingInteractions[i];
+
+
 
 
     await runScript(
@@ -8135,13 +11759,19 @@ async function saveInteractionsAfterTeacher(
         {
 
 
+
+
           interactionId:
             interaction.interactionId ||
             '',
 
 
+
+
           teacherId:
             teacherId,
+
+
 
 
           date:
@@ -8149,9 +11779,13 @@ async function saveInteractionsAfterTeacher(
             '',
 
 
+
+
           interactionType:
             interaction.interactionType ||
             '',
+
+
 
 
           memo:
@@ -8159,12 +11793,18 @@ async function saveInteractionsAfterTeacher(
             ''
 
 
+
+
         }
       ]
     );
 
 
+
+
   }
+
+
 
 
 }
@@ -8172,9 +11812,15 @@ async function saveInteractionsAfterTeacher(
 
 
 
+
+
+
+
 async function refreshAfterSave(
   teacherId
 ) {
+
+
 
 
   teachers =
@@ -8186,13 +11832,21 @@ async function refreshAfterSave(
     [];
 
 
+
+
   closeTeacherForm();
+
+
 
 
   renderAll();
 
 
+
+
   renderJapanMap();
+
+
 
 
   var teacher =
@@ -8201,7 +11855,11 @@ async function refreshAfterSave(
     );
 
 
+
+
   if (teacher) {
+
+
 
 
     openTeacherDetail(
@@ -8209,10 +11867,18 @@ async function refreshAfterSave(
     );
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8222,10 +11888,14 @@ async function removeChildRow(
 ) {
 
 
+
+
   var row =
     button.closest(
       '.child-edit'
     );
+
+
 
 
   var childId =
@@ -8234,14 +11904,22 @@ async function removeChildRow(
     );
 
 
+
+
   if (!childId) {
+
+
 
 
     row.remove();
 
 
+
+
     return;
   }
+
+
 
 
   if (
@@ -8252,14 +11930,22 @@ async function removeChildRow(
   ) {
 
 
+
+
     return;
   }
+
+
 
 
   setLoading(true);
 
 
+
+
   try {
+
+
 
 
     await runScript(
@@ -8270,25 +11956,43 @@ async function removeChildRow(
     );
 
 
+
+
     row.remove();
+
+
 
 
   } catch (e) {
 
 
+
+
     handleError(e);
+
+
 
 
   } finally {
 
 
+
+
     setLoading(false);
+
+
 
 
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8298,9 +12002,13 @@ async function removeChildRow(
    ======================================== */
 
 
+
+
 async function deleteTeacherAction(
   id
 ) {
+
+
 
 
   if (
@@ -8312,14 +12020,22 @@ async function deleteTeacherAction(
   ) {
 
 
+
+
     return;
   }
+
+
 
 
   setLoading(true);
 
 
+
+
   try {
+
+
 
 
     await runScript(
@@ -8328,6 +12044,8 @@ async function deleteTeacherAction(
         id
       ]
     );
+
+
 
 
     teachers =
@@ -8339,13 +12057,21 @@ async function deleteTeacherAction(
       [];
 
 
+
+
     selectedTeacherId = '';
+
+
 
 
     renderAll();
 
 
+
+
     renderJapanMap();
+
+
 
 
     showPage(
@@ -8353,22 +12079,38 @@ async function deleteTeacherAction(
     );
 
 
+
+
   } catch (e) {
+
+
 
 
     handleError(e);
 
 
+
+
   } finally {
+
+
 
 
     setLoading(false);
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8378,7 +12120,11 @@ async function deleteTeacherAction(
    ======================================== */
 
 
+
+
 function showPrefectureResults() {
+
+
 
 
   var query =
@@ -8387,13 +12133,19 @@ function showPrefectureResults() {
     );
 
 
+
+
   var box =
     document.getElementById(
       'prefResults'
     );
 
 
+
+
   box.innerHTML = '';
+
+
 
 
   for (
@@ -8403,8 +12155,12 @@ function showPrefectureResults() {
   ) {
 
 
+
+
     var pref =
       prefectures[i];
+
+
 
 
     if (
@@ -8413,8 +12169,12 @@ function showPrefectureResults() {
     ) {
 
 
+
+
       continue;
     }
+
+
 
 
     var item =
@@ -8423,12 +12183,18 @@ function showPrefectureResults() {
       );
 
 
+
+
     item.className =
       'combo-option';
 
 
+
+
     item.textContent =
       pref;
+
+
 
 
     item.onclick =
@@ -8437,12 +12203,18 @@ function showPrefectureResults() {
       );
 
 
+
+
     box.appendChild(
       item
     );
 
 
+
+
   }
+
+
 
 
   box.classList.add(
@@ -8450,7 +12222,13 @@ function showPrefectureResults() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8458,7 +12236,11 @@ function showPrefectureResults() {
 function makePrefSelector(pref) {
 
 
+
+
   return function() {
+
+
 
 
     setValue(
@@ -8467,10 +12249,14 @@ function makePrefSelector(pref) {
     );
 
 
+
+
     setValue(
       'city',
       ''
     );
+
+
 
 
     document.getElementById(
@@ -8480,7 +12266,11 @@ function makePrefSelector(pref) {
     );
 
 
+
+
   };
+
+
 
 
 }
@@ -8488,7 +12278,13 @@ function makePrefSelector(pref) {
 
 
 
+
+
+
+
 function showCityResults() {
+
+
 
 
   var query =
@@ -8497,18 +12293,26 @@ function showCityResults() {
     );
 
 
+
+
   var selectedPref =
     valueOf(
       'prefecture'
     );
 
 
+
+
   var results = [];
+
+
 
 
   for (
     var pref in addressMaster
   ) {
+
+
 
 
     if (
@@ -8520,6 +12324,8 @@ function showCityResults() {
     }
 
 
+
+
     if (
       selectedPref &&
       pref !== selectedPref
@@ -8528,9 +12334,13 @@ function showCityResults() {
     }
 
 
+
+
     var cities =
       addressMaster[pref] ||
       [];
+
+
 
 
     for (
@@ -8540,8 +12350,12 @@ function showCityResults() {
     ) {
 
 
+
+
       var city =
         cities[i];
+
+
 
 
       if (
@@ -8552,18 +12366,28 @@ function showCityResults() {
       }
 
 
+
+
       results.push({
+
+
 
 
         prefecture:
           pref,
 
 
+
+
         city:
           city
 
 
+
+
       });
+
+
 
 
       if (
@@ -8573,7 +12397,11 @@ function showCityResults() {
       }
 
 
+
+
     }
+
+
 
 
     if (
@@ -8583,7 +12411,11 @@ function showCityResults() {
     }
 
 
+
+
   }
+
+
 
 
   var box =
@@ -8592,7 +12424,11 @@ function showCityResults() {
     );
 
 
+
+
   box.innerHTML = '';
+
+
 
 
   for (
@@ -8602,8 +12438,12 @@ function showCityResults() {
   ) {
 
 
+
+
     var result =
       results[j];
+
+
 
 
     var item =
@@ -8612,20 +12452,32 @@ function showCityResults() {
       );
 
 
+
+
     item.className =
       'combo-option';
+
+
 
 
     item.textContent =
 
 
+
+
       result.city +
+
+
 
 
       '｜' +
 
 
+
+
       result.prefecture;
+
+
 
 
     item.onclick =
@@ -8634,12 +12486,18 @@ function showCityResults() {
       );
 
 
+
+
     box.appendChild(
       item
     );
 
 
+
+
   }
+
+
 
 
   box.classList.add(
@@ -8647,7 +12505,13 @@ function showCityResults() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8655,7 +12519,11 @@ function showCityResults() {
 function makeCitySelector(row) {
 
 
+
+
   return function() {
+
+
 
 
     setValue(
@@ -8664,10 +12532,14 @@ function makeCitySelector(row) {
     );
 
 
+
+
     setValue(
       'prefecture',
       row.prefecture
     );
+
+
 
 
     document.getElementById(
@@ -8677,7 +12549,11 @@ function makeCitySelector(row) {
     );
 
 
+
+
   };
+
+
 
 
 }
@@ -8685,7 +12561,13 @@ function makeCitySelector(row) {
 
 
 
+
+
+
+
 function hideCombos() {
+
+
 
 
   document.getElementById(
@@ -8695,6 +12577,8 @@ function hideCombos() {
   );
 
 
+
+
   document.getElementById(
     'cityResults'
   ).classList.remove(
@@ -8702,7 +12586,13 @@ function hideCombos() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8712,6 +12602,8 @@ document.addEventListener(
   function(e) {
 
 
+
+
     if (
       !e.target.closest(
         '.combo'
@@ -8719,10 +12611,16 @@ document.addEventListener(
     ) {
 
 
+
+
       hideCombos();
 
 
+
+
     }
+
+
 
 
     if (
@@ -8732,14 +12630,24 @@ document.addEventListener(
     ) {
 
 
+
+
       hideSettingSuggestions();
+
+
 
 
     }
 
 
+
+
   }
 );
+
+
+
+
 
 
 
@@ -8749,9 +12657,13 @@ document.addEventListener(
    ======================================== */
 
 
+
+
 function openGoogleMap(
   address
 ) {
+
+
 
 
   if (!address) {
@@ -8759,10 +12671,16 @@ function openGoogleMap(
   }
 
 
+
+
   window.open(
 
 
+
+
     'https://www.google.com/maps/search/?api=1&query=' +
+
+
 
 
     encodeURIComponent(
@@ -8770,16 +12688,28 @@ function openGoogleMap(
     ),
 
 
+
+
     '_blank',
+
+
 
 
     'noopener'
 
 
+
+
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -8789,7 +12719,11 @@ function openGoogleMap(
    ======================================== */
 
 
+
+
 var settingCandidates = {
+
+
 
 
   appName: [
@@ -8806,6 +12740,8 @@ var settingCandidates = {
   ],
 
 
+
+
   personLabel: [
     '先生',
     '講師',
@@ -8815,6 +12751,8 @@ var settingCandidates = {
     '担当者',
     '受講生'
   ],
+
+
 
 
   placeLabel: [
@@ -8829,6 +12767,8 @@ var settingCandidates = {
   ],
 
 
+
+
   placeKanaLabel: [
     '店名ふりがな',
     'サロン名ふりがな',
@@ -8841,7 +12781,13 @@ var settingCandidates = {
   ]
 
 
+
+
 };
+
+
+
+
 
 
 
@@ -8854,16 +12800,22 @@ function showSettingSuggestions(
 ) {
 
 
+
+
   var input =
     document.getElementById(
       inputId
     );
 
 
+
+
   var box =
     document.getElementById(
       resultId
     );
+
+
 
 
   if (
@@ -8874,7 +12826,11 @@ function showSettingSuggestions(
   }
 
 
+
+
   hideSettingSuggestions();
+
+
 
 
   var query =
@@ -8884,6 +12840,8 @@ function showSettingSuggestions(
     ).trim();
 
 
+
+
   var candidates =
     settingCandidates[
       candidateType
@@ -8891,20 +12849,32 @@ function showSettingSuggestions(
     [];
 
 
+
+
   box.innerHTML = '';
+
+
 
 
   var matched;
 
 
+
+
   if (showAll) {
+
+
 
 
     matched =
       candidates.slice();
 
 
+
+
   } else {
+
+
 
 
     matched =
@@ -8912,9 +12882,13 @@ function showSettingSuggestions(
         function(candidate) {
 
 
+
+
           if (!query) {
             return true;
           }
+
+
 
 
           return candidate.indexOf(
@@ -8922,15 +12896,23 @@ function showSettingSuggestions(
           ) !== -1;
 
 
+
+
         }
       );
+
+
 
 
   }
 
 
+
+
   matched.forEach(
     function(candidate) {
+
+
 
 
       var item =
@@ -8939,34 +12921,52 @@ function showSettingSuggestions(
         );
 
 
+
+
       item.type =
         'button';
+
+
 
 
       item.className =
         'setting-option';
 
 
+
+
       item.textContent =
         candidate;
+
+
 
 
       item.onclick =
         function(event) {
 
 
+
+
           event.preventDefault();
           event.stopPropagation();
+
+
 
 
           input.value =
             candidate;
 
 
+
+
           hideSettingSuggestions();
 
 
+
+
         };
+
+
 
 
       box.appendChild(
@@ -8974,13 +12974,19 @@ function showSettingSuggestions(
       );
 
 
+
+
     }
   );
+
+
 
 
   if (
     matched.length === 0
   ) {
+
+
 
 
     var note =
@@ -8989,12 +12995,18 @@ function showSettingSuggestions(
       );
 
 
+
+
     note.className =
       'setting-no-result';
 
 
+
+
     note.textContent =
       '候補にない名称もそのまま入力できます。';
+
+
 
 
     box.appendChild(
@@ -9002,7 +13014,11 @@ function showSettingSuggestions(
     );
 
 
+
+
   }
+
+
 
 
   box.classList.add(
@@ -9010,12 +13026,20 @@ function showSettingSuggestions(
   );
 
 
+
+
 }
 
 
 
 
+
+
+
+
 function hideSettingSuggestions() {
+
+
 
 
   document
@@ -9026,13 +13050,19 @@ function hideSettingSuggestions() {
       function(box) {
 
 
+
+
         box.classList.remove(
           'show'
         );
 
 
+
+
       }
     );
+
+
 
 
 }
@@ -9040,7 +13070,13 @@ function hideSettingSuggestions() {
 
 
 
+
+
+
+
 function personLabel() {
+
+
 
 
   return String(
@@ -9050,12 +13086,20 @@ function personLabel() {
     '人物';
 
 
+
+
 }
 
 
 
 
+
+
+
+
 function placeLabel() {
+
+
 
 
   return String(
@@ -9065,12 +13109,20 @@ function placeLabel() {
     '店名';
 
 
+
+
 }
 
 
 
 
+
+
+
+
 function placeKanaLabel() {
+
+
 
 
   return String(
@@ -9080,12 +13132,20 @@ function placeKanaLabel() {
     '店名ふりがな';
 
 
+
+
 }
 
 
 
 
+
+
+
+
 function appName() {
+
+
 
 
   return String(
@@ -9095,7 +13155,13 @@ function appName() {
     'Mirel Map';
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -9105,6 +13171,8 @@ function mirelClampNumber(value, min, max, fallback) {
   if (!isFinite(n)) n = Number(fallback);
   return Math.min(max, Math.max(min, n));
 }
+
+
 
 
 function mirelTypographyPresetValues(kind, preset) {
@@ -9119,12 +13187,16 @@ function mirelTypographyPresetValues(kind, preset) {
 }
 
 
+
+
 function mirelSyncTypographyNumber(rangeId, numberId) {
   var range = document.getElementById(rangeId);
   var number = document.getElementById(numberId);
   if (!range || !number) return;
   number.value = range.value;
 }
+
+
 
 
 function mirelSyncTypographyRange(numberId, rangeId, presetId) {
@@ -9140,6 +13212,8 @@ function mirelSyncTypographyRange(numberId, rangeId, presetId) {
   if (preset) preset.value = 'custom';
   updateFontSizePreview();
 }
+
+
 
 
 function mirelTypographyNumberTyping(numberId, rangeId, presetId) {
@@ -9161,6 +13235,8 @@ function mirelTypographyNumberTyping(numberId, rangeId, presetId) {
 }
 
 
+
+
 function mirelTypographyCustomChanged(kind) {
   var preset = document.getElementById(kind === 'font' ? 'settingFontSize' : 'settingLineSpacing');
   if (preset) preset.value = 'custom';
@@ -9172,6 +13248,8 @@ function mirelTypographyCustomChanged(kind) {
   }
   updateFontSizePreview();
 }
+
+
 
 
 function applyTypographyPreset(kind) {
@@ -9196,24 +13274,36 @@ function applyTypographyPreset(kind) {
 }
 
 
+
+
 function updateFontSizePreview() {
+
+
 
 
   var fontPreview = document.getElementById('settingFontSizePreview');
   var spacingPreview = document.getElementById('settingSpacingPreview');
 
 
+
+
   var size = valueOf('settingFontSize') || 'standard';
   if (['small', 'standard', 'large', 'custom'].indexOf(size) === -1) size = 'standard';
+
+
 
 
   var spacing = valueOf('settingLineSpacing') || 'standard';
   if (['compact', 'standard', 'spacious', 'custom'].indexOf(spacing) === -1) spacing = 'standard';
 
 
+
+
   var fontScale = mirelClampNumber(valueOf('settingFontScale'), 80, 140, 100);
   var lineHeight = mirelClampNumber(valueOf('settingLineHeight'), 1.10, 2.00, 1.50);
   var itemGap = mirelClampNumber(valueOf('settingItemGap'), 2, 24, 9);
+
+
 
 
   if (fontPreview) {
@@ -9222,12 +13312,16 @@ function updateFontSizePreview() {
   }
 
 
+
+
   if (spacingPreview) {
     spacingPreview.setAttribute('data-preview-line-spacing', spacing);
     spacingPreview.style.setProperty('--preview-scale', String(fontScale / 100));
     spacingPreview.style.setProperty('--preview-line-height', String(lineHeight));
     spacingPreview.style.setProperty('--preview-gap', itemGap + 'px');
   }
+
+
 
 
   var spacingLabel = document.getElementById('settingLineSpacingPreviewLabel');
@@ -9239,6 +13333,8 @@ function updateFontSizePreview() {
   }
 
 
+
+
   var label = document.getElementById('settingFontSizePreviewLabel');
   if (label) {
     label.textContent =
@@ -9246,6 +13342,8 @@ function updateFontSizePreview() {
       size === 'large' ? '大きめ' :
       size === 'custom' ? '詳細設定' : '標準';
   }
+
+
 
 
   var detail = document.getElementById('settingTypographyPreviewDetail');
@@ -9257,7 +13355,15 @@ function updateFontSizePreview() {
 
 
 
+
+
+
+
+
+
 function fillSettingsForm() {
+
+
 
 
   setValue(
@@ -9266,10 +13372,14 @@ function fillSettingsForm() {
   );
 
 
+
+
   setValue(
     'settingPersonLabel',
     personLabel()
   );
+
+
 
 
   setValue(
@@ -9278,10 +13388,14 @@ function fillSettingsForm() {
   );
 
 
+
+
   setValue(
     'settingPlaceKanaLabel',
     placeKanaLabel()
   );
+
+
 
 
   setValue(
@@ -9293,6 +13407,8 @@ function fillSettingsForm() {
   );
 
 
+
+
   setValue(
     'settingLineSpacing',
     (
@@ -9300,6 +13416,8 @@ function fillSettingsForm() {
       'standard'
     )
   );
+
+
 
 
   setValue('settingFontScale', appSettings.fontScale || 100);
@@ -9310,7 +13428,11 @@ function fillSettingsForm() {
   setValue('settingItemGapNumber', appSettings.itemGap || 9);
 
 
+
+
   updateFontSizePreview();
+
+
 
 
 }
@@ -9318,10 +13440,18 @@ function fillSettingsForm() {
 
 
 
+
+
+
+
 async function saveSettingsForm() {
 
 
+
+
   var payload = {
+
+
 
 
     appName:
@@ -9331,11 +13461,15 @@ async function saveSettingsForm() {
       'Mirel Map',
 
 
+
+
     personLabel:
       valueOf(
         'settingPersonLabel'
       ) ||
       '人物',
+
+
 
 
     placeLabel:
@@ -9345,11 +13479,15 @@ async function saveSettingsForm() {
       '店名',
 
 
+
+
     placeKanaLabel:
       valueOf(
         'settingPlaceKanaLabel'
       ) ||
       '店名ふりがな',
+
+
 
 
     fontSize:
@@ -9359,6 +13497,8 @@ async function saveSettingsForm() {
       'standard',
 
 
+
+
     lineSpacing:
       valueOf(
         'settingLineSpacing'
@@ -9366,18 +13506,28 @@ async function saveSettingsForm() {
       'standard',
 
 
+
+
     fontScale: mirelClampNumber(valueOf('settingFontScale'), 80, 140, 100),
     lineHeight: mirelClampNumber(valueOf('settingLineHeight'), 1.10, 2.00, 1.50),
     itemGap: mirelClampNumber(valueOf('settingItemGap'), 2, 24, 9)
 
 
+
+
   };
+
+
 
 
   setLoading(true);
 
 
+
+
   try {
+
+
 
 
     appSettings =
@@ -9389,16 +13539,26 @@ async function saveSettingsForm() {
       );
 
 
+
+
     cacheUiSettings();
+
+
 
 
     applySettingsToUi();
 
 
+
+
     renderAll();
 
 
+
+
     renderJapanMap();
+
+
 
 
     /* 再描画後に生成された一覧・詳細・フォーム要素にも設定を再適用 */
@@ -9408,24 +13568,38 @@ async function saveSettingsForm() {
     });
 
 
+
+
     appToast(
       '設定を保存しました。'
     );
 
 
+
+
   } catch (e) {
+
+
 
 
     handleError(e);
 
 
+
+
   } finally {
+
+
 
 
     setLoading(false);
 
 
+
+
   }
+
+
 
 
 }
@@ -9433,19 +13607,31 @@ async function saveSettingsForm() {
 
 
 
+
+
+
+
 function applyFontSizeSetting() {
 
 
+
+
   if (!document.body) return;
+
+
 
 
   var size = String(appSettings.fontSize || 'standard');
   if (['small','standard','large','custom'].indexOf(size) === -1) size = 'standard';
 
 
+
+
   var fallback = mirelTypographyPresetValues('font', size === 'custom' ? 'standard' : size).fontScale;
   var scale = mirelClampNumber(appSettings.fontScale, 80, 140, fallback);
   var ratio = scale / 100;
+
+
 
 
   document.body.setAttribute('data-mirel-font-size', size);
@@ -9464,19 +13650,31 @@ function applyFontSizeSetting() {
 
 
 
+
+
+
+
 function applyLineSpacingSetting() {
 
 
+
+
   if (!document.body) return;
+
+
 
 
   var spacing = String(appSettings.lineSpacing || 'standard');
   if (['compact','standard','spacious','custom'].indexOf(spacing) === -1) spacing = 'standard';
 
 
+
+
   var preset = mirelTypographyPresetValues('spacing', spacing === 'custom' ? 'standard' : spacing);
   var lineHeight = mirelClampNumber(appSettings.lineHeight, 1.10, 2.00, preset.lineHeight);
   var itemGap = mirelClampNumber(appSettings.itemGap, 2, 24, preset.itemGap);
+
+
 
 
   document.body.setAttribute('data-mirel-line-spacing', spacing);
@@ -9496,19 +13694,33 @@ function applyLineSpacingSetting() {
 
 
 
+
+
+
+
+
+
 function applySettingsToUi() {
+
+
 
 
   applyFontSizeSetting();
   applyLineSpacingSetting();
 
 
+
+
   var app =
     appName();
 
 
+
+
   var person =
     personLabel();
+
+
 
 
   var brandName =
@@ -9517,14 +13729,22 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (brandName) {
+
+
 
 
     brandName.textContent =
       app;
 
 
+
+
   }
+
+
 
 
   var brandSub =
@@ -9533,22 +13753,36 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (brandSub) {
+
+
 
 
     brandSub.textContent =
 
 
+
+
       '全国の' +
+
+
 
 
       person +
 
 
+
+
       '管理';
 
 
+
+
   }
+
+
 
 
   var authAppName =
@@ -9557,14 +13791,22 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (authAppName) {
+
+
 
 
     authAppName.textContent =
       app;
 
 
+
+
   }
+
+
 
 
   var authDescription =
@@ -9573,26 +13815,42 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (authDescription) {
+
+
 
 
     authDescription.textContent =
 
 
+
+
       'Googleアカウントでログインして' +
+
+
 
 
       person +
 
 
+
+
       '情報を開きます。';
+
+
 
 
   }
 
 
+
+
   document.title =
     app;
+
+
 
 
   var appleAppTitle =
@@ -9601,7 +13859,11 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (appleAppTitle) {
+
+
 
 
     appleAppTitle.setAttribute(
@@ -9610,7 +13872,11 @@ function applySettingsToUi() {
     );
 
 
+
+
   }
+
+
 
 
   var listPageTitle =
@@ -9619,19 +13885,31 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (listPageTitle) {
+
+
 
 
     listPageTitle.textContent =
 
 
+
+
       person +
+
+
 
 
       '一覧';
 
 
+
+
   }
+
+
 
 
   var navListText =
@@ -9640,19 +13918,31 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (navListText) {
+
+
 
 
     navListText.textContent =
 
 
+
+
       person +
+
+
 
 
       '一覧';
 
 
+
+
   }
+
+
 
 
   var mapLegendActive =
@@ -9661,19 +13951,31 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (mapLegendActive) {
+
+
 
 
     mapLegendActive.textContent =
 
 
+
+
       person +
+
+
 
 
       'あり';
 
 
+
+
   }
+
+
 
 
   var activePrefBtn =
@@ -9682,19 +13984,31 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (activePrefBtn) {
+
+
 
 
     activePrefBtn.textContent =
 
 
+
+
       person +
+
+
 
 
       'がいる県のみ';
 
 
+
+
   }
+
+
 
 
   var mapSearch =
@@ -9703,22 +14017,36 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (mapSearch) {
+
+
 
 
     mapSearch.placeholder =
 
 
+
+
       '名前・' +
+
+
 
 
       placeLabel() +
 
 
+
+
       '・地域を検索';
 
 
+
+
   }
+
+
 
 
   var listSearch =
@@ -9727,22 +14055,36 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (listSearch) {
+
+
 
 
     listSearch.placeholder =
 
 
+
+
       '名前・呼び名・' +
+
+
 
 
       placeLabel() +
 
 
+
+
       '・地域で検索';
 
 
+
+
   }
+
+
 
 
   var globalSearch =
@@ -9751,22 +14093,36 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (globalSearch) {
+
+
 
 
     globalSearch.placeholder =
 
 
+
+
       '名前・ふりがな・呼び名・' +
+
+
 
 
       placeLabel() +
 
 
+
+
       '・SNS・住所';
 
 
+
+
   }
+
+
 
 
   var placeNameLabel =
@@ -9775,14 +14131,22 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (placeNameLabel) {
+
+
 
 
     placeNameLabel.textContent =
       placeLabel();
 
 
+
+
   }
+
+
 
 
   var placeKanaLabelEl =
@@ -9791,11 +14155,17 @@ function applySettingsToUi() {
     );
 
 
+
+
   if (placeKanaLabelEl) {
+
+
 
 
     placeKanaLabelEl.textContent =
       placeKanaLabel();
+
+
 
 
   }
@@ -9803,7 +14173,15 @@ function applySettingsToUi() {
 
 
 
+
+
+
+
 }
+
+
+
+
 
 
 
@@ -9814,9 +14192,15 @@ function applySettingsToUi() {
 
 
 
+
+
+
+
 /* ========================================
    アプリ内確認ダイアログ
    ======================================== */
+
+
 
 
 function appConfirm(
@@ -9826,8 +14210,12 @@ function appConfirm(
 ) {
 
 
+
+
   return new Promise(
     function(resolve) {
+
+
 
 
       var modal =
@@ -9836,10 +14224,14 @@ function appConfirm(
         );
 
 
+
+
       var titleEl =
         document.getElementById(
           'confirmTitle'
         );
+
+
 
 
       var messageEl =
@@ -9848,10 +14240,14 @@ function appConfirm(
         );
 
 
+
+
       var cancel =
         document.getElementById(
           'confirmCancel'
         );
+
+
 
 
       var ok =
@@ -9860,9 +14256,13 @@ function appConfirm(
         );
 
 
+
+
       titleEl.textContent =
         title ||
         '確認';
+
+
 
 
       messageEl.textContent =
@@ -9870,12 +14270,18 @@ function appConfirm(
         '';
 
 
+
+
       ok.textContent =
         okText ||
         '削除する';
 
 
+
+
       function finish(result) {
+
+
 
 
         modal.classList.remove(
@@ -9883,14 +14289,22 @@ function appConfirm(
         );
 
 
+
+
         cancel.onclick = null;
         ok.onclick = null;
+
+
 
 
         resolve(result);
 
 
+
+
       }
+
+
 
 
       cancel.onclick =
@@ -9899,10 +14313,14 @@ function appConfirm(
         };
 
 
+
+
       ok.onclick =
         function() {
           finish(true);
         };
+
+
 
 
       modal.classList.add(
@@ -9910,11 +14328,19 @@ function appConfirm(
       );
 
 
+
+
     }
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -9924,13 +14350,19 @@ function appConfirm(
    ======================================== */
 
 
+
+
 function valueOf(id) {
+
+
 
 
   var el =
     document.getElementById(
       id
     );
+
+
 
 
   return el
@@ -9941,7 +14373,13 @@ function valueOf(id) {
     : '';
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -9952,10 +14390,14 @@ function setValue(
 ) {
 
 
+
+
   var el =
     document.getElementById(
       id
     );
+
+
 
 
   if (!el) {
@@ -9963,7 +14405,11 @@ function setValue(
   }
 
 
+
+
   el.value =
+
+
 
 
     value === null ||
@@ -9972,12 +14418,20 @@ function setValue(
       : value;
 
 
+
+
 }
 
 
 
 
+
+
+
+
 function setLoading(show) {
+
+
 
 
   document.getElementById(
@@ -9988,7 +14442,13 @@ function setLoading(show) {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -9996,7 +14456,11 @@ function setLoading(show) {
 function handleError(error) {
 
 
+
+
   setLoading(false);
+
+
 
 
   var message =
@@ -10006,10 +14470,14 @@ function handleError(error) {
       : String(error);
 
 
+
+
   if (message === 'Failed to fetch') {
     message =
       '通信に失敗しました。通信状態を確認して、もう一度お試しください。';
   }
+
+
 
 
   if (typeof appToast === 'function') {
@@ -10017,7 +14485,13 @@ function handleError(error) {
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -10025,7 +14499,11 @@ function handleError(error) {
 function escapeHtml(str) {
 
 
+
+
   return String(
+
+
 
 
     str === null ||
@@ -10034,7 +14512,11 @@ function escapeHtml(str) {
       : str
 
 
+
+
   )
+
+
 
 
     .replace(
@@ -10043,10 +14525,14 @@ function escapeHtml(str) {
     )
 
 
+
+
     .replace(
       /</g,
       '&lt;'
     )
+
+
 
 
     .replace(
@@ -10055,10 +14541,14 @@ function escapeHtml(str) {
     )
 
 
+
+
     .replace(
       /"/g,
       '&quot;'
     )
+
+
 
 
     .replace(
@@ -10067,7 +14557,13 @@ function escapeHtml(str) {
     );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -10075,7 +14571,11 @@ function escapeHtml(str) {
 function escapeAttr(str) {
 
 
+
+
   return escapeHtml(str);
+
+
 
 
 }
@@ -10083,10 +14583,18 @@ function escapeAttr(str) {
 
 
 
+
+
+
+
 function escapeJs(str) {
 
 
+
+
   return String(
+
+
 
 
     str === null ||
@@ -10095,7 +14603,11 @@ function escapeJs(str) {
       : str
 
 
+
+
   )
+
+
 
 
     .replace(
@@ -10104,10 +14616,14 @@ function escapeJs(str) {
     )
 
 
+
+
     .replace(
       /'/g,
       "\\'"
     )
+
+
 
 
     .replace(
@@ -10116,13 +14632,19 @@ function escapeJs(str) {
     )
 
 
+
+
     .replace(
       /\n/g,
       '\\n'
     );
 
 
+
+
 }
+
+
 
 
 /* =========================================================
@@ -10132,16 +14654,24 @@ function escapeJs(str) {
    ========================================================= */
 
 
+
+
 var mirelAffiliations =
   [];
+
+
 
 
 var mirelTeacherAffiliations =
   {};
 
 
+
+
 var mirelProfiles =
   {};
+
+
 
 
 var mirelFeatureSettings =
@@ -10150,7 +14680,13 @@ var mirelFeatureSettings =
 
 
 
+
+
+
+
 var MIREL_FEATURE_DEFAULTS = {
+
+
 
 
   gender: true,
@@ -10167,7 +14703,13 @@ var MIREL_FEATURE_DEFAULTS = {
   children: true
 
 
+
+
 };
+
+
+
+
 
 
 
@@ -10177,15 +14719,23 @@ var MIREL_FEATURE_DEFAULTS = {
    ========================================================= */
 
 
+
+
 gradeOptions = [
+
+
 
 
   '',
 
 
+
+
   '年少',
   '年中',
   '年長',
+
+
 
 
   '小1',
@@ -10196,9 +14746,13 @@ gradeOptions = [
   '小6',
 
 
+
+
   '中1',
   '中2',
   '中3',
+
+
 
 
   '高1',
@@ -10206,14 +14760,20 @@ gradeOptions = [
   '高3',
 
 
+
+
   '短大1',
   '短大2',
+
+
 
 
   '大学1',
   '大学2',
   '大学3',
   '大学4',
+
+
 
 
   '大学6年制1',
@@ -10224,14 +14784,20 @@ gradeOptions = [
   '大学6年制6',
 
 
+
+
   '専門1',
   '専門2',
   '専門3',
   '専門4',
 
 
+
+
   '修士1',
   '修士2',
+
+
 
 
   '博士1',
@@ -10239,10 +14805,18 @@ gradeOptions = [
   '博士3',
 
 
+
+
   'その他'
 
 
+
+
 ];
+
+
+
+
 
 
 
@@ -10252,15 +14826,23 @@ gradeOptions = [
    ========================================================= */
 
 
+
+
 function mirelFeatureOn(
   key
 ) {
+
+
 
 
   var value =
     mirelFeatureSettings[
       key
     ];
+
+
+
+
 
 
 
@@ -10272,6 +14854,8 @@ function mirelFeatureOn(
   ) {
 
 
+
+
     return (
       MIREL_FEATURE_DEFAULTS[
         key
@@ -10279,7 +14863,13 @@ function mirelFeatureOn(
     );
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -10292,7 +14882,13 @@ function mirelFeatureOn(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -10302,13 +14898,21 @@ function mirelFeatureOn(
    ========================================================= */
 
 
+
+
 async function mirelLoadExtraData() {
+
+
 
 
   var data =
     await runScript(
       'getMirelExtraData'
     );
+
+
+
+
 
 
 
@@ -10320,9 +14924,17 @@ async function mirelLoadExtraData() {
 
 
 
+
+
+
+
   mirelAffiliations =
     data.affiliations ||
     [];
+
+
+
+
 
 
 
@@ -10334,9 +14946,17 @@ async function mirelLoadExtraData() {
 
 
 
+
+
+
+
   mirelProfiles =
     data.profiles ||
     {};
+
+
+
+
 
 
 
@@ -10348,10 +14968,20 @@ async function mirelLoadExtraData() {
 
 
 
+
+
+
+
   mirelApplyProfileDerivedValues();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -10362,8 +14992,14 @@ async function mirelLoadExtraData() {
    ========================================================= */
 
 
+
+
 var mirelBaseStartApp =
   startApp;
+
+
+
+
 
 
 
@@ -10372,10 +15008,16 @@ startApp =
   async function() {
 
 
+
+
     await mirelBaseStartApp();
 
 
+
+
   };
+
+
 
 
 /* =========================================================
@@ -10383,7 +15025,11 @@ startApp =
    ========================================================= */
 
 
+
+
 function mirelInstallExtraStyles() {
+
+
 
 
   if (
@@ -10393,10 +15039,18 @@ function mirelInstallExtraStyles() {
   ) {
 
 
+
+
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -10409,13 +15063,23 @@ function mirelInstallExtraStyles() {
 
 
 
+
+
+
+
   style.id =
     'mirel-extra-style';
 
 
 
 
+
+
+
+
   style.textContent = `
+
+
 
 
     .mirel-extra-section {
@@ -10425,12 +15089,16 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-feature-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 12px;
     }
+
+
 
 
     .mirel-feature-toggle {
@@ -10445,11 +15113,15 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-feature-toggle input {
       width: 18px;
       height: 18px;
       accent-color: #df607f;
     }
+
+
 
 
     .mirel-aff-create-box {
@@ -10461,6 +15133,8 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-create-title {
       margin-bottom: 10px;
       font-size: 14px;
@@ -10468,9 +15142,13 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-create-note {
       margin-bottom: 10px;
     }
+
+
 
 
     .mirel-aff-name-input,
@@ -10482,12 +15160,16 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-color-line {
       display: flex;
       align-items: center;
       gap: 9px;
       margin-top: 10px;
     }
+
+
 
 
     .mirel-aff-color-label,
@@ -10498,10 +15180,14 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-edit-label {
       display: block;
       margin-bottom: 6px;
     }
+
+
 
 
     .mirel-aff-create-actions,
@@ -10513,9 +15199,13 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-master-list {
       margin-top: 18px;
     }
+
+
 
 
     .mirel-aff-existing-title {
@@ -10523,6 +15213,8 @@ function mirelInstallExtraStyles() {
       font-size: 14px;
       font-weight: 700;
     }
+
+
 
 
     .mirel-aff-master-row {
@@ -10534,6 +15226,8 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-view-row {
       display: grid;
       grid-template-columns: 34px minmax(0, 1fr);
@@ -10541,6 +15235,8 @@ function mirelInstallExtraStyles() {
       row-gap: 8px;
       align-items: center;
     }
+
+
 
 
     .mirel-aff-view-actions {
@@ -10553,11 +15249,15 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-order-actions {
       display: inline-flex;
       gap: 4px;
       align-items: center;
     }
+
+
 
 
     .mirel-aff-order-button {
@@ -10571,6 +15271,8 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-mini-action {
       min-width: 0 !important;
       padding: 7px 10px !important;
@@ -10581,14 +15283,20 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-order-button:disabled {
       opacity: .32;
     }
 
 
+
+
     .mirel-aff-order-note {
       margin: 4px 0 10px;
     }
+
+
 
 
     .mirel-aff-view-swatch {
@@ -10597,6 +15305,8 @@ function mirelInstallExtraStyles() {
       border-radius: 999px;
       border: 1px solid #ded2cf;
     }
+
+
 
 
     .mirel-aff-view-name {
@@ -10612,9 +15322,13 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-edit-panel {
       padding-top: 4px;
     }
+
+
 
 
     .mirel-aff-master-row input[type="color"] {
@@ -10624,6 +15338,8 @@ function mirelInstallExtraStyles() {
       opacity: 0;
       pointer-events: none;
     }
+
+
 
 
     .mirel-aff-color-preview {
@@ -10639,6 +15355,8 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-palette {
       display: flex;
       flex-wrap: wrap;
@@ -10646,6 +15364,8 @@ function mirelInstallExtraStyles() {
       grid-column: 1 / -1;
       margin: 2px 0 4px;
     }
+
+
 
 
     .mirel-aff-preset {
@@ -10663,9 +15383,13 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-preset:active {
       transform: scale(0.94);
     }
+
+
 
 
     .mirel-aff-custom-color {
@@ -10686,6 +15410,8 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-custom-color input[type="color"] {
       position: absolute;
       inset: 0;
@@ -10696,12 +15422,16 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-feature-save-actions {
       display: flex;
       justify-content: flex-end;
       margin-top: 14px;
       padding-bottom: 4px;
     }
+
+
 
 
     .mirel-aff-picker {
@@ -10712,10 +15442,14 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-choice {
       position: relative;
       cursor: pointer;
     }
+
+
 
 
     .mirel-aff-choice input {
@@ -10723,6 +15457,8 @@ function mirelInstallExtraStyles() {
       opacity: 0;
       pointer-events: none;
     }
+
+
 
 
     .mirel-aff-choice span {
@@ -10737,10 +15473,14 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-aff-choice input:checked + span {
       border-color: #444;
       box-shadow: 0 0 0 2px #fff inset;
     }
+
+
 
 
     .mirel-aff-tags {
@@ -10749,6 +15489,8 @@ function mirelInstallExtraStyles() {
       gap: 6px;
       margin-top: 5px;
     }
+
+
 
 
     .mirel-aff-tag {
@@ -10760,6 +15502,8 @@ function mirelInstallExtraStyles() {
       font-size: 12px;
       font-weight: 600;
     }
+
+
 
 
     .mirel-filter-select {
@@ -10774,9 +15518,13 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-hidden {
       display: none !important;
     }
+
+
 
 
     .mirel-setup-overlay {
@@ -10787,6 +15535,8 @@ function mirelInstallExtraStyles() {
       overflow-y: auto;
       padding: 24px 16px 60px;
     }
+
+
 
 
     .mirel-setup-card {
@@ -10800,11 +15550,15 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-setup-title {
       font-size: 24px;
       font-weight: 700;
       margin-bottom: 8px;
     }
+
+
 
 
     .mirel-setup-note {
@@ -10815,11 +15569,15 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-phone-link {
       color: inherit;
       text-decoration: underline;
       text-underline-offset: 3px;
     }
+
+
 
 
     .mirel-toast {
@@ -10842,13 +15600,21 @@ function mirelInstallExtraStyles() {
     }
 
 
+
+
     .mirel-toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
 
 
+
+
   `;
+
+
+
+
 
 
 
@@ -10858,7 +15624,13 @@ function mirelInstallExtraStyles() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -10868,9 +15640,13 @@ function mirelInstallExtraStyles() {
    ========================================================= */
 
 
+
+
 function mirelAffiliationById(
   id
 ) {
+
+
 
 
   for (
@@ -10880,6 +15656,8 @@ function mirelAffiliationById(
   ) {
 
 
+
+
     if (
       mirelAffiliations[i]
         .affiliationId ===
@@ -10887,12 +15665,18 @@ function mirelAffiliationById(
     ) {
 
 
+
+
       return mirelAffiliations[
         i
       ];
 
 
+
+
     }
+
+
 
 
   }
@@ -10900,7 +15684,13 @@ function mirelAffiliationById(
 
 
 
+
+
+
+
   return null;
+
+
 
 
 }
@@ -10908,9 +15698,15 @@ function mirelAffiliationById(
 
 
 
+
+
+
+
 function mirelAffiliationIds(
   teacherId
 ) {
+
+
 
 
   return (
@@ -10921,7 +15717,13 @@ function mirelAffiliationIds(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -10931,11 +15733,15 @@ function mirelAffiliationNames(
 ) {
 
 
+
+
   return mirelAffiliationIds(
     teacherId
   )
     .map(
       function(id) {
+
+
 
 
         var row =
@@ -10946,9 +15752,15 @@ function mirelAffiliationNames(
 
 
 
+
+
+
+
         return row
           ? row.name
           : '';
+
+
 
 
       }
@@ -10956,7 +15768,13 @@ function mirelAffiliationNames(
     .filter(Boolean);
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -10967,9 +15785,15 @@ function mirelTeacherHasAffiliation(
 ) {
 
 
+
+
   if (!affiliationId) {
     return true;
   }
+
+
+
+
 
 
 
@@ -10983,7 +15807,15 @@ function mirelTeacherHasAffiliation(
   );
 
 
+
+
 }
+
+
+
+
+
+
 
 
 
@@ -11005,9 +15837,15 @@ var MIREL_AFFILIATION_PASTEL_COLORS = [
 
 
 
+
+
+
+
 function mirelAffiliationDisplayColor(
   color
 ) {
+
+
 
 
   var value =
@@ -11015,6 +15853,10 @@ function mirelAffiliationDisplayColor(
       color ||
       '#f7d8df'
     ).trim();
+
+
+
+
 
 
 
@@ -11030,11 +15872,17 @@ function mirelAffiliationDisplayColor(
 
 
 
+
+
+
+
   var r =
     parseInt(
       value.slice(1, 3),
       16
     );
+
+
 
 
   var g =
@@ -11044,11 +15892,17 @@ function mirelAffiliationDisplayColor(
     );
 
 
+
+
   var b =
     parseInt(
       value.slice(5, 7),
       16
     );
+
+
+
+
 
 
 
@@ -11061,6 +15915,8 @@ function mirelAffiliationDisplayColor(
     );
 
 
+
+
   var min =
     Math.min(
       r,
@@ -11069,12 +15925,18 @@ function mirelAffiliationDisplayColor(
     );
 
 
+
+
   var lightness =
     (
       max +
       min
     ) /
     510;
+
+
+
+
 
 
 
@@ -11094,9 +15956,15 @@ function mirelAffiliationDisplayColor(
 
 
 
+
+
+
+
   function pastelChannel(
     channel
   ) {
+
+
 
 
     return Math.round(
@@ -11105,7 +15973,13 @@ function mirelAffiliationDisplayColor(
     );
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -11121,6 +15995,8 @@ function mirelAffiliationDisplayColor(
         function(channel) {
 
 
+
+
           return channel
             .toString(16)
             .padStart(
@@ -11129,13 +16005,21 @@ function mirelAffiliationDisplayColor(
             );
 
 
+
+
         }
       )
       .join('')
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11146,10 +16030,16 @@ function mirelSetAffiliationColor(
 ) {
 
 
+
+
   var input =
     document.getElementById(
       inputId
     );
+
+
+
+
 
 
 
@@ -11161,14 +16051,24 @@ function mirelSetAffiliationColor(
 
 
 
+
+
+
+
   var displayColor =
     mirelAffiliationDisplayColor(
       color
     );
 
 
+
+
   input.value =
     displayColor;
+
+
+
+
 
 
 
@@ -11181,13 +16081,23 @@ function mirelSetAffiliationColor(
 
 
 
+
+
+
+
   if (preview) {
     preview.style.background =
       displayColor;
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11197,11 +16107,15 @@ function mirelAffiliationPaletteHtml(
 ) {
 
 
+
+
   return (
     '<div class="mirel-aff-palette" aria-label="淡い色の候補">' +
     MIREL_AFFILIATION_PASTEL_COLORS
       .map(
         function(color) {
+
+
 
 
           return (
@@ -11229,6 +16143,8 @@ function mirelAffiliationPaletteHtml(
           );
 
 
+
+
         }
       )
       .join('') +
@@ -11250,7 +16166,13 @@ function mirelAffiliationPaletteHtml(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11260,10 +16182,14 @@ function mirelAffiliationTagsHtml(
 ) {
 
 
+
+
   var ids =
     mirelAffiliationIds(
       teacherId
     );
+
+
 
 
   if (!ids.length) {
@@ -11271,12 +16197,18 @@ function mirelAffiliationTagsHtml(
   }
 
 
+
+
   var tags =
     '';
 
 
+
+
   ids.forEach(
     function(id) {
+
+
 
 
       var row =
@@ -11285,9 +16217,13 @@ function mirelAffiliationTagsHtml(
         );
 
 
+
+
       if (!row) {
         return;
       }
+
+
 
 
       tags +=
@@ -11304,8 +16240,12 @@ function mirelAffiliationTagsHtml(
         '</span>';
 
 
+
+
     }
   );
+
+
 
 
   return tags
@@ -11315,7 +16255,13 @@ function mirelAffiliationTagsHtml(
     : '';
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11323,6 +16269,8 @@ function mirelAffiliationTagsHtml(
 function mirelGradeAgeDisplay(
   grade
 ) {
+
+
 
 
   var ranges = {
@@ -11365,13 +16313,19 @@ function mirelGradeAgeDisplay(
   };
 
 
+
+
   var range =
     ranges[grade];
+
+
 
 
   if (!range) {
     return '';
   }
+
+
 
 
   return (
@@ -11381,7 +16335,13 @@ function mirelGradeAgeDisplay(
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11389,8 +16349,12 @@ function mirelGradeAgeDisplay(
 function mirelApplyProfileDerivedValues() {
 
 
+
+
   teachers.forEach(
     function(teacher) {
+
+
 
 
       var profile =
@@ -11400,6 +16364,8 @@ function mirelApplyProfileDerivedValues() {
         {};
 
 
+
+
       var gradeDisplay =
         mirelGradeDisplay(
           profile.grade,
@@ -11407,8 +16373,12 @@ function mirelApplyProfileDerivedValues() {
         );
 
 
+
+
       teacher.gradeDisplay =
         gradeDisplay;
+
+
 
 
       if (
@@ -11418,20 +16388,32 @@ function mirelApplyProfileDerivedValues() {
       ) {
 
 
+
+
         teacher.ageDisplay =
           mirelGradeAgeDisplay(
             gradeDisplay
           );
 
 
+
+
       }
+
+
 
 
     }
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11441,11 +16423,19 @@ function mirelApplyProfileDerivedValues() {
    ========================================================= */
 
 
+
+
 function mirelCurrentFiscalYear() {
+
+
 
 
   var now =
     new Date();
+
+
+
+
 
 
 
@@ -11457,7 +16447,13 @@ function mirelCurrentFiscalYear() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11465,7 +16461,11 @@ function mirelCurrentFiscalYear() {
 function mirelGradeGroups() {
 
 
+
+
   return [
+
+
 
 
     [
@@ -11473,6 +16473,8 @@ function mirelGradeGroups() {
       '年中',
       '年長'
     ],
+
+
 
 
     [
@@ -11485,11 +16487,15 @@ function mirelGradeGroups() {
     ],
 
 
+
+
     [
       '中1',
       '中2',
       '中3'
     ],
+
+
 
 
     [
@@ -11499,10 +16505,14 @@ function mirelGradeGroups() {
     ],
 
 
+
+
     [
       '短大1',
       '短大2'
     ],
+
+
 
 
     [
@@ -11511,6 +16521,8 @@ function mirelGradeGroups() {
       '大学3',
       '大学4'
     ],
+
+
 
 
     [
@@ -11523,6 +16535,8 @@ function mirelGradeGroups() {
     ],
 
 
+
+
     [
       '専門1',
       '専門2',
@@ -11531,10 +16545,14 @@ function mirelGradeGroups() {
     ],
 
 
+
+
     [
       '修士1',
       '修士2'
     ],
+
+
 
 
     [
@@ -11544,10 +16562,18 @@ function mirelGradeGroups() {
     ]
 
 
+
+
   ];
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11558,9 +16584,15 @@ function mirelGradeDisplay(
 ) {
 
 
+
+
   if (!grade) {
     return '';
   }
+
+
+
+
 
 
 
@@ -11571,10 +16603,18 @@ function mirelGradeDisplay(
   ) {
 
 
+
+
     return grade;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -11589,6 +16629,10 @@ function mirelGradeDisplay(
 
 
 
+
+
+
+
   if (diff < 0) {
     diff = 0;
   }
@@ -11596,8 +16640,16 @@ function mirelGradeDisplay(
 
 
 
+
+
+
+
   var groups =
     mirelGradeGroups();
+
+
+
+
 
 
 
@@ -11609,10 +16661,16 @@ function mirelGradeDisplay(
   ) {
 
 
+
+
     var index =
       groups[i].indexOf(
         grade
       );
+
+
+
+
 
 
 
@@ -11622,9 +16680,15 @@ function mirelGradeDisplay(
     ) {
 
 
+
+
       var next =
         index +
         diff;
+
+
+
+
 
 
 
@@ -11635,10 +16699,18 @@ function mirelGradeDisplay(
       ) {
 
 
+
+
         return '卒業・修了';
 
 
+
+
       }
+
+
+
+
 
 
 
@@ -11648,7 +16720,11 @@ function mirelGradeDisplay(
       ];
 
 
+
+
     }
+
+
 
 
   }
@@ -11656,10 +16732,20 @@ function mirelGradeDisplay(
 
 
 
+
+
+
+
   return grade;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -11670,7 +16756,11 @@ function mirelGradeDisplay(
    ========================================================= */
 
 
+
+
 function mirelInstallTeacherExtraFields() {
+
+
 
 
   var salon =
@@ -11681,9 +16771,17 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
   if (!salon) {
     return;
   }
+
+
+
+
 
 
 
@@ -11696,9 +16794,17 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
   if (!salonField) {
     return;
   }
+
+
+
+
 
 
 
@@ -11710,6 +16816,8 @@ function mirelInstallTeacherExtraFields() {
   ) {
 
 
+
+
     var gradeField =
       document.createElement(
         'div'
@@ -11718,12 +16826,22 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
     gradeField.className =
       'field mirel-field-compact';
 
 
+
+
     gradeField.id =
       'mirelGradeField';
+
+
+
+
 
 
 
@@ -11734,8 +16852,14 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
     gradeOptions.forEach(
       function(value) {
+
+
 
 
         if (!value) {
@@ -11745,7 +16869,13 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
         options +=
+
+
 
 
           '<option value="' +
@@ -11755,12 +16885,18 @@ function mirelInstallTeacherExtraFields() {
           '">' +
 
 
+
+
           escapeHtml(
             value
           ) +
 
 
+
+
           '</option>';
+
+
 
 
       }
@@ -11769,19 +16905,35 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
     gradeField.innerHTML =
+
+
 
 
       '<label>学年</label>' +
 
 
+
+
       '<select id="mirelGrade">' +
+
+
 
 
       options +
 
 
+
+
       '</select>';
+
+
+
+
 
 
 
@@ -11792,7 +16944,13 @@ function mirelInstallTeacherExtraFields() {
     );
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -11804,6 +16962,8 @@ function mirelInstallTeacherExtraFields() {
   ) {
 
 
+
+
     var affField =
       document.createElement(
         'div'
@@ -11812,8 +16972,14 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
     affField.className =
       'field';
+
+
 
 
     affField.id =
@@ -11822,13 +16988,25 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
     affField.innerHTML =
 
 
-      '<label>所属</label>' +
+
+
+      '<label>分類</label>' +
+
+
 
 
       '<div id="mirelAffiliationPicker" class="mirel-aff-picker"></div>';
+
+
+
+
 
 
 
@@ -11839,7 +17017,11 @@ function mirelInstallTeacherExtraFields() {
     );
 
 
+
+
   }
+
+
 
 
 }
@@ -11847,9 +17029,15 @@ function mirelInstallTeacherExtraFields() {
 
 
 
+
+
+
+
 function mirelRenderAffiliationPicker(
   teacherId
 ) {
+
+
 
 
   var box =
@@ -11860,9 +17048,17 @@ function mirelRenderAffiliationPicker(
 
 
 
+
+
+
+
   if (!box) {
     return;
   }
+
+
+
+
 
 
 
@@ -11875,23 +17071,39 @@ function mirelRenderAffiliationPicker(
 
 
 
+
+
+
+
   if (
     !mirelAffiliations.length
   ) {
 
 
+
+
     box.innerHTML =
 
 
+
+
       '<div class="form-note">' +
-      '所属は設定画面から追加できます。' +
+      '分類は設定画面から追加できます。' +
       '</div>';
+
+
 
 
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -11902,8 +17114,14 @@ function mirelRenderAffiliationPicker(
 
 
 
+
+
+
+
   mirelAffiliations.forEach(
     function(row) {
+
+
 
 
       var checked =
@@ -11914,10 +17132,18 @@ function mirelRenderAffiliationPicker(
 
 
 
+
+
+
+
       html +=
 
 
+
+
         '<label class="mirel-aff-choice">' +
+
+
 
 
         '<input type="checkbox" ' +
@@ -11935,6 +17161,8 @@ function mirelRenderAffiliationPicker(
         '>' +
 
 
+
+
         '<span style="' +
         'background:' +
         escapeHtml(
@@ -11947,15 +17175,23 @@ function mirelRenderAffiliationPicker(
         '">' +
 
 
+
+
         escapeHtml(
           row.name
         ) +
 
 
+
+
         '</span>' +
 
 
+
+
         '</label>';
+
+
 
 
     }
@@ -11964,8 +17200,14 @@ function mirelRenderAffiliationPicker(
 
 
 
+
+
+
+
   box.innerHTML =
     html;
+
+
 
 
 }
@@ -11973,7 +17215,13 @@ function mirelRenderAffiliationPicker(
 
 
 
+
+
+
+
 function mirelSelectedAffiliationIds() {
+
+
 
 
   return Array
@@ -11986,14 +17234,24 @@ function mirelSelectedAffiliationIds() {
       function(input) {
 
 
+
+
         return input.value;
+
+
 
 
       }
     );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -12003,14 +17261,22 @@ function mirelSelectedAffiliationIds() {
    ========================================================= */
 
 
+
+
 var mirelBaseOpenTeacherForm =
   openTeacherForm;
 
 
 
 
+
+
+
+
 openTeacherForm =
   function(id) {
+
+
 
 
     mirelBaseOpenTeacherForm(
@@ -12020,7 +17286,15 @@ openTeacherForm =
 
 
 
+
+
+
+
     mirelInstallTeacherExtraFields();
+
+
+
+
 
 
 
@@ -12038,6 +17312,10 @@ openTeacherForm =
 
 
 
+
+
+
+
     var grade =
       document.getElementById(
         'mirelGrade'
@@ -12046,7 +17324,13 @@ openTeacherForm =
 
 
 
+
+
+
+
     if (grade) {
+
+
 
 
       grade.value =
@@ -12054,7 +17338,13 @@ openTeacherForm =
         '';
 
 
+
+
     }
+
+
+
+
 
 
 
@@ -12067,10 +17357,20 @@ openTeacherForm =
 
 
 
+
+
+
+
     mirelApplyFormVisibility();
 
 
+
+
   };
+
+
+
+
 
 
 
@@ -12080,8 +17380,14 @@ openTeacherForm =
    ========================================================= */
 
 
+
+
 var mirelBaseSaveTeacherForm =
   saveTeacherForm;
+
+
+
+
 
 
 
@@ -12090,10 +17396,16 @@ saveTeacherForm =
   async function() {
 
 
+
+
     var originalTeacherId =
       valueOf(
         'teacherId'
       );
+
+
+
+
 
 
 
@@ -12106,10 +17418,18 @@ saveTeacherForm =
 
 
 
+
+
+
+
     var grade =
       gradeInput
         ? gradeInput.value
         : '';
+
+
+
+
 
 
 
@@ -12120,7 +17440,15 @@ saveTeacherForm =
 
 
 
+
+
+
+
     await mirelBaseSaveTeacherForm();
+
+
+
+
 
 
 
@@ -12132,6 +17460,10 @@ saveTeacherForm =
 
 
 
+
+
+
+
     if (!teacherId) {
       return;
     }
@@ -12139,35 +17471,59 @@ saveTeacherForm =
 
 
 
+
+
+
+
     try {
+
+
 
 
       var result =
         await runScript(
 
 
+
+
           'saveMirelTeacherExtras',
 
 
+
+
           [{
+
+
 
 
             teacherId:
               teacherId,
 
 
+
+
             grade:
               grade,
+
+
 
 
             affiliationIds:
               affiliationIds
 
 
+
+
           }]
 
 
+
+
         );
+
+
+
+
 
 
 
@@ -12179,9 +17535,17 @@ saveTeacherForm =
 
 
 
+
+
+
+
       mirelAffiliations =
         result.affiliations ||
         mirelAffiliations;
+
+
+
+
 
 
 
@@ -12193,6 +17557,10 @@ saveTeacherForm =
 
 
 
+
+
+
+
       mirelProfiles =
         result.profiles ||
         mirelProfiles;
@@ -12200,7 +17568,15 @@ saveTeacherForm =
 
 
 
+
+
+
+
       mirelApplyProfileDerivedValues();
+
+
+
+
 
 
 
@@ -12211,6 +17587,8 @@ saveTeacherForm =
       ) {
 
 
+
+
         var teacher =
           findTeacher(
             teacherId
@@ -12219,7 +17597,13 @@ saveTeacherForm =
 
 
 
+
+
+
+
         if (teacher) {
+
+
 
 
           renderTeacherDetail(
@@ -12227,7 +17611,11 @@ saveTeacherForm =
           );
 
 
+
+
         }
+
+
 
 
       }
@@ -12235,10 +17623,18 @@ saveTeacherForm =
 
 
 
+
+
+
+
       mirelRefreshAffiliationFilters();
 
 
+
+
     } catch (e) {
+
+
 
 
       handleError(
@@ -12246,10 +17642,18 @@ saveTeacherForm =
       );
 
 
+
+
     }
 
 
+
+
   };
+
+
+
+
 
 
 
@@ -12259,8 +17663,14 @@ saveTeacherForm =
    ========================================================= */
 
 
+
+
 var mirelBaseRenderTeacherDetail =
   renderTeacherDetail;
+
+
+
+
 
 
 
@@ -12269,9 +17679,15 @@ renderTeacherDetail =
   function(teacher) {
 
 
+
+
     mirelBaseRenderTeacherDetail(
       teacher
     );
+
+
+
+
 
 
 
@@ -12283,7 +17699,13 @@ renderTeacherDetail =
 
 
 
+
+
+
+
     mirelApplyDetailVisibility();
+
+
 
 
   };
@@ -12291,9 +17713,15 @@ renderTeacherDetail =
 
 
 
+
+
+
+
 function mirelInjectDetailExtras(
   teacher
 ) {
+
+
 
 
   var detail =
@@ -12304,9 +17732,17 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
   if (!detail) {
     return;
   }
+
+
+
+
 
 
 
@@ -12319,9 +17755,17 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
   if (!firstCard) {
     return;
   }
+
+
+
+
 
 
 
@@ -12334,7 +17778,11 @@ function mirelInjectDetailExtras(
       function(row) {
 
 
+
+
         row.remove();
+
+
 
 
       }
@@ -12343,8 +17791,16 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
   var beforeRow =
     null;
+
+
+
+
 
 
 
@@ -12357,10 +17813,16 @@ function mirelInjectDetailExtras(
       function(row) {
 
 
+
+
         var label =
           row.querySelector(
             '.label'
           );
+
+
+
+
 
 
 
@@ -12377,15 +17839,25 @@ function mirelInjectDetailExtras(
         ) {
 
 
+
+
           beforeRow =
             row;
+
+
 
 
         }
 
 
+
+
       }
     );
+
+
+
+
 
 
 
@@ -12399,11 +17871,17 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
   if (
     mirelFeatureOn(
       'grade'
     )
   ) {
+
+
 
 
     var gradeText =
@@ -12415,7 +17893,13 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
     if (gradeText) {
+
+
 
 
       var gradeRow =
@@ -12426,8 +17910,16 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
       gradeRow.className =
         'detail-row mirel-extra-detail-row';
+
+
+
+
 
 
 
@@ -12435,7 +17927,11 @@ function mirelInjectDetailExtras(
       gradeRow.innerHTML =
 
 
+
+
         '<div class="label">学年</div>' +
+
+
 
 
         '<div class="value">' +
@@ -12447,16 +17943,28 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
       firstCard.insertBefore(
         gradeRow,
         beforeRow
       );
 
 
+
+
     }
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -12468,6 +17976,8 @@ function mirelInjectDetailExtras(
   ) {
 
 
+
+
     var ids =
       mirelAffiliationIds(
         teacher.teacherId
@@ -12476,7 +17986,13 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
     if (ids.length) {
+
+
 
 
       var affRow =
@@ -12487,8 +18003,16 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
       affRow.className =
         'detail-row mirel-extra-detail-row';
+
+
+
+
 
 
 
@@ -12499,14 +18023,24 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
       ids.forEach(
         function(id) {
+
+
 
 
           var row =
             mirelAffiliationById(
               id
             );
+
+
+
+
 
 
 
@@ -12518,7 +18052,13 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
           tags +=
+
+
 
 
             '<span class="mirel-aff-tag" ' +
@@ -12531,12 +18071,18 @@ function mirelInjectDetailExtras(
             ';">' +
 
 
+
+
             escapeHtml(
               row.name
             ) +
 
 
+
+
             '</span>';
+
+
 
 
         }
@@ -12545,15 +18091,27 @@ function mirelInjectDetailExtras(
 
 
 
+
+
+
+
       affRow.innerHTML =
 
 
-        '<div class="label">所属</div>' +
+
+
+        '<div class="label">分類</div>' +
+
+
 
 
         '<div class="value mirel-aff-tags">' +
         tags +
         '</div>';
+
+
+
+
 
 
 
@@ -12564,13 +18122,23 @@ function mirelInjectDetailExtras(
       );
 
 
+
+
     }
+
+
 
 
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -12580,8 +18148,14 @@ function mirelInjectDetailExtras(
    ========================================================= */
 
 
+
+
 var mirelBaseTeacherMatches =
   teacherMatches;
+
+
+
+
 
 
 
@@ -12593,6 +18167,8 @@ teacherMatches =
   ) {
 
 
+
+
     if (
       mirelBaseTeacherMatches(
         teacher,
@@ -12601,10 +18177,18 @@ teacherMatches =
     ) {
 
 
+
+
       return true;
 
 
+
+
     }
+
+
+
+
 
 
 
@@ -12612,6 +18196,10 @@ teacherMatches =
     if (!query) {
       return true;
     }
+
+
+
+
 
 
 
@@ -12628,6 +18216,10 @@ teacherMatches =
 
 
 
+
+
+
+
     return (
       affText.indexOf(
         query.toLowerCase()
@@ -12635,7 +18227,13 @@ teacherMatches =
     );
 
 
+
+
   };
+
+
+
+
 
 
 
@@ -12645,7 +18243,11 @@ teacherMatches =
    ========================================================= */
 
 
+
+
 function mirelInstallSearchFilters() {
+
+
 
 
   mirelInstallOneFilter(
@@ -12653,6 +18255,10 @@ function mirelInstallSearchFilters() {
     'mirelListAffiliationFilter',
     renderFullTeacherList
   );
+
+
+
+
 
 
 
@@ -12666,10 +18272,20 @@ function mirelInstallSearchFilters() {
 
 
 
+
+
+
+
   mirelRefreshAffiliationFilters();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -12681,10 +18297,16 @@ function mirelInstallOneFilter(
 ) {
 
 
+
+
   var search =
     document.getElementById(
       searchId
     );
+
+
+
+
 
 
 
@@ -12697,10 +18319,18 @@ function mirelInstallOneFilter(
   ) {
 
 
+
+
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -12713,12 +18343,22 @@ function mirelInstallOneFilter(
 
 
 
+
+
+
+
   select.id =
     filterId;
 
 
+
+
   select.className =
     'mirel-filter-select';
+
+
+
+
 
 
 
@@ -12729,15 +18369,23 @@ function mirelInstallOneFilter(
 
 
 
+
+
+
+
   if (
     searchId === 'listSearch'
   ) {
+
+
 
 
     var row =
       document.getElementById(
         'mirelListFilterRow'
       );
+
+
 
 
     if (row) {
@@ -12748,7 +18396,11 @@ function mirelInstallOneFilter(
     }
 
 
+
+
   }
+
+
 
 
   search.insertAdjacentElement(
@@ -12757,12 +18409,20 @@ function mirelInstallOneFilter(
   );
 
 
+
+
 }
 
 
 
 
+
+
+
+
 function mirelRefreshAffiliationFilters() {
+
+
 
 
   [
@@ -12773,10 +18433,16 @@ function mirelRefreshAffiliationFilters() {
       function(id) {
 
 
+
+
         var select =
           document.getElementById(
             id
           );
+
+
+
+
 
 
 
@@ -12788,8 +18454,16 @@ function mirelRefreshAffiliationFilters() {
 
 
 
+
+
+
+
         var current =
           select.value;
+
+
+
+
 
 
 
@@ -12797,9 +18471,15 @@ function mirelRefreshAffiliationFilters() {
         var html =
 
 
+
+
           '<option value="">' +
-          '所属：すべて' +
+          '分類：すべて' +
           '</option>';
+
+
+
+
 
 
 
@@ -12808,7 +18488,11 @@ function mirelRefreshAffiliationFilters() {
           function(row) {
 
 
+
+
             html +=
+
+
 
 
               '<option value="' +
@@ -12818,12 +18502,18 @@ function mirelRefreshAffiliationFilters() {
               '">' +
 
 
+
+
               escapeHtml(
                 row.name
               ) +
 
 
+
+
               '</option>';
+
+
 
 
           }
@@ -12832,8 +18522,16 @@ function mirelRefreshAffiliationFilters() {
 
 
 
+
+
+
+
         select.innerHTML =
           html;
+
+
+
+
 
 
 
@@ -12847,10 +18545,14 @@ function mirelRefreshAffiliationFilters() {
               function(option) {
 
 
+
+
                 return (
                   option.value ===
                   current
                 );
+
+
 
 
               }
@@ -12858,18 +18560,30 @@ function mirelRefreshAffiliationFilters() {
         ) {
 
 
+
+
           select.value =
             current;
 
 
+
+
         }
+
+
 
 
       }
     );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -12879,8 +18593,14 @@ function mirelRefreshAffiliationFilters() {
    ========================================================= */
 
 
+
+
 var mirelBaseRenderFullTeacherList =
   renderFullTeacherList;
+
+
+
+
 
 
 
@@ -12889,10 +18609,16 @@ renderFullTeacherList =
   function() {
 
 
+
+
     var filter =
       document.getElementById(
         'mirelListAffiliationFilter'
       );
+
+
+
+
 
 
 
@@ -12905,16 +18631,30 @@ renderFullTeacherList =
 
 
 
+
+
+
+
     if (!affiliationId) {
+
+
 
 
       mirelBaseRenderFullTeacherList();
 
 
+
+
       return;
 
 
+
+
     }
+
+
+
+
 
 
 
@@ -12925,9 +18665,15 @@ renderFullTeacherList =
 
 
 
+
+
+
+
     teachers =
       original.filter(
         function(teacher) {
+
+
 
 
           return mirelTeacherHasAffiliation(
@@ -12936,8 +18682,14 @@ renderFullTeacherList =
           );
 
 
+
+
         }
       );
+
+
+
+
 
 
 
@@ -12945,20 +18697,34 @@ renderFullTeacherList =
     try {
 
 
+
+
       mirelBaseRenderFullTeacherList();
 
 
+
+
     } finally {
+
+
 
 
       teachers =
         original;
 
 
+
+
     }
 
 
+
+
   };
+
+
+
+
 
 
 
@@ -12968,14 +18734,22 @@ renderFullTeacherList =
    ========================================================= */
 
 
+
+
 renderSearchResults =
   function() {
+
+
 
 
     var search =
       document.getElementById(
         'globalSearch'
       );
+
+
+
+
 
 
 
@@ -12991,10 +18765,18 @@ renderSearchResults =
 
 
 
+
+
+
+
     var filter =
       document.getElementById(
         'mirelSearchAffiliationFilter'
       );
+
+
+
+
 
 
 
@@ -13007,10 +18789,18 @@ renderSearchResults =
 
 
 
+
+
+
+
     var resultBox =
       document.getElementById(
         'searchResults'
       );
+
+
+
+
 
 
 
@@ -13022,24 +18812,40 @@ renderSearchResults =
 
 
 
+
+
+
+
     if (
       !query &&
       !affiliationId
     ) {
 
 
+
+
       resultBox.innerHTML =
 
 
+
+
         '<div class="empty">' +
-        '検索語を入力するか、所属を選択してください。' +
+        '検索語を入力するか、分類を選択してください。' +
         '</div>';
+
+
 
 
       return;
 
 
+
+
     }
+
+
+
+
 
 
 
@@ -13050,8 +18856,14 @@ renderSearchResults =
 
 
 
+
+
+
+
     teachers.forEach(
       function(teacher) {
+
+
 
 
         if (
@@ -13062,10 +18874,18 @@ renderSearchResults =
         ) {
 
 
+
+
           return;
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -13078,10 +18898,18 @@ renderSearchResults =
         ) {
 
 
+
+
           return;
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -13092,8 +18920,14 @@ renderSearchResults =
           );
 
 
+
+
       }
     );
+
+
+
+
 
 
 
@@ -13101,7 +18935,11 @@ renderSearchResults =
     resultBox.innerHTML =
 
 
+
+
       html ||
+
+
 
 
       (
@@ -13114,7 +18952,13 @@ renderSearchResults =
       );
 
 
+
+
   };
+
+
+
+
 
 
 
@@ -13124,7 +18968,11 @@ renderSearchResults =
    ========================================================= */
 
 
+
+
 function mirelInstallSettingsUi() {
+
+
 
 
   var page =
@@ -13135,9 +18983,17 @@ function mirelInstallSettingsUi() {
 
 
 
+
+
+
+
   if (!page) {
     return;
   }
+
+
+
+
 
 
 
@@ -13150,13 +19006,25 @@ function mirelInstallSettingsUi() {
 
 
 
+
+
+
+
   if (!card) {
+
+
 
 
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -13169,7 +19037,13 @@ function mirelInstallSettingsUi() {
 
 
 
+
+
+
+
   if (existingArea) {
+
+
 
 
     /* index.html に既存の設定領域がある場合でも、
@@ -13184,6 +19058,8 @@ function mirelInstallSettingsUi() {
         '<div id="mirelPerformancePanel"></div>';
 
 
+
+
       if (featureActions && featureActions.parentNode) {
         featureActions.parentNode.insertBefore(perfSection, featureActions.nextSibling);
       } else {
@@ -13192,19 +19068,33 @@ function mirelInstallSettingsUi() {
     }
 
 
+
+
     mirelRenderFeatureSettings();
+
+
 
 
     mirelRenderAffiliationMaster();
 
 
+
+
     mirelRenderPerformancePanel();
+
+
 
 
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -13217,6 +19107,10 @@ function mirelInstallSettingsUi() {
 
 
 
+
+
+
+
   var area =
     document.createElement(
       'div'
@@ -13225,8 +19119,14 @@ function mirelInstallSettingsUi() {
 
 
 
+
+
+
+
   area.id =
     'mirelExtraSettings';
+
+
 
 
   area.className =
@@ -13235,10 +19135,18 @@ function mirelInstallSettingsUi() {
 
 
 
+
+
+
+
   area.innerHTML =
 
 
+
+
     '<div class="section-title">使用する項目</div>' +
+
+
 
 
     '<div class="form-note">' +
@@ -13246,12 +19154,18 @@ function mirelInstallSettingsUi() {
     '</div>' +
 
 
+
+
     '<div id="mirelFeatureGrid" class="mirel-feature-grid"></div>' +
+
+
 
 
     '<div class="mirel-feature-save-actions">' +
       '<button class="primary" type="button" onclick="saveSettingsForm()">設定を保存</button>' +
     '</div>' +
+
+
 
 
     '<div class="mirel-extra-section mirel-perf-section">' +
@@ -13261,10 +19175,16 @@ function mirelInstallSettingsUi() {
     '</div>' +
 
 
+
+
     '<div class="mirel-extra-section">' +
 
 
+
+
       '<div class="section-title">分類ラベル</div>' +
+
+
 
 
       '<div class="form-note">' +
@@ -13272,7 +19192,11 @@ function mirelInstallSettingsUi() {
       '</div>' +
 
 
+
+
       '<div id="mirelAffiliationMaster"></div>' +
+
+
 
 
     '</div>';
@@ -13280,11 +19204,19 @@ function mirelInstallSettingsUi() {
 
 
 
+
+
+
+
   if (actions) {
+
+
 
 
     actions.style.display =
       'none';
+
+
 
 
     card.insertBefore(
@@ -13293,7 +19225,11 @@ function mirelInstallSettingsUi() {
     );
 
 
+
+
   } else {
+
+
 
 
     card.appendChild(
@@ -13301,7 +19237,13 @@ function mirelInstallSettingsUi() {
     );
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -13309,13 +19251,23 @@ function mirelInstallSettingsUi() {
   mirelRenderFeatureSettings();
 
 
+
+
   mirelRenderAffiliationMaster();
+
+
 
 
   mirelRenderPerformancePanel();
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -13325,10 +19277,16 @@ function mirelInstallSettingsUi() {
    ========================================================= */
 
 
+
+
 function mirelFeatureDefinitions() {
 
 
+
+
   return [
+
+
 
 
     ['map', '地図表示'],
@@ -13336,7 +19294,7 @@ function mirelFeatureDefinitions() {
     ['grade', '学年'],
     ['birthday', '誕生日'],
     ['age', '年齢'],
-    ['affiliation', '所属'],
+    ['affiliation', '分類'],
     ['place', '店名'],
     ['address', '住所'],
     ['phone', '電話番号'],
@@ -13345,7 +19303,11 @@ function mirelFeatureDefinitions() {
     ['children', '子ども情報']
 
 
+
+
   ];
+
+
 
 
 }
@@ -13353,13 +19315,23 @@ function mirelFeatureDefinitions() {
 
 
 
+
+
+
+
 function mirelRenderFeatureSettings() {
+
+
 
 
   var grid =
     document.getElementById(
       'mirelFeatureGrid'
     );
+
+
+
+
 
 
 
@@ -13371,8 +19343,16 @@ function mirelRenderFeatureSettings() {
 
 
 
+
+
+
+
   var html =
     '';
+
+
+
+
 
 
 
@@ -13382,10 +19362,16 @@ function mirelRenderFeatureSettings() {
       function(row) {
 
 
+
+
         html +=
 
 
+
+
           '<label class="mirel-feature-toggle">' +
+
+
 
 
           '<input type="checkbox" ' +
@@ -13403,6 +19389,8 @@ function mirelRenderFeatureSettings() {
           '>' +
 
 
+
+
           '<span>' +
           escapeHtml(
             row[1]
@@ -13410,7 +19398,11 @@ function mirelRenderFeatureSettings() {
           '</span>' +
 
 
+
+
           '</label>';
+
+
 
 
       }
@@ -13419,11 +19411,21 @@ function mirelRenderFeatureSettings() {
 
 
 
+
+
+
+
   grid.innerHTML =
     html;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -13433,8 +19435,14 @@ function mirelRenderFeatureSettings() {
    ========================================================= */
 
 
+
+
 var mirelBaseSaveSettingsForm =
   saveSettingsForm;
+
+
+
+
 
 
 
@@ -13443,13 +19451,23 @@ saveSettingsForm =
   async function() {
 
 
+
+
     await mirelBaseSaveSettingsForm();
+
+
+
+
 
 
 
 
     var payload =
       {};
+
+
+
+
 
 
 
@@ -13462,10 +19480,14 @@ saveSettingsForm =
         function(input) {
 
 
+
+
           payload[
             input.dataset.feature
           ] =
             input.checked;
+
+
 
 
         }
@@ -13474,14 +19496,24 @@ saveSettingsForm =
 
 
 
+
+
+
+
     try {
+
+
 
 
       var result =
         await runScript(
 
 
+
+
           'saveMirelFeatureSettings',
+
+
 
 
           [
@@ -13489,7 +19521,13 @@ saveSettingsForm =
           ]
 
 
+
+
         );
+
+
+
+
 
 
 
@@ -13504,16 +19542,28 @@ saveSettingsForm =
 
 
 
+
+
+
+
       mirelApplyCurrentVisibility();
+
+
 
 
       renderAll();
 
 
+
+
       renderJapanMap();
 
 
+
+
     } catch (e) {
+
+
 
 
       handleError(
@@ -13521,10 +19571,18 @@ saveSettingsForm =
       );
 
 
+
+
     }
 
 
+
+
   };
+
+
+
+
 
 
 
@@ -13534,7 +19592,11 @@ saveSettingsForm =
    ========================================================= */
 
 
+
+
 function mirelRenderAffiliationMaster() {
+
+
 
 
   var box =
@@ -13543,16 +19605,24 @@ function mirelRenderAffiliationMaster() {
     );
 
 
+
+
   if (!box) {
     return;
   }
+
+
 
 
   var html =
     '<div class="mirel-aff-create-box">' +
 
 
+
+
       '<div class="mirel-aff-create-title">新しい分類ラベルを作成</div>' +
+
+
 
 
       '<div class="small-note mirel-aff-create-note">' +
@@ -13560,10 +19630,16 @@ function mirelRenderAffiliationMaster() {
       '</div>' +
 
 
+
+
       '<input id="mirelNewAffName" class="mirel-aff-name-input" type="text" placeholder="新しい分類ラベル名">' +
 
 
+
+
       '<input id="mirelNewAffColor" type="hidden" value="#f7d8df">' +
+
+
 
 
       '<div class="mirel-aff-color-line">' +
@@ -13572,9 +19648,13 @@ function mirelRenderAffiliationMaster() {
       '</div>' +
 
 
+
+
       mirelAffiliationPaletteHtml(
         'mirelNewAffColor'
       ) +
+
+
 
 
       '<div class="mirel-aff-create-actions">' +
@@ -13582,7 +19662,11 @@ function mirelRenderAffiliationMaster() {
       '</div>' +
 
 
+
+
     '</div>' +
+
+
 
 
     '<div class="mirel-aff-master-list">' +
@@ -13590,18 +19674,28 @@ function mirelRenderAffiliationMaster() {
       '<div class="small-note mirel-aff-order-note">上にあるラベルほど、人物フォームでは左から先に表示されます。</div>';
 
 
+
+
   if (!mirelAffiliations.length) {
 
 
+
+
     html +=
-      '<div class="empty">所属はまだありません。</div>';
+      '<div class="empty">分類ラベルはまだありません。</div>';
+
+
 
 
   } else {
 
 
+
+
     mirelAffiliations.forEach(
       function(row, index) {
+
+
 
 
         var color =
@@ -13610,7 +19704,11 @@ function mirelRenderAffiliationMaster() {
           );
 
 
+
+
         html +=
+
+
 
 
           '<div class="mirel-aff-master-row" id="mirelAffRow_' +
@@ -13620,11 +19718,15 @@ function mirelRenderAffiliationMaster() {
           '">' +
 
 
+
+
             '<div class="mirel-aff-view-row" id="mirelAffView_' +
             escapeAttr(
               row.affiliationId
             ) +
             '">' +
+
+
 
 
               '<span class="mirel-aff-view-swatch" style="background:' +
@@ -13634,11 +19736,15 @@ function mirelRenderAffiliationMaster() {
               ';"></span>' +
 
 
+
+
               '<div class="mirel-aff-view-name">' +
               escapeHtml(
                 row.name
               ) +
               '</div>' +
+
+
 
 
               '<div class="mirel-aff-view-actions">' +
@@ -13660,11 +19766,15 @@ function mirelRenderAffiliationMaster() {
                 '</div>' +
 
 
+
+
                 '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelStartAffiliationEdit(\'' +
                 escapeJs(
                   row.affiliationId
                 ) +
                 '\')">編集</button>' +
+
+
 
 
                 '<button type="button" class="secondary mirel-aff-mini-action" onclick="mirelDeleteAffiliation(\'' +
@@ -13675,7 +19785,11 @@ function mirelRenderAffiliationMaster() {
               '</div>' +
 
 
+
+
             '</div>' +
+
+
 
 
             '<div class="mirel-aff-edit-panel" id="mirelAffEdit_' +
@@ -13683,6 +19797,8 @@ function mirelRenderAffiliationMaster() {
               row.affiliationId
             ) +
             '" style="display:none">' +
+
+
 
 
               '<input type="hidden" id="mirelAffColor_' +
@@ -13696,11 +19812,15 @@ function mirelRenderAffiliationMaster() {
               '">' +
 
 
+
+
               '<label class="mirel-aff-edit-label" for="mirelAffName_' +
               escapeAttr(
                 row.affiliationId
               ) +
               '">ラベル名</label>' +
+
+
 
 
               '<input class="mirel-aff-edit-name" type="text" id="mirelAffName_' +
@@ -13712,6 +19832,8 @@ function mirelRenderAffiliationMaster() {
                 row.name
               ) +
               '">' +
+
+
 
 
               '<div class="mirel-aff-color-line">' +
@@ -13728,10 +19850,14 @@ function mirelRenderAffiliationMaster() {
               '</div>' +
 
 
+
+
               mirelAffiliationPaletteHtml(
                 'mirelAffColor_' +
                 row.affiliationId
               ) +
+
+
 
 
               '<div class="mirel-aff-edit-actions">' +
@@ -13742,6 +19868,8 @@ function mirelRenderAffiliationMaster() {
                 '\')">キャンセル</button>' +
 
 
+
+
                 '<button type="button" class="primary" onclick="mirelUpdateAffiliation(\'' +
                 escapeJs(
                   row.affiliationId
@@ -13750,27 +19878,45 @@ function mirelRenderAffiliationMaster() {
               '</div>' +
 
 
+
+
             '</div>' +
 
 
+
+
           '</div>';
+
+
 
 
       }
     );
 
 
+
+
   }
 
 
+
+
   html += '</div>';
+
+
 
 
   box.innerHTML =
     html;
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -13779,6 +19925,8 @@ async function mirelMoveAffiliation(
   id,
   direction
 ) {
+
+
 
 
   var currentIndex =
@@ -13795,11 +19943,19 @@ async function mirelMoveAffiliation(
 
 
 
+
+
+
+
   if (
     currentIndex === -1
   ) {
     return;
   }
+
+
+
+
 
 
 
@@ -13814,6 +19970,10 @@ async function mirelMoveAffiliation(
 
 
 
+
+
+
+
   if (
     nextIndex < 0 ||
     nextIndex >= mirelAffiliations.length
@@ -13824,8 +19984,16 @@ async function mirelMoveAffiliation(
 
 
 
+
+
+
+
   var reordered =
     mirelAffiliations.slice();
+
+
+
+
 
 
 
@@ -13839,11 +20007,19 @@ async function mirelMoveAffiliation(
 
 
 
+
+
+
+
   reordered.splice(
     nextIndex,
     0,
     moved
   );
+
+
+
+
 
 
 
@@ -13854,14 +20030,26 @@ async function mirelMoveAffiliation(
 
 
 
+
+
+
+
   mirelAffiliations =
     reordered;
 
 
 
 
+
+
+
+
   mirelRenderAffiliationMaster();
   mirelRefreshAffiliationFilters();
+
+
+
+
 
 
 
@@ -13873,6 +20061,8 @@ async function mirelMoveAffiliation(
   ) {
 
 
+
+
     mirelRenderAffiliationPicker(
       valueOf(
         'teacherId'
@@ -13880,12 +20070,20 @@ async function mirelMoveAffiliation(
     );
 
 
+
+
   }
 
 
 
 
+
+
+
+
   try {
+
+
 
 
     var result =
@@ -13903,9 +20101,17 @@ async function mirelMoveAffiliation(
 
 
 
+
+
+
+
     mirelAffiliations =
       result.affiliations ||
       reordered;
+
+
+
+
 
 
 
@@ -13917,8 +20123,16 @@ async function mirelMoveAffiliation(
 
 
 
+
+
+
+
     mirelRenderAffiliationMaster();
     mirelRefreshAffiliationFilters();
+
+
+
+
 
 
 
@@ -13930,6 +20144,8 @@ async function mirelMoveAffiliation(
     ) {
 
 
+
+
       mirelRenderAffiliationPicker(
         valueOf(
           'teacherId'
@@ -13937,18 +20153,28 @@ async function mirelMoveAffiliation(
       );
 
 
+
+
     }
 
 
+
+
   } catch (e) {
+
+
 
 
     mirelAffiliations =
       previous;
 
 
+
+
     mirelRenderAffiliationMaster();
     mirelRefreshAffiliationFilters();
+
+
 
 
     handleError(
@@ -13956,7 +20182,11 @@ async function mirelMoveAffiliation(
     );
 
 
+
+
   }
+
+
 
 
 }
@@ -13964,9 +20194,15 @@ async function mirelMoveAffiliation(
 
 
 
+
+
+
+
 function mirelStartAffiliationEdit(
   id
 ) {
+
+
 
 
   document
@@ -13979,6 +20215,10 @@ function mirelStartAffiliationEdit(
           'none';
       }
     );
+
+
+
+
 
 
 
@@ -13997,6 +20237,10 @@ function mirelStartAffiliationEdit(
 
 
 
+
+
+
+
   var view =
     document.getElementById(
       'mirelAffView_' +
@@ -14004,11 +20248,17 @@ function mirelStartAffiliationEdit(
     );
 
 
+
+
   var edit =
     document.getElementById(
       'mirelAffEdit_' +
       id
     );
+
+
+
+
 
 
 
@@ -14021,13 +20271,23 @@ function mirelStartAffiliationEdit(
 
 
 
+
+
+
+
   if (edit) {
     edit.style.display =
       'block';
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -14037,7 +20297,11 @@ function mirelCancelAffiliationEdit(
 ) {
 
 
+
+
   mirelRenderAffiliationMaster();
+
+
 
 
 }
@@ -14045,13 +20309,23 @@ function mirelCancelAffiliationEdit(
 
 
 
+
+
+
+
 async function mirelAddAffiliation() {
+
+
 
 
   var name =
     valueOf(
       'mirelNewAffName'
     );
+
+
+
+
 
 
 
@@ -14064,6 +20338,10 @@ async function mirelAddAffiliation() {
 
 
 
+
+
+
+
   var color =
     colorInput
       ? colorInput.value
@@ -14072,18 +20350,32 @@ async function mirelAddAffiliation() {
 
 
 
+
+
+
+
   if (!name) {
 
 
+
+
     appToast(
-      '所属名を入力してください。'
+      '分類ラベル名を入力してください。'
     );
+
+
 
 
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -14096,10 +20388,16 @@ async function mirelAddAffiliation() {
 
 
 
+
+
+
+
   setValue(
     'mirelNewAffName',
     ''
   );
+
+
 
 
   mirelSetAffiliationColor(
@@ -14108,7 +20406,13 @@ async function mirelAddAffiliation() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -14116,6 +20420,8 @@ async function mirelAddAffiliation() {
 async function mirelUpdateAffiliation(
   id
 ) {
+
+
 
 
   var name =
@@ -14127,18 +20433,32 @@ async function mirelUpdateAffiliation(
 
 
 
+
+
+
+
   if (!name) {
 
 
+
+
     appToast(
-      '所属名を入力してください。'
+      '分類ラベル名を入力してください。'
     );
+
+
 
 
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -14152,15 +20472,25 @@ async function mirelUpdateAffiliation(
 
 
 
+
+
+
+
   await mirelSaveAffiliation({
+
+
 
 
     affiliationId:
       id,
 
 
+
+
     name:
       name,
+
+
 
 
     color:
@@ -14169,10 +20499,18 @@ async function mirelUpdateAffiliation(
         : '#f7d8df'
 
 
+
+
   });
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -14182,7 +20520,11 @@ async function mirelSaveAffiliation(
 ) {
 
 
+
+
   try {
+
+
 
 
     setLoading(
@@ -14192,11 +20534,19 @@ async function mirelSaveAffiliation(
 
 
 
+
+
+
+
     var result =
       await runScript(
 
 
+
+
         'saveMirelAffiliation',
+
+
 
 
         [
@@ -14204,7 +20554,13 @@ async function mirelSaveAffiliation(
         ]
 
 
+
+
       );
+
+
+
+
 
 
 
@@ -14216,6 +20572,10 @@ async function mirelSaveAffiliation(
 
 
 
+
+
+
+
     mirelTeacherAffiliations =
       result.teacherAffiliations ||
       {};
@@ -14223,10 +20583,20 @@ async function mirelSaveAffiliation(
 
 
 
+
+
+
+
     mirelRenderAffiliationMaster();
 
 
+
+
     mirelRefreshAffiliationFilters();
+
+
+
+
 
 
 
@@ -14238,6 +20608,8 @@ async function mirelSaveAffiliation(
     ) {
 
 
+
+
       mirelRenderAffiliationPicker(
         valueOf(
           'teacherId'
@@ -14245,10 +20617,16 @@ async function mirelSaveAffiliation(
       );
 
 
+
+
     }
 
 
+
+
   } catch (e) {
+
+
 
 
     handleError(
@@ -14256,7 +20634,11 @@ async function mirelSaveAffiliation(
     );
 
 
+
+
   } finally {
+
+
 
 
     setLoading(
@@ -14264,7 +20646,11 @@ async function mirelSaveAffiliation(
     );
 
 
+
+
   }
+
+
 
 
 }
@@ -14272,9 +20658,15 @@ async function mirelSaveAffiliation(
 
 
 
+
+
+
+
 async function mirelDeleteAffiliation(
   id
 ) {
+
+
 
 
   if (
@@ -14285,7 +20677,11 @@ async function mirelDeleteAffiliation(
   ) {
 
 
+
+
     return;
+
+
 
 
   }
@@ -14293,7 +20689,13 @@ async function mirelDeleteAffiliation(
 
 
 
+
+
+
+
   try {
+
+
 
 
     setLoading(
@@ -14303,11 +20705,19 @@ async function mirelDeleteAffiliation(
 
 
 
+
+
+
+
     var result =
       await runScript(
 
 
+
+
         'deleteMirelAffiliation',
+
+
 
 
         [
@@ -14315,7 +20725,13 @@ async function mirelDeleteAffiliation(
         ]
 
 
+
+
       );
+
+
+
+
 
 
 
@@ -14327,6 +20743,10 @@ async function mirelDeleteAffiliation(
 
 
 
+
+
+
+
     mirelTeacherAffiliations =
       result.teacherAffiliations ||
       {};
@@ -14334,16 +20754,28 @@ async function mirelDeleteAffiliation(
 
 
 
+
+
+
+
     mirelRenderAffiliationMaster();
+
+
 
 
     mirelRefreshAffiliationFilters();
 
 
+
+
     renderAll();
 
 
+
+
   } catch (e) {
+
+
 
 
     handleError(
@@ -14351,7 +20783,11 @@ async function mirelDeleteAffiliation(
     );
 
 
+
+
   } finally {
+
+
 
 
     setLoading(
@@ -14359,10 +20795,18 @@ async function mirelDeleteAffiliation(
     );
 
 
+
+
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -14372,10 +20816,14 @@ async function mirelDeleteAffiliation(
    ========================================================= */
 
 
+
+
 function mirelToggleField(
   id,
   visible
 ) {
+
+
 
 
   var element =
@@ -14386,9 +20834,17 @@ function mirelToggleField(
 
 
 
+
+
+
+
   if (!element) {
     return;
   }
+
+
+
+
 
 
 
@@ -14402,10 +20858,16 @@ function mirelToggleField(
 
 
 
+
+
+
+
   field.classList.toggle(
     'mirel-hidden',
     !visible
   );
+
+
 
 
 }
@@ -14413,7 +20875,13 @@ function mirelToggleField(
 
 
 
+
+
+
+
 function mirelApplyFormVisibility() {
+
+
 
 
   mirelToggleField(
@@ -14422,6 +20890,10 @@ function mirelApplyFormVisibility() {
       'gender'
     )
   );
+
+
+
+
 
 
 
@@ -14436,6 +20908,10 @@ function mirelApplyFormVisibility() {
 
 
 
+
+
+
+
   [
     'birthYear',
     'birthMonth',
@@ -14443,6 +20919,8 @@ function mirelApplyFormVisibility() {
   ]
     .forEach(
       function(id) {
+
+
 
 
         mirelToggleField(
@@ -14453,8 +20931,14 @@ function mirelApplyFormVisibility() {
         );
 
 
+
+
       }
     );
+
+
+
+
 
 
 
@@ -14469,12 +20953,20 @@ function mirelApplyFormVisibility() {
 
 
 
+
+
+
+
   mirelToggleField(
     'mirelGrade',
     mirelFeatureOn(
       'grade'
     )
   );
+
+
+
+
 
 
 
@@ -14487,7 +20979,13 @@ function mirelApplyFormVisibility() {
 
 
 
+
+
+
+
   if (aff) {
+
+
 
 
     aff.classList.toggle(
@@ -14498,7 +20996,13 @@ function mirelApplyFormVisibility() {
     );
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -14513,12 +21017,20 @@ function mirelApplyFormVisibility() {
 
 
 
+
+
+
+
   mirelToggleField(
     'salonKana',
     mirelFeatureOn(
       'place'
     )
   );
+
+
+
+
 
 
 
@@ -14531,11 +21043,17 @@ function mirelApplyFormVisibility() {
 
 
 
+
+
+
+
   /* 郵便番号＋「住所を入力」ボタンをまとめて非表示 */
   var postal =
     document.getElementById(
       'postalCode'
     );
+
+
 
 
   var postalRow =
@@ -14544,6 +21062,8 @@ function mirelApplyFormVisibility() {
           '.mirel-postal-row'
         )
       : null;
+
+
 
 
   if (postalRow) {
@@ -14556,11 +21076,17 @@ function mirelApplyFormVisibility() {
 
 
 
+
+
+
+
   /* 都道府県＋市区町村の行もまとめて非表示 */
   var prefecture =
     document.getElementById(
       'prefecture'
     );
+
+
 
 
   var addressGrid =
@@ -14569,6 +21095,8 @@ function mirelApplyFormVisibility() {
           '.grid2'
         )
       : null;
+
+
 
 
   if (addressGrid) {
@@ -14581,6 +21109,10 @@ function mirelApplyFormVisibility() {
 
 
 
+
+
+
+
   [
     'address1',
     'address2'
@@ -14589,14 +21121,22 @@ function mirelApplyFormVisibility() {
       function(id) {
 
 
+
+
         mirelToggleField(
           id,
           addressVisible
         );
 
 
+
+
       }
     );
+
+
+
+
 
 
 
@@ -14611,15 +21151,21 @@ function mirelApplyFormVisibility() {
       function(row) {
 
 
+
+
         var section =
           document.getElementById(
             row[0]
           );
 
 
+
+
         if (!section) {
           return;
         }
+
+
 
 
         section.classList.toggle(
@@ -14630,11 +21176,17 @@ function mirelApplyFormVisibility() {
         );
 
 
+
+
       }
     );
 
 
+
+
 }
+
+
 
 
 /* =========================================================
@@ -14642,7 +21194,11 @@ function mirelApplyFormVisibility() {
    ========================================================= */
 
 
+
+
 function mirelApplyDetailVisibility() {
+
+
 
 
   var detail =
@@ -14653,9 +21209,17 @@ function mirelApplyDetailVisibility() {
 
 
 
+
+
+
+
   if (!detail) {
     return;
   }
+
+
+
+
 
 
 
@@ -14668,10 +21232,16 @@ function mirelApplyDetailVisibility() {
       function(row) {
 
 
+
+
         var label =
           row.querySelector(
             '.label'
           );
+
+
+
+
 
 
 
@@ -14683,8 +21253,16 @@ function mirelApplyDetailVisibility() {
 
 
 
+
+
+
+
         var text =
           label.textContent.trim();
+
+
+
+
 
 
 
@@ -14695,10 +21273,16 @@ function mirelApplyDetailVisibility() {
 
 
 
+
+
+
+
         if (
           text ===
           '性別'
         ) {
+
+
 
 
           visible =
@@ -14707,7 +21291,13 @@ function mirelApplyDetailVisibility() {
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14718,13 +21308,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'phone'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14735,13 +21333,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'birthday'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14752,13 +21358,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'age'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14769,13 +21383,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'grade'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14786,13 +21408,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'affiliation'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14805,13 +21435,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'place'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14822,13 +21460,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'address'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14839,13 +21485,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'address'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14856,13 +21510,21 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           visible =
             mirelFeatureOn(
               'sns'
             );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14873,8 +21535,14 @@ function mirelApplyDetailVisibility() {
         );
 
 
+
+
       }
     );
+
+
+
+
 
 
 
@@ -14887,10 +21555,16 @@ function mirelApplyDetailVisibility() {
       function(card) {
 
 
+
+
         var title =
           card.querySelector(
             '.section-title'
           );
+
+
+
+
 
 
 
@@ -14902,8 +21576,16 @@ function mirelApplyDetailVisibility() {
 
 
 
+
+
+
+
         var text =
           title.textContent.trim();
+
+
+
+
 
 
 
@@ -14915,6 +21597,8 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           card.classList.toggle(
             'mirel-hidden',
             !mirelFeatureOn(
@@ -14923,7 +21607,13 @@ function mirelApplyDetailVisibility() {
           );
 
 
+
+
         }
+
+
+
+
 
 
 
@@ -14935,6 +21625,8 @@ function mirelApplyDetailVisibility() {
         ) {
 
 
+
+
           card.classList.toggle(
             'mirel-hidden',
             !mirelFeatureOn(
@@ -14943,11 +21635,19 @@ function mirelApplyDetailVisibility() {
           );
 
 
+
+
         }
+
+
 
 
       }
     );
+
+
+
+
 
 
 
@@ -14960,6 +21660,8 @@ function mirelApplyDetailVisibility() {
       function(button) {
 
 
+
+
         if (
           button.textContent.indexOf(
             'Google Maps'
@@ -14969,10 +21671,14 @@ function mirelApplyDetailVisibility() {
         }
 
 
+
+
         var actions =
           button.closest(
             '.actions'
           );
+
+
 
 
         if (actions) {
@@ -14985,11 +21691,19 @@ function mirelApplyDetailVisibility() {
         }
 
 
+
+
       }
     );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -14999,7 +21713,11 @@ function mirelApplyDetailVisibility() {
    ========================================================= */
 
 
+
+
 function mirelApplyCurrentVisibility() {
+
+
 
 
   mirelApplyMapVisibility();
@@ -15008,9 +21726,15 @@ function mirelApplyCurrentVisibility() {
 
 
 
+
+
+
+
   if (
     selectedTeacherId
   ) {
+
+
 
 
     var teacher =
@@ -15021,7 +21745,13 @@ function mirelApplyCurrentVisibility() {
 
 
 
+
+
+
+
     if (teacher) {
+
+
 
 
       renderTeacherDetail(
@@ -15029,13 +21759,23 @@ function mirelApplyCurrentVisibility() {
       );
 
 
+
+
     }
+
+
 
 
   }
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -15045,13 +21785,19 @@ function appToast(
 ) {
 
 
+
+
   var toast =
     document.getElementById(
       'mirelToast'
     );
 
 
+
+
   if (!toast) {
+
+
 
 
     toast =
@@ -15060,12 +21806,18 @@ function appToast(
       );
 
 
+
+
     toast.id =
       'mirelToast';
 
 
+
+
     toast.className =
       'mirel-toast';
+
+
 
 
     document.body.appendChild(
@@ -15073,7 +21825,11 @@ function appToast(
     );
 
 
+
+
   }
+
+
 
 
   toast.textContent =
@@ -15083,9 +21839,13 @@ function appToast(
     );
 
 
+
+
   toast.classList.add(
     'show'
   );
+
+
 
 
   clearTimeout(
@@ -15093,9 +21853,13 @@ function appToast(
   );
 
 
+
+
   appToast._timer =
     setTimeout(
       function() {
+
+
 
 
         toast.classList.remove(
@@ -15103,12 +21867,20 @@ function appToast(
         );
 
 
+
+
       },
       2200
     );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -15118,7 +21890,11 @@ function appToast(
    ========================================================= */
 
 
+
+
 function mirelMaybeShowInitialSetup() {
+
+
 
 
   if (
@@ -15128,10 +21904,18 @@ function mirelMaybeShowInitialSetup() {
   ) {
 
 
+
+
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -15143,10 +21927,18 @@ function mirelMaybeShowInitialSetup() {
   ) {
 
 
+
+
     return;
 
 
+
+
   }
+
+
+
+
 
 
 
@@ -15159,12 +21951,22 @@ function mirelMaybeShowInitialSetup() {
 
 
 
+
+
+
+
   overlay.id =
     'mirelSetupOverlay';
 
 
+
+
   overlay.className =
     'mirel-setup-overlay';
+
+
+
+
 
 
 
@@ -15175,15 +21977,25 @@ function mirelMaybeShowInitialSetup() {
 
 
 
+
+
+
+
   mirelFeatureDefinitions()
     .forEach(
       function(row) {
 
 
+
+
         checks +=
 
 
+
+
           '<label class="mirel-feature-toggle">' +
+
+
 
 
           '<input ' +
@@ -15194,6 +22006,8 @@ function mirelMaybeShowInitialSetup() {
           '" checked>' +
 
 
+
+
           '<span>' +
           escapeHtml(
             row[1]
@@ -15201,7 +22015,11 @@ function mirelMaybeShowInitialSetup() {
           '</span>' +
 
 
+
+
           '</label>';
+
+
 
 
       }
@@ -15210,10 +22028,18 @@ function mirelMaybeShowInitialSetup() {
 
 
 
+
+
+
+
   overlay.innerHTML =
 
 
+
+
     '<div class="mirel-setup-card">' +
+
+
 
 
       '<div class="mirel-setup-title">' +
@@ -15221,9 +22047,13 @@ function mirelMaybeShowInitialSetup() {
       '</div>' +
 
 
+
+
       '<div class="mirel-setup-note">' +
       '後から設定画面でいつでも変更できます。OFFにしてもデータは削除されません。' +
       '</div>' +
+
+
 
 
       '<div class="mirel-feature-grid">' +
@@ -15231,7 +22061,11 @@ function mirelMaybeShowInitialSetup() {
       '</div>' +
 
 
+
+
       '<div class="form-actions" style="margin-top:22px;">' +
+
+
 
 
         '<button class="primary" type="button" onclick="mirelFinishSetup()">' +
@@ -15239,10 +22073,18 @@ function mirelMaybeShowInitialSetup() {
         '</button>' +
 
 
+
+
       '</div>' +
 
 
+
+
     '</div>';
+
+
+
+
 
 
 
@@ -15252,7 +22094,13 @@ function mirelMaybeShowInitialSetup() {
   );
 
 
+
+
 }
+
+
+
+
 
 
 
@@ -15260,14 +22108,24 @@ function mirelMaybeShowInitialSetup() {
 async function mirelFinishSetup() {
 
 
+
+
   var payload = {
+
+
 
 
     setupCompleted:
       true
 
 
+
+
   };
+
+
+
+
 
 
 
@@ -15280,10 +22138,14 @@ async function mirelFinishSetup() {
       function(input) {
 
 
+
+
         payload[
           input.dataset.feature
         ] =
           input.checked;
+
+
 
 
       }
@@ -15292,7 +22154,13 @@ async function mirelFinishSetup() {
 
 
 
+
+
+
+
   try {
+
+
 
 
     setLoading(
@@ -15302,11 +22170,19 @@ async function mirelFinishSetup() {
 
 
 
+
+
+
+
     var result =
       await runScript(
 
 
+
+
         'saveMirelFeatureSettings',
+
+
 
 
         [
@@ -15314,7 +22190,13 @@ async function mirelFinishSetup() {
         ]
 
 
+
+
       );
+
+
+
+
 
 
 
@@ -15322,6 +22204,10 @@ async function mirelFinishSetup() {
     mirelFeatureSettings =
       result.featureSettings ||
       {};
+
+
+
+
 
 
 
@@ -15334,10 +22220,18 @@ async function mirelFinishSetup() {
 
 
 
+
+
+
+
     if (overlay) {
 
 
+
+
       overlay.remove();
+
+
 
 
     }
@@ -15345,13 +22239,23 @@ async function mirelFinishSetup() {
 
 
 
+
+
+
+
     mirelRenderFeatureSettings();
+
+
 
 
     mirelApplyCurrentVisibility();
 
 
+
+
   } catch (e) {
+
+
 
 
     handleError(
@@ -15359,7 +22263,11 @@ async function mirelFinishSetup() {
     );
 
 
+
+
   } finally {
+
+
 
 
     setLoading(
@@ -15367,10 +22275,16 @@ async function mirelFinishSetup() {
     );
 
 
+
+
   }
 
 
+
+
 }
+
+
 
 
 /* 速度診断 表示 */
@@ -15392,14 +22306,22 @@ async function mirelFinishSetup() {
 
 
 
+
+
+
+
 /* =========================================================
    2026-10-09-26
    ワークスペース切替 / 別Googleアカウント切替
    ========================================================= */
 
 
+
+
 var mirelWorkspaceState = null;
 var mirelWorkspaceLoading = false;
+
+
 
 
 function mirelClearUserLocalCache() {
@@ -15408,10 +22330,14 @@ function mirelClearUserLocalCache() {
 }
 
 
+
+
 function mirelLogoutAndSwitchAccount() {
   clearAccessToken();
   try { localStorage.removeItem(STORAGE_AUTHORIZED); } catch (e) {}
   mirelClearUserLocalCache();
+
+
 
 
   teachers = [];
@@ -15421,7 +22347,11 @@ function mirelLogoutAndSwitchAccount() {
   mirelFeatureSettings = {};
 
 
+
+
   showLoginScreen();
+
+
 
 
   var message = document.getElementById('authMessage');
@@ -15431,11 +22361,15 @@ function mirelLogoutAndSwitchAccount() {
 }
 
 
+
+
 function mirelEnsureWorkspacePanel() {
   var page = document.getElementById('pageSettings');
   if (!page) return;
   var card = page.querySelector('.card');
   if (!card) return;
+
+
 
 
   var panel = document.getElementById('mirelWorkspaceSection');
@@ -15449,6 +22383,8 @@ function mirelEnsureWorkspacePanel() {
       '<div id="mirelWorkspacePanel"><div class="small-note">読み込み中…</div></div>';
 
 
+
+
     var extra = document.getElementById('mirelExtraSettings');
     if (extra && extra.parentNode === card) {
       card.insertBefore(panel, extra);
@@ -15458,8 +22394,12 @@ function mirelEnsureWorkspacePanel() {
   }
 
 
+
+
   mirelLoadWorkspacePanel();
 }
+
+
 
 
 async function mirelLoadWorkspacePanel(force) {
@@ -15469,6 +22409,8 @@ async function mirelLoadWorkspacePanel(force) {
     mirelRenderWorkspacePanel();
     return;
   }
+
+
 
 
   mirelWorkspaceLoading = true;
@@ -15483,9 +22425,13 @@ async function mirelLoadWorkspacePanel(force) {
 }
 
 
+
+
 function mirelRenderWorkspacePanel() {
   var host = document.getElementById('mirelWorkspacePanel');
   if (!host) return;
+
+
 
 
   var state = mirelWorkspaceState || {};
@@ -15493,11 +22439,15 @@ function mirelRenderWorkspacePanel() {
   var activeId = String(state.activeWorkspaceId || '');
 
 
+
+
   var options = list.map(function(ws) {
     var selected = String(ws.id) === activeId ? ' selected' : '';
     return '<option value="' + escapeHtml(String(ws.id || '')) + '"' + selected + '>' +
       escapeHtml(String(ws.name || 'メイン')) + '</option>';
   }).join('');
+
+
 
 
   host.innerHTML =
@@ -15523,6 +22473,8 @@ function mirelRenderWorkspacePanel() {
 }
 
 
+
+
 async function mirelSwitchWorkspaceFromUi() {
   var select = document.getElementById('mirelWorkspaceSelect');
   if (!select || !select.value) return;
@@ -15530,6 +22482,8 @@ async function mirelSwitchWorkspaceFromUi() {
     appToast('すでにこのワークスペースを使用しています。');
     return;
   }
+
+
 
 
   setLoading(true);
@@ -15544,6 +22498,8 @@ async function mirelSwitchWorkspaceFromUi() {
 }
 
 
+
+
 async function mirelCreateWorkspaceFromUi() {
   var input = document.getElementById('mirelNewWorkspaceName');
   var name = input ? String(input.value || '').trim() : '';
@@ -15552,6 +22508,8 @@ async function mirelCreateWorkspaceFromUi() {
     if (input) input.focus();
     return;
   }
+
+
 
 
   setLoading(true);
@@ -15566,11 +22524,15 @@ async function mirelCreateWorkspaceFromUi() {
 }
 
 
+
+
 var mirelBaseInstallSettingsUiForWorkspace = mirelInstallSettingsUi;
 mirelInstallSettingsUi = function() {
   mirelBaseInstallSettingsUiForWorkspace();
   mirelEnsureWorkspacePanel();
 };
+
+
 
 
 /* 設定ページを開いた時にも最新のワークスペース一覧を確認する */
@@ -15582,6 +22544,12 @@ showPage = function(pageName) {
   }
   return result;
 };
+
+
+
+
+
+
 
 
 
@@ -15602,6 +22570,7 @@ showPage = function(pageName) {
   }
 })();
 
+
 /* =========================================================
    2026-10-11-48
    起動画面の切り替わり改善
@@ -15609,17 +22578,21 @@ showPage = function(pageName) {
    ・ログイン画面／アプリ画面を先に描画してからローディングをフェードアウト
    ========================================================= */
 
+
 showLoginScreen = function() {
   var appShell = document.getElementById('appShell');
   var authScreen = document.getElementById('authScreen');
+
 
   if (appShell) {
     appShell.classList.add('hidden');
   }
 
+
   if (authScreen) {
     authScreen.classList.remove('hidden');
   }
+
 
   requestAnimationFrame(function() {
     requestAnimationFrame(function() {
@@ -15628,16 +22601,18 @@ showLoginScreen = function() {
   });
 };
 
+
 showAppScreen = function() {
   var authScreen = document.getElementById('authScreen');
   var appShell = document.getElementById('appShell');
+
 
   if (authScreen) {
     authScreen.classList.add('hidden');
   }
 
+
   if (appShell) {
     appShell.classList.remove('hidden');
   }
 };
-
