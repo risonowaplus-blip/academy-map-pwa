@@ -16969,3 +16969,341 @@ mirelArrangeSettingsForRelease = function() {
 
 
 };
+
+
+/* =====================================================
+   Mirel Map：一括削除画面
+   2026-10-11
+   ===================================================== */
+
+mirelEnsureBulkDeleteSection_ = function() {
+  var section = mirelSettingsAccordion_(
+    'mirelBulkDeleteSection',
+    'データ一括削除'
+  );
+
+  var body = section.querySelector(
+    '.mirel-settings-accordion-body'
+  );
+
+  if (!body) return section;
+
+  body.innerHTML = `
+    <div style="display:grid;gap:12px;padding:8px 0">
+
+      <div>
+        <button type="button"
+          class="detail-delete-button"
+          onclick="mirelExecuteBulkDelete('persons')">
+          人物データを一括削除
+        </button>
+        <div class="small-note">
+          人物・子ども・SNS・交流履歴・関連情報を削除します。
+          分類ラベルは残ります。
+        </div>
+      </div>
+
+      <div>
+        <button type="button"
+          class="detail-delete-button"
+          onclick="mirelExecuteBulkDelete('labels')">
+          分類ラベルを一括削除
+        </button>
+        <div class="small-note">
+          分類ラベルと人物への紐づけを削除します。
+          人物情報は残ります。
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #ddd;padding-top:14px">
+        <button type="button"
+          class="detail-delete-button"
+          onclick="mirelConfirmWorkspaceDeletion()">
+          ワークスペースごと削除
+        </button>
+        <div class="small-note">
+          ワークスペースと登録情報をすべて削除します。
+          他のワークスペースには影響しません。
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  return section;
+};
+
+async function mirelExecuteBulkDelete(type) {
+  var persons = type === 'persons';
+
+  var title = persons
+    ? '人物データを一括削除しますか？'
+    : '分類ラベルを一括削除しますか？';
+
+  var message = persons
+    ? '人物・子ども・SNS・交流履歴などの関連情報を削除します。分類ラベルは残ります。'
+    : '分類ラベルと人物への紐づけを削除します。人物情報は残ります。';
+
+  var first = await appConfirm(
+    title,
+    message,
+    '確認する'
+  );
+
+  if (!first) return;
+
+  var second = await appConfirm(
+    '最終確認',
+    'この操作は元に戻せません。',
+    'すべて削除する'
+  );
+
+  if (!second) return;
+
+  setLoading(true);
+
+  try {
+    var result = await runScript(
+      persons
+        ? 'mirelBulkDeletePersons'
+        : 'mirelBulkDeleteLabels'
+    );
+
+    if (!result || result.ok !== true) {
+      throw new Error('削除処理が完了しませんでした。');
+    }
+
+    try {
+      localStorage.removeItem(STORAGE_APP_SNAPSHOT);
+    } catch (e) {}
+
+    await startApp();
+
+    appToast(
+      persons
+        ? '人物データを一括削除しました。'
+        : '分類ラベルを一括削除しました。'
+    );
+  } catch (e) {
+    handleError(e);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function mirelConfirmWorkspaceDeletion() {
+  var state;
+
+  try {
+    state = await runScript('getMyWorkspaces', []);
+  } catch (e) {
+    handleError(e);
+    return;
+  }
+
+  var list = state.workspaces || [];
+
+  if (list.length <= 1) {
+    appToast(
+      '最後のワークスペースは削除できません。'
+    );
+    return;
+  }
+
+  var active = list.find(function(ws) {
+    return String(ws.id) ===
+      String(state.activeWorkspaceId);
+  });
+
+  if (!active) {
+    appToast('ワークスペースを確認できません。');
+    return;
+  }
+
+  var existing = document.getElementById(
+    'mirelWorkspaceDeleteOverlay'
+  );
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'mirelWorkspaceDeleteOverlay';
+
+  overlay.style.cssText = `
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    box-sizing:border-box;
+  `;
+
+  var dialog = document.createElement('div');
+  dialog.style.cssText = `
+    background:#fff;
+    color:#222;
+    width:100%;
+    max-width:420px;
+    border-radius:16px;
+    padding:22px;
+    box-sizing:border-box;
+    box-shadow:0 12px 40px rgba(0,0,0,.2);
+  `;
+
+  var heading = document.createElement('h3');
+  heading.textContent = 'ワークスペースの削除';
+  heading.style.margin = '0 0 16px';
+
+  var name = document.createElement('div');
+  name.textContent = '対象：' + active.name;
+  name.style.cssText = `
+    font-weight:bold;
+    margin-bottom:12px;
+    overflow-wrap:anywhere;
+  `;
+
+  var warning = document.createElement('p');
+  warning.textContent =
+    'このワークスペースと登録データをすべて削除します。' +
+    '他のワークスペースには影響しません。';
+  warning.style.lineHeight = '1.7';
+
+  var checkLabel = document.createElement('label');
+  checkLabel.style.cssText = `
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    padding:14px;
+    background:#f6f6f6;
+    border-radius:10px;
+    margin:18px 0;
+    line-height:1.6;
+    cursor:pointer;
+  `;
+
+  var checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.style.cssText = `
+    width:20px;
+    height:20px;
+    flex-shrink:0;
+    margin-top:3px;
+  `;
+
+  var checkText = document.createElement('span');
+  checkText.textContent =
+    '削除内容を確認し、すべてのデータが削除されることに同意します。';
+
+  checkLabel.appendChild(checkbox);
+  checkLabel.appendChild(checkText);
+
+  var actions = document.createElement('div');
+  actions.style.cssText = `
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+  `;
+
+  var cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.textContent = 'キャンセル';
+  cancel.style.cssText = `
+    flex:1;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:9px;
+    background:#fff;
+    color:#333;
+  `;
+
+  var remove = document.createElement('button');
+  remove.type = 'button';
+  remove.textContent = '削除する';
+  remove.disabled = true;
+
+  function updateButton() {
+    remove.disabled = !checkbox.checked;
+    remove.style.cssText = `
+      flex:1;
+      padding:12px;
+      border:0;
+      border-radius:9px;
+      color:white;
+      background:${checkbox.checked ? '#bd4545' : '#ccc'};
+      opacity:${checkbox.checked ? '1' : '.6'};
+    `;
+  }
+
+  checkbox.addEventListener('change', updateButton);
+  updateButton();
+
+  cancel.onclick = function() {
+    overlay.remove();
+  };
+
+  remove.onclick = async function() {
+    if (!checkbox.checked) return;
+
+    overlay.remove();
+
+    var finalConfirm = await appConfirm(
+      '最終確認',
+      '「' + active.name +
+      '」を本当に削除しますか？\n' +
+      'この操作は取り消せません。',
+      '削除する'
+    );
+
+    if (!finalConfirm) return;
+
+    setLoading(true);
+
+    try {
+      var result = await runScript(
+        'mirelDeleteCurrentWorkspace',
+        [active.id]
+      );
+
+      if (!result || result.ok !== true) {
+        throw new Error(
+          'ワークスペースを削除できませんでした。'
+        );
+      }
+
+      // 古いワークスペース情報とキャッシュを破棄
+      mirelWorkspaceState = null;
+
+      try {
+        localStorage.removeItem(STORAGE_APP_SNAPSHOT);
+      } catch (e) {}
+
+      await startApp();
+
+      if (typeof mirelLoadWorkspacePanel === 'function') {
+        await mirelLoadWorkspacePanel(true);
+      }
+
+      appToast(
+        'ワークスペースを削除しました。'
+      );
+    } catch (e) {
+      handleError(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  actions.appendChild(cancel);
+  actions.appendChild(remove);
+
+  dialog.appendChild(heading);
+  dialog.appendChild(name);
+  dialog.appendChild(warning);
+  dialog.appendChild(checkLabel);
+  dialog.appendChild(actions);
+
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+}
