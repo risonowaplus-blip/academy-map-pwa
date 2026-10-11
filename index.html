@@ -2,10 +2,16 @@
 <html lang="ja">
 
 
+
+
 <head>
 
 
+
+
   <meta charset="utf-8">
+
+
 
 
   <meta
@@ -14,7 +20,11 @@
   >
 
 
-  <meta name="mirel-app-version" content="2026.10.11-49">
+
+
+  <meta name="mirel-app-version" content="2026.10.11-50">
+
+
 
 
   <meta
@@ -23,16 +33,22 @@
   >
 
 
+
+
   <meta
     name="apple-mobile-web-app-capable"
     content="yes"
   >
 
 
+
+
   <meta
     name="apple-mobile-web-app-status-bar-style"
     content="default"
   >
+
+
 
 
   <meta
@@ -42,6 +58,8 @@
   >
 
 
+
+
   <link
     id="appManifest"
     rel="manifest"
@@ -49,10 +67,14 @@
   >
 
 
+
+
   <link
     rel="apple-touch-icon"
     href="./apple-touch-icon.png?v=20261010-44"
   >
+
+
 
 
   <link
@@ -62,10 +84,14 @@
   >
 
 
+
+
   <link
     rel="stylesheet"
     href="./style.css?v=20261009-39"
   >
+
+
 
 
   <style id="mirel-pwa-loading-20261009-39">
@@ -90,15 +116,21 @@
   </style>
 
 
+
+
   <title>
     Mirel Map
   </title>
+
+
 
 
   <style>
     .mirel-field-compact {
       max-width: 320px;
     }
+
+
 
 
     .mirel-postal-row {
@@ -109,16 +141,22 @@
     }
 
 
+
+
     .mirel-postal-row .field {
       flex: 0 1 220px;
       margin: 0;
     }
 
 
+
+
     .mirel-postal-button {
       margin-bottom: 2px;
       white-space: nowrap;
     }
+
+
 
 
     @media (max-width: 560px) {
@@ -131,10 +169,16 @@
 
 
 
+
+
+
+
   <style>
     #teacherModal .modal {
       padding-bottom: calc(92px + env(safe-area-inset-bottom));
     }
+
+
 
 
     .mirel-edit-accordion {
@@ -144,6 +188,8 @@
       background: #fff;
       overflow: hidden;
     }
+
+
 
 
     .mirel-edit-accordion > summary {
@@ -159,9 +205,13 @@
     }
 
 
+
+
     .mirel-edit-accordion > summary::-webkit-details-marker {
       display: none;
     }
+
+
 
 
     .mirel-edit-accordion > summary::after {
@@ -173,9 +223,13 @@
     }
 
 
+
+
     .mirel-edit-accordion[open] > summary::after {
       transform: rotate(180deg);
     }
+
+
 
 
     .mirel-edit-summary-main {
@@ -186,6 +240,8 @@
     }
 
 
+
+
     .mirel-edit-count {
       font-size: 12px;
       font-weight: 600;
@@ -194,15 +250,21 @@
     }
 
 
+
+
     .mirel-edit-accordion .children-area {
       margin-top: 0;
       padding: 0 14px 14px;
     }
 
 
+
+
     #teacherModal .modal {
       padding-bottom: calc(104px + env(safe-area-inset-bottom));
     }
+
+
 
 
     .mirel-form-sticky-actions {
@@ -221,6 +283,8 @@
     }
 
 
+
+
     .mirel-form-sticky-actions::after {
       content: "";
       position: absolute;
@@ -233,9 +297,13 @@
     }
 
 
+
+
     .mirel-list-search {
       margin-bottom: 0 !important;
     }
+
+
 
 
     .mirel-list-filter-row {
@@ -246,6 +314,8 @@
     }
 
 
+
+
     .mirel-list-filter-row .mirel-region-jump,
     .mirel-list-filter-row .mirel-filter-select {
       width: 100%;
@@ -254,10 +324,14 @@
     }
 
 
+
+
     .mirel-list-filter-row .mirel-region-jump select {
       width: 100%;
       margin: 0 !important;
     }
+
+
 
 
     .mirel-history-tabs {
@@ -270,9 +344,13 @@
     }
 
 
+
+
     .mirel-history-tabs::-webkit-scrollbar {
       display: none;
     }
+
+
 
 
     .mirel-history-tab {
@@ -286,10 +364,14 @@
     }
 
 
+
+
     .mirel-history-tab.active {
       font-weight: 700;
       border-color: currentColor;
     }
+
+
 
 
     .mirel-history-toggle {
@@ -307,12 +389,18 @@
 
 
 
+
+
+
+
   <style>
     body {
       --mirel-detail-primary-size: 15px;
       --mirel-detail-body-size: 14px;
       --mirel-detail-small-size: 13px;
     }
+
+
 
 
     body[data-mirel-font-size="small"] {
@@ -322,11 +410,15 @@
     }
 
 
+
+
     body[data-mirel-font-size="standard"] {
       --mirel-detail-primary-size: 15px;
       --mirel-detail-body-size: 14px;
       --mirel-detail-small-size: 13px;
     }
+
+
 
 
     body[data-mirel-font-size="large"] {
@@ -336,10 +428,14 @@
     }
 
 
+
+
     #detailContent .mirel-interaction-row,
     #detailContent .mirel-child-card > .child {
       font-size: var(--mirel-detail-body-size) !important;
     }
+
+
 
 
     #detailContent .mirel-interaction-row .interaction-date,
@@ -348,11 +444,15 @@
     }
 
 
+
+
     #detailContent .mirel-interaction-row .interaction-type-label,
     #detailContent .mirel-child-card .child-meta,
     #detailContent .mirel-child-card .small-note {
       font-size: var(--mirel-detail-small-size) !important;
     }
+
+
 
 
     #detailContent .mirel-interaction-row > div:not(.detail-head),
@@ -363,9 +463,13 @@
     }
 
 
+
+
     .mirel-list-card .teacher-name {
       font-size: var(--mirel-detail-primary-size) !important;
     }
+
+
 
 
     .mirel-list-card .mirel-list-address,
@@ -373,6 +477,10 @@
       font-size: var(--mirel-detail-body-size) !important;
     }
   </style>
+
+
+
+
 
 
 
@@ -403,6 +511,8 @@
   #detailContent .interaction-type-label {
     font-size: var(--mirel-detail-small-size) !important;
   }
+
+
 
 
   .mirel-workspace-section {
@@ -453,6 +563,12 @@
 
 
 
+
+
+
+
+
+
 <style id="mirel-release-polish-20261009-32">
   /* 文字サイズ差を明確化 */
   body[data-mirel-font-size="small"] {
@@ -478,6 +594,8 @@
   #detailContent .detail-row .label,
   #detailContent .meta,
   #detailContent .mirel-child-detail-label { font-size: var(--mirel-detail-small-size) !important; }
+
+
 
 
   /* 行間・余白設定 */
@@ -523,6 +641,8 @@
   }
 
 
+
+
   /* 設定画面の固定保存 */
   .mirel-fixed-settings-save {
     position: fixed;
@@ -538,9 +658,13 @@
   .mirel-perf-section { display:none !important; }
 
 
+
+
   /* 設定セクション */
   #pageSettings .mirel-extra-section { margin-top: 18px; }
   #pageSettings #mirelWorkspaceSection { margin-bottom: 12px; }
+
+
 
 
   /* アプリ全体へ文字サイズ・行間・余白を反映 */
@@ -564,6 +688,8 @@
   .bottom-nav button { font-size: var(--mirel-ui-small-size) !important; }
 
 
+
+
   /* 詳細：所属は名前より上 */
   .mirel-detail-affiliation-top {
     display:flex;
@@ -574,10 +700,16 @@
   .mirel-detail-sns-card .link-list { margin-top:8px; }
 
 
+
+
   /* 子ども詳細 */
   .mirel-child-detail-info { margin-top:10px; display:grid; gap:7px; }
   .mirel-child-detail-line { display:grid; grid-template-columns:72px minmax(0,1fr); gap:10px; align-items:start; }
   .mirel-child-detail-label { opacity:.68; }
+
+
+
+
 
 
 
@@ -640,6 +772,8 @@
   .mirel-range-number { width:76px !important; min-width:0 !important; text-align:right; }
 
 
+
+
   /* プレビュー：項目間余白と文章内の行間を分けて見せる */
   .mirel-preview-section-label {
     font-size: calc(12px * var(--preview-scale)) !important;
@@ -672,6 +806,8 @@
   }
 
 
+
+
   /* 実画面：文字倍率と余白設定を主要UIへ確実に反映 */
   .teacher.mirel-list-card {
     min-height:0 !important;
@@ -684,6 +820,8 @@
   .teacher.mirel-list-card .mirel-aff-tag { font-size:var(--mirel-ui-body-size) !important; }
   .teacher.mirel-list-card .mirel-list-first,
   .teacher.mirel-list-card .mirel-aff-tags { gap:var(--mirel-inner-gap, 5px) !important; }
+
+
 
 
   #detailContent .card {
@@ -711,6 +849,8 @@
   }
 
 
+
+
   #teacherModal .modal, #detailModal .modal, #settingsModal .modal {
     font-size:var(--mirel-ui-body-size) !important;
   }
@@ -725,6 +865,10 @@
     padding:var(--mirel-accordion-pad-y, 10px) var(--mirel-card-pad-x, 13px) !important;
   }
   #pageMap, #pageSettings, #pageList, #pageAdd { font-size:var(--mirel-ui-body-size) !important; }
+
+
+
+
 
 
 
@@ -755,6 +899,8 @@
   .teacher-list .teacher > * + * {
     margin-top: var(--mirel-inner-gap, 5px) !important;
   }
+
+
 
 
   #detailContent {
@@ -791,6 +937,8 @@
   }
 
 
+
+
   #teacherModal .modal {
     font-size: var(--mirel-ui-body-size, 15px) !important;
     line-height: var(--mirel-content-line-height, 1.5) !important;
@@ -811,6 +959,8 @@
   }
 
 
+
+
   #pageSettings, #pageMap, #pageList, #pageAdd {
     font-size: var(--mirel-ui-body-size, 15px) !important;
     line-height: var(--mirel-content-line-height, 1.5) !important;
@@ -821,11 +971,17 @@
   #pageSettings .field, #pageAdd .field { margin-bottom: var(--mirel-ui-gap, 9px) !important; }
 
 
+
+
   .mirel-font-preview-compact { margin-top: 8px; }
   .mirel-font-preview-compact .mirel-font-preview-card { padding: 10px 12px; }
   .mirel-font-preview-compact .mirel-font-preview-body,
   .mirel-font-preview-compact .mirel-font-preview-small { margin-top: 4px; }
 </style>
+
+
+
+
 
 
 
@@ -848,6 +1004,8 @@
     pointer-events: auto;
     transition: opacity .12s ease;
   }
+
+
 
 
   /* 設定画面：6項目を初動で一覧できるコンパクトな折りたたみ */
@@ -900,12 +1058,22 @@
 </style>
 
 
+
+
 </head>
 
 
 
 
+
+
+
+
 <body>
+
+
+
+
 
 
 
@@ -916,7 +1084,11 @@
 >
 
 
+
+
   <div class="auth-card">
+
+
 
 
     <div class="app-mark">
@@ -924,14 +1096,20 @@
     </div>
 
 
+
+
     <h1 id="authAppName">
       Mirel Map
     </h1>
 
 
+
+
     <p id="authDescription">
       Googleアカウントでログインして人物情報を開きます。
     </p>
+
+
 
 
     <button
@@ -943,16 +1121,26 @@
     </button>
 
 
+
+
     <div
       id="authMessage"
       class="small-note"
     ></div>
 
 
+
+
   </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -971,6 +1159,10 @@
 
 
 
+
+
+
+
 <div
   id="appShell"
   class="app-shell hidden"
@@ -979,10 +1171,18 @@
 
 
 
+
+
+
+
   <header class="topbar">
 
 
+
+
     <div>
+
+
 
 
       <div id="brandName" class="brand">
@@ -990,12 +1190,18 @@
       </div>
 
 
+
+
       <div id="brandSub" class="sub">
         全国の人物管理
       </div>
 
 
+
+
     </div>
+
+
 
 
     <button
@@ -1006,12 +1212,22 @@
     </button>
 
 
+
+
   </header>
 
 
 
 
+
+
+
+
   <main class="main">
+
+
+
+
 
 
 
@@ -1022,7 +1238,13 @@
     >
 
 
+
+
       <div class="desktop-grid">
+
+
+
+
 
 
 
@@ -1032,7 +1254,13 @@
 
 
 
+
+
+
+
           <div class="card">
+
+
 
 
             <input
@@ -1044,10 +1272,14 @@
             >
 
 
+
+
             <div
               id="stats"
               class="stats"
             ></div>
+
+
 
 
           </div>
@@ -1055,18 +1287,30 @@
 
 
 
+
+
+
+
           <div class="card map-card">
+
+
 
 
             <div class="map-heading">
 
 
+
+
               <div>
+
+
 
 
                 <div class="label">
                   日本地図
                 </div>
+
+
 
 
                 <div
@@ -1077,10 +1321,18 @@
                 </div>
 
 
+
+
               </div>
 
 
+
+
             </div>
+
+
+
+
 
 
 
@@ -1094,11 +1346,19 @@
 
 
 
+
+
+
+
             <div class="map-legend">
               <span class="legend-item">
 
 
+
+
                 <span class="legend-dot teacher-dot"></span>
+
+
 
 
                 <span id="mapLegendActive">
@@ -1106,22 +1366,38 @@
                 </span>
 
 
+
+
               </span>
+
+
 
 
               <span class="legend-item">
 
 
+
+
                 <span class="legend-dot selected-dot"></span>
+
+
 
 
                 選択中
 
 
+
+
               </span>
 
 
+
+
             </div>
+
+
+
+
 
 
 
@@ -1132,9 +1408,13 @@
             >
 
 
+
+
               <div class="empty">
                 日本地図または都道府県名を選択してください。
               </div>
+
+
 
 
             </div>
@@ -1142,7 +1422,13 @@
 
 
 
+
+
+
+
             <div class="segmented">
+
+
 
 
               <button
@@ -1154,6 +1440,8 @@
               </button>
 
 
+
+
               <button
                 id="allPrefBtn"
                 onclick="setPrefMode('all')"
@@ -1162,7 +1450,13 @@
               </button>
 
 
+
+
             </div>
+
+
+
+
 
 
 
@@ -1173,7 +1467,13 @@
             ></div>
 
 
+
+
           </div>
+
+
+
+
 
 
 
@@ -1183,10 +1483,20 @@
 
 
 
+
+
+
+
       </div>
 
 
+
+
     </section>
+
+
+
+
 
 
 
@@ -1197,7 +1507,11 @@
     >
 
 
+
+
       <div class="card">
+
+
 
 
         <div
@@ -1208,13 +1522,17 @@
         </div>
 
 
+
+
         <input
           id="listSearch"
           class="search mirel-list-search"
           type="search"
-          placeholder="名前・ふりがな・呼び名・店名・電話番号・住所・所属で検索"
+          placeholder="名前・ふりがな・呼び名・店名・電話番号・住所・分類で検索"
           oninput="renderFullTeacherList()"
         >
+
+
 
 
         <div
@@ -1223,16 +1541,26 @@
         ></div>
 
 
+
+
         <div
           id="fullTeacherList"
           class="teacher-list top-gap"
         ></div>
 
 
+
+
       </div>
 
 
+
+
     </section>
+
+
+
+
 
 
 
@@ -1243,7 +1571,11 @@
     >
 
 
+
+
       <div class="card">
+
+
 
 
         <div class="section-title">
@@ -1251,13 +1583,17 @@
         </div>
 
 
+
+
         <input
           id="globalSearch"
           class="search"
           type="search"
-          placeholder="名前・ふりがな・呼び名・店名・電話番号・SNS・住所・所属"
+          placeholder="名前・ふりがな・呼び名・店名・電話番号・SNS・住所・分類"
           oninput="renderSearchResults()"
         >
+
+
 
 
         <div
@@ -1266,10 +1602,18 @@
         ></div>
 
 
+
+
       </div>
 
 
+
+
     </section>
+
+
+
+
 
 
 
@@ -1280,12 +1624,18 @@
     >
 
 
+
+
       <div class="card">
+
+
 
 
         <div class="section-title">
           設定
         </div>
+
+
 
 
         <div class="form-note">
@@ -1295,12 +1645,20 @@
 
 
 
+
+
+
+
         <div class="field setting-combo">
+
+
 
 
           <label>
             アプリ名
           </label>
+
+
 
 
           <input
@@ -1321,10 +1679,14 @@
           >
 
 
+
+
           <div
             id="settingAppNameResults"
             class="setting-results"
           ></div>
+
+
 
 
         </div>
@@ -1332,12 +1694,20 @@
 
 
 
+
+
+
+
         <div class="field setting-combo">
+
+
 
 
           <label>
             人物名称
           </label>
+
+
 
 
           <input
@@ -1358,10 +1728,14 @@
           >
 
 
+
+
           <div
             id="settingPersonLabelResults"
             class="setting-results"
           ></div>
+
+
 
 
         </div>
@@ -1369,12 +1743,20 @@
 
 
 
+
+
+
+
         <div class="field setting-combo">
+
+
 
 
           <label>
             店名の表示名
           </label>
+
+
 
 
           <input
@@ -1395,10 +1777,14 @@
           >
 
 
+
+
           <div
             id="settingPlaceLabelResults"
             class="setting-results"
           ></div>
+
+
 
 
         </div>
@@ -1406,12 +1792,20 @@
 
 
 
+
+
+
+
         <div class="field setting-combo">
+
+
 
 
           <label>
             店名ふりがなの表示名
           </label>
+
+
 
 
           <input
@@ -1432,10 +1826,14 @@
           >
 
 
+
+
           <div
             id="settingPlaceKanaLabelResults"
             class="setting-results"
           ></div>
+
+
 
 
         </div>
@@ -1443,12 +1841,20 @@
 
 
 
+
+
+
+
         <div class="field">
+
+
 
 
           <label>
             文字サイズ
           </label>
+
+
 
 
           <select id="settingFontSize" onchange="applyTypographyPreset('font')">
@@ -1459,9 +1865,13 @@
           </select>
 
 
+
+
           <div class="small-note">
             アプリ全体の文字サイズを調整します。プリセット選択後に、下の詳細設定で自由に微調整できます。
           </div>
+
+
 
 
           <div class="mirel-typography-detail">
@@ -1472,6 +1882,8 @@
               <span>%</span>
             </div>
           </div>
+
+
 
 
           <div id="settingFontSizePreview" class="mirel-font-preview mirel-font-preview-compact" data-preview-font-size="standard">
@@ -1487,9 +1899,13 @@
           </div>
 
 
+
+
           <label style="margin-top:16px;display:block;">
             行間・余白
           </label>
+
+
 
 
           <select id="settingLineSpacing" onchange="applyTypographyPreset('spacing')">
@@ -1500,9 +1916,13 @@
           </select>
 
 
+
+
           <div class="small-note">
             アプリ全体の行間と項目間隔を調整します。必要に応じて数値で細かく設定できます。
           </div>
+
+
 
 
           <div class="mirel-typography-detail">
@@ -1520,6 +1940,8 @@
           </div>
 
 
+
+
           <div id="settingSpacingPreview" class="mirel-font-preview" data-preview-line-spacing="standard">
             <div class="mirel-font-preview-head">
               行間・余白のプレビュー
@@ -1531,7 +1953,7 @@
               <div class="mirel-preview-field-stack">
                 <div class="mirel-preview-field"><span>名前</span><strong>山田 花子</strong></div>
                 <div class="mirel-preview-field"><span>住所</span><strong>東京都千代田区丸の内1-9-1</strong></div>
-                <div class="mirel-preview-field"><span>所属</span><strong>友人・仕事関係</strong></div>
+                <div class="mirel-preview-field"><span>分類</span><strong>友人・仕事関係</strong></div>
               </div>
               <div class="mirel-preview-section-label mirel-preview-line-label">交流履歴メモの行間</div>
               <div class="mirel-preview-longtext">先日の交流では、今後の予定についてゆっくり話しました。次回は資料を持参して、具体的な内容を確認する予定です。長文になった場合の行と行の間隔をここで確認できます。</div>
@@ -1539,7 +1961,13 @@
           </div>
 
 
+
+
         </div>
+
+
+
+
 
 
 
@@ -1550,9 +1978,13 @@
         >
 
 
+
+
           <div class="section-title">
             使用する項目
           </div>
+
+
 
 
           <div class="form-note">
@@ -1560,10 +1992,14 @@
           </div>
 
 
+
+
           <div
             id="mirelFeatureGrid"
             class="mirel-feature-grid"
           ></div>
+
+
 
 
           <div class="mirel-feature-save-actions">
@@ -1578,9 +2014,13 @@
 <div class="mirel-extra-section">
 
 
+
+
             <div class="section-title">
               分類ラベル
             </div>
+
+
 
 
             <div class="form-note">
@@ -1588,19 +2028,33 @@
             </div>
 
 
+
+
             <div id="mirelAffiliationMaster"></div>
+
+
 
 
           </div>
 
 
+
+
         </div>
+
+
 
 
       </div>
 
 
+
+
     </section>
+
+
+
+
 
 
 
@@ -1611,10 +2065,18 @@
     >
 
 
+
+
       <div id="detailContent"></div>
 
 
+
+
     </section>
+
+
+
+
 
 
 
@@ -1624,7 +2086,13 @@
 
 
 
+
+
+
+
   <nav class="bottom-nav">
+
+
 
 
     <button
@@ -1634,9 +2102,13 @@
     >
 
 
+
+
       <span class="nav-icon">
         🗾
       </span>
+
+
 
 
       <span>
@@ -1644,7 +2116,13 @@
       </span>
 
 
+
+
     </button>
+
+
+
+
 
 
 
@@ -1656,9 +2134,13 @@
     >
 
 
+
+
       <span class="nav-icon">
         👥
       </span>
+
+
 
 
       <span id="navListText">
@@ -1666,7 +2148,13 @@
       </span>
 
 
+
+
     </button>
+
+
+
+
 
 
 
@@ -1677,9 +2165,13 @@
     >
 
 
+
+
       <span class="nav-icon">
         ＋
       </span>
+
+
 
 
       <span>
@@ -1687,7 +2179,13 @@
       </span>
 
 
+
+
     </button>
+
+
+
+
 
 
 
@@ -1699,9 +2197,13 @@
     >
 
 
+
+
       <span class="nav-icon">
         ⚙
       </span>
+
+
 
 
       <span>
@@ -1709,10 +2211,18 @@
       </span>
 
 
+
+
     </button>
 
 
+
+
   </nav>
+
+
+
+
 
 
 
@@ -1722,9 +2232,15 @@
 
 
 
+
+
+
+
 <!-- =====================================
      先生フォーム
      ===================================== -->
+
+
 
 
 <div
@@ -1733,12 +2249,20 @@
 >
 
 
+
+
   <div class="modal">
 
 
 
 
+
+
+
+
     <div class="modal-head">
+
+
 
 
       <div
@@ -1749,6 +2273,8 @@
       </div>
 
 
+
+
       <button
         class="close"
         onclick="closeTeacherForm()"
@@ -1757,7 +2283,13 @@
       </button>
 
 
+
+
     </div>
+
+
+
+
 
 
 
@@ -1765,6 +2297,10 @@
     <div class="form-note">
       すべて任意項目です。分かる内容だけ入力してください。
     </div>
+
+
+
+
 
 
 
@@ -1777,11 +2313,19 @@
 
 
 
+
+
+
+
 <!-- 名前・ふりがな -->
 <div class="grid2">
 
 
+
+
   <div class="field">
+
+
 
 
     <label>
@@ -1789,10 +2333,18 @@
     </label>
 
 
+
+
     <input id="name">
 
 
+
+
   </div>
+
+
+
+
 
 
 
@@ -1800,18 +2352,30 @@
   <div class="field">
 
 
+
+
     <label>
       ふりがな
     </label>
 
 
+
+
     <input id="kana">
+
+
 
 
   </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -1820,7 +2384,11 @@
 <div class="grid2">
 
 
+
+
   <div class="field">
+
+
 
 
     <label>
@@ -1828,10 +2396,18 @@
     </label>
 
 
+
+
     <input id="nickname">
 
 
+
+
   </div>
+
+
+
+
 
 
 
@@ -1839,12 +2415,18 @@
   <div class="field">
 
 
+
+
     <label>
       性別
     </label>
 
 
+
+
     <select id="gender">
+
+
 
 
       <option value="">未設定</option>
@@ -1852,13 +2434,23 @@
       <option value="男">男</option>
 
 
+
+
     </select>
+
+
 
 
   </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -1870,9 +2462,13 @@
 >
 
 
+
+
   <label>
     学年
   </label>
+
+
 
 
   <select id="mirelGrade">
@@ -1917,7 +2513,13 @@
   </select>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -1926,12 +2528,18 @@
 <div class="grid2">
 
 
+
+
   <div class="field">
+
+
 
 
     <label>
       生まれ年
     </label>
+
+
 
 
     <input
@@ -1940,7 +2548,13 @@
     >
 
 
+
+
   </div>
+
+
+
+
 
 
 
@@ -1948,9 +2562,13 @@
   <div class="field">
 
 
+
+
     <label>
       誕生月
     </label>
+
+
 
 
     <input
@@ -1961,10 +2579,18 @@
     >
 
 
+
+
   </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -1973,12 +2599,18 @@
 <div class="grid2">
 
 
+
+
   <div class="field">
+
+
 
 
     <label>
       誕生日
     </label>
+
+
 
 
     <input
@@ -1989,7 +2621,13 @@
     >
 
 
+
+
   </div>
+
+
+
+
 
 
 
@@ -1997,9 +2635,13 @@
   <div class="field">
 
 
+
+
     <label>
       年齢
     </label>
+
+
 
 
     <input
@@ -2009,7 +2651,11 @@
     >
 
 
+
+
   </div>
+
+
 
 
 </div>
@@ -2017,16 +2663,24 @@
 
 
 
-<!-- 所属 -->
+
+
+
+
+<!-- 分類 -->
 <div
   class="field"
   id="mirelAffiliationField"
 >
 
 
+
+
   <label>
     所属
   </label>
+
+
 
 
   <div
@@ -2035,11 +2689,17 @@
   ></div>
 
 
+
+
 </div>
+
+
 
 
 <!-- 店名 -->
 <div class="field">
+
+
 
 
   <label id="placeNameLabel">
@@ -2047,10 +2707,18 @@
   </label>
 
 
+
+
   <input id="salonName">
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2059,15 +2727,27 @@
 <div class="field">
 
 
+
+
   <label id="placeKanaLabel">
     店名読み
   </label>
 
 
+
+
   <input id="salonKana">
 
 
+
+
 </div>
+
+
+
+
+
+
 
 
 
@@ -2078,12 +2758,18 @@
 <div class="mirel-postal-row">
 
 
+
+
   <div class="field mirel-field-compact">
+
+
 
 
     <label>
       郵便番号
     </label>
+
+
 
 
     <input
@@ -2098,7 +2784,11 @@
     >
 
 
+
+
   </div>
+
+
 
 
   <button
@@ -2110,7 +2800,13 @@
   </button>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2121,12 +2817,20 @@
 
 
 
+
+
+
+
   <div class="field combo">
+
+
 
 
     <label>
       都道府県
     </label>
+
+
 
 
     <input
@@ -2138,10 +2842,14 @@
     >
 
 
+
+
     <div
       id="prefResults"
       class="combo-results"
     ></div>
+
+
 
 
   </div>
@@ -2149,12 +2857,20 @@
 
 
 
+
+
+
+
   <div class="field combo">
+
+
 
 
     <label>
       市区町村
     </label>
+
+
 
 
     <input
@@ -2166,10 +2882,14 @@
     >
 
 
+
+
     <div
       id="cityResults"
       class="combo-results"
     ></div>
+
+
 
 
   </div>
@@ -2177,7 +2897,15 @@
 
 
 
+
+
+
+
 </div>
+
+
+
+
 
 
 
@@ -2186,15 +2914,25 @@
 <div class="field">
 
 
+
+
   <label>
     町名・番地
   </label>
 
 
+
+
   <input id="address1" onblur="mirelAutoLookupPostalFromAddress()">
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2203,15 +2941,25 @@
 <div class="field">
 
 
+
+
   <label>
     建物名・部屋番号
   </label>
 
 
+
+
   <input id="address2">
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2220,9 +2968,13 @@
 <div class="field mirel-field-compact">
 
 
+
+
   <label>
     電話番号
   </label>
+
+
 
 
   <input
@@ -2234,7 +2986,13 @@
   >
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2243,13 +3001,21 @@
 <div class="field">
 
 
+
+
   <label>
     メモ
   </label>
   <textarea id="memo"></textarea>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2274,6 +3040,10 @@
 
 
 
+
+
+
+
 <!-- 交流履歴 -->
 <details
   id="interactionEditSection"
@@ -2290,6 +3060,10 @@
     class="children-area"
   ></div>
 </details>
+
+
+
+
 
 
 
@@ -2314,7 +3088,13 @@
 
 
 
+
+
+
+
     <div class="form-actions mirel-form-sticky-actions">
+
+
 
 
       <button
@@ -2325,6 +3105,8 @@
       </button>
 
 
+
+
       <button
         class="primary"
         onclick="saveTeacherForm()"
@@ -2333,7 +3115,13 @@
       </button>
 
 
+
+
     </div>
+
+
+
+
 
 
 
@@ -2341,7 +3129,13 @@
   </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2351,10 +3145,14 @@
      ===================================== -->
 
 
+
+
 <div
   id="interactionModal"
   class="modal-bg"
 >
+
+
 
 
   <div class="modal">
@@ -2362,7 +3160,13 @@
 
 
 
+
+
+
+
     <div class="modal-head">
+
+
 
 
       <div
@@ -2373,6 +3177,8 @@
       </div>
 
 
+
+
       <button
         class="close"
         onclick="closeInteractionForm()"
@@ -2381,7 +3187,13 @@
       </button>
 
 
+
+
     </div>
+
+
+
+
 
 
 
@@ -2389,6 +3201,10 @@
     <div class="form-note">
       すべて任意項目です。
     </div>
+
+
+
+
 
 
 
@@ -2401,12 +3217,20 @@
 
 
 
+
+
+
+
     <div class="field">
+
+
 
 
       <label>
         日付
       </label>
+
+
 
 
       <input
@@ -2415,7 +3239,13 @@
       >
 
 
+
+
     </div>
+
+
+
+
 
 
 
@@ -2423,9 +3253,13 @@
     <div class="field">
 
 
+
+
       <label>
         交流した場所・種別
       </label>
+
+
 
 
       <input
@@ -2435,7 +3269,11 @@
       >
 
 
+
+
       <datalist id="interactionTypeOptions">
+
+
 
 
         <option value="研修"></option>
@@ -2448,7 +3286,11 @@
         <option value="その他"></option>
 
 
+
+
       </datalist>
+
+
 
 
     </div>
@@ -2456,12 +3298,20 @@
 
 
 
+
+
+
+
     <div class="field">
+
+
 
 
       <label>
         メモ
       </label>
+
+
 
 
       <textarea
@@ -2471,12 +3321,20 @@
       ></textarea>
 
 
+
+
     </div>
 
 
 
 
+
+
+
+
     <div class="form-actions">
+
+
 
 
       <button
@@ -2487,6 +3345,8 @@
       </button>
 
 
+
+
       <button
         class="primary"
         onclick="saveInteractionForm()"
@@ -2495,7 +3355,13 @@
       </button>
 
 
+
+
     </div>
+
+
+
+
 
 
 
@@ -2503,7 +3369,13 @@
   </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2513,16 +3385,24 @@
      ===================================== -->
 
 
+
+
 <div
   id="linkModal"
   class="modal-bg"
 >
 
 
+
+
   <div class="modal">
 
 
+
+
     <div class="modal-head">
+
+
 
 
       <div
@@ -2533,6 +3413,8 @@
       </div>
 
 
+
+
       <button
         class="close"
         onclick="closeLinkForm()"
@@ -2541,7 +3423,13 @@
       </button>
 
 
+
+
     </div>
+
+
+
+
 
 
 
@@ -2554,7 +3442,13 @@
 
 
 
+
+
+
+
     <div class="field">
+
+
 
 
       <label>
@@ -2562,10 +3456,14 @@
       </label>
 
 
+
+
       <select
         id="linkType"
         onchange="updateLinkInputGuide()"
       >
+
+
 
 
         <option value="Instagram">Instagram</option>
@@ -2580,7 +3478,11 @@
         <option value="その他">その他</option>
 
 
+
+
       </select>
+
+
 
 
     </div>
@@ -2588,12 +3490,20 @@
 
 
 
+
+
+
+
     <div class="field">
+
+
 
 
       <label>
         表示名
       </label>
+
+
 
 
       <input
@@ -2602,7 +3512,13 @@
       >
 
 
+
+
     </div>
+
+
+
+
 
 
 
@@ -2610,15 +3526,21 @@
     <div class="field">
 
 
+
+
       <label id="linkValueLabel">
         アカウント名またはURL
       </label>
+
+
 
 
       <input
         id="linkValue"
         placeholder="例：ユーザー名 / @ユーザー名 / Instagram URL"
       >
+
+
 
 
       <div
@@ -2629,12 +3551,20 @@
       </div>
 
 
+
+
     </div>
 
 
 
 
+
+
+
+
     <div class="form-actions">
+
+
 
 
       <button
@@ -2645,6 +3575,8 @@
       </button>
 
 
+
+
       <button
         class="primary"
         onclick="saveLinkForm()"
@@ -2653,13 +3585,23 @@
       </button>
 
 
+
+
     </div>
+
+
 
 
   </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2669,13 +3611,19 @@
      ===================================== -->
 
 
+
+
 <div
   id="confirmModal"
   class="confirm-bg"
 >
 
 
+
+
   <div class="confirm-card">
+
+
 
 
     <div
@@ -2686,13 +3634,19 @@
     </div>
 
 
+
+
     <div
       id="confirmMessage"
       class="confirm-message"
     ></div>
 
 
+
+
     <div class="confirm-actions">
+
+
 
 
       <button
@@ -2703,6 +3657,8 @@
       </button>
 
 
+
+
       <button
         id="confirmOk"
         class="confirm-danger"
@@ -2711,13 +3667,23 @@
       </button>
 
 
+
+
     </div>
+
+
 
 
   </div>
 
 
+
+
 </div>
+
+
+
+
 
 
 
@@ -2731,22 +3697,38 @@
 
 
 
+
+
+
+
 <script src="https://accounts.google.com/gsi/client"></script>
+
+
 
 
 <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 
 
+
+
 <script src="./config.js?v=20261009-39"></script>
 
 
-<script src="./app.js?v=20261011-48"></script>
 
 
-<script src="./app-enhancements.js?v=20261011-48"></script>
+<script src="./app.js?v=20261011-50"></script>
+
+
+
+
+<script src="./app-enhancements.js?v=20261011-50"></script>
+
+
 
 
 </body>
+
+
 
 
 </html>
